@@ -20,6 +20,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
+import javax.swing.event.TreeModelEvent;
 
 /**
  *
@@ -29,8 +30,8 @@ public class RangeMatrix extends JComponent {
 
     private final RangeMatrixModel model;
     private Graphics2D g2d;
-    private final RangeMatrixColumnHeader columnHeader;
-    private final RangeMatrixRowHeader rowHeader;
+    transient protected RangeMatrixColumnHeader columnHeader;
+    protected RangeMatrixRowHeader rowHeader;
     //private final RangeMatrixHeaderCorner headerCorner;
     float width;
     float height;
@@ -39,7 +40,7 @@ public class RangeMatrix extends JComponent {
     public RangeMatrix(RangeMatrixModel model) {
         this.model = model;
         this.columnHeader = new RangeMatrixColumnHeader(model);
-        this.rowHeader = new RangeMatrixRowHeader(model,columnHeader);
+        this.rowHeader = new RangeMatrixRowHeader(model, columnHeader);
         //this.headerCorner = new RangeMatrixHeaderCorner(model);
         addComponentListener(new RangeMatrixListenerImpl());
     }
@@ -149,6 +150,25 @@ public class RangeMatrix extends JComponent {
     }
 
     private class RangeMatrixListenerImpl extends ComponentAdapter {
+
+    }
+
+    protected class RangeMatrixHandler implements RangeMatrixListener {
+
+        @Override
+        public void columnHeaderChanged(RangeMatrixEvent e) {
+            columnHeader.rebuildBuffer();
+        }
+
+        @Override
+        public void rowHeaderChanged(RangeMatrixEvent e) {
+            rowHeader.rebuildBuffer();
+        }
+
+        @Override
+        public void valueChanged(RangeMatrixEvent e) {
+            rebuildBuffer();
+        }
 
     }
 }

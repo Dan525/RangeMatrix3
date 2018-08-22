@@ -211,7 +211,7 @@ public class RangeMatrixRowHeader extends JComponent {
         return new Dimension(width, height);
     }
 
-    private void rebuildBuffer() {
+    void rebuildBuffer() {
 
         int w = (int) getWidthOfComponent();
         int h = (int) getHeightOfComponent();

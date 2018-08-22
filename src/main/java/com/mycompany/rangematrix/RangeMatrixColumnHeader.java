@@ -254,7 +254,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return new Dimension(getWidthOfComponent(), getHeightOfComponent());
     }
 
-    private void rebuildBuffer() {
+    void rebuildBuffer() {
         buffer = new BufferedImage(getWidthOfComponent(), getHeightOfComponent(), BufferedImage.TYPE_INT_ARGB);
 
         g2d = buffer.createGraphics();
