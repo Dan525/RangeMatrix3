@@ -87,6 +87,17 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
         return ((File)row).getName();
     }
     
+    //Corner
+
+    @Override
+    public ArrayList<String> getCornerColumnNames() {
+        ArrayList<String> cornerNames = new ArrayList<>();
+        cornerNames.add("      ");
+        cornerNames.add("Название сигнала");
+        cornerNames.add("Тип сигнала");
+        return cornerNames;
+    }
+    
     //Values
 
     @Override
@@ -104,14 +115,5 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public void removeRangeMatrixListener(RangeMatrixListener l) {
         listeners.remove(l);
-    }
-
-    @Override
-    public ArrayList<String> getCornerColumnNames() {
-        ArrayList<String> cornerNames = new ArrayList<>();
-        cornerNames.add("      ");
-        cornerNames.add("Название сигнала");
-        cornerNames.add("Тип сигнала");
-        return cornerNames;
     }
 }
