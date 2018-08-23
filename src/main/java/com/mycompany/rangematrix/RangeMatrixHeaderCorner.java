@@ -49,7 +49,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
         this.model = model;
         font = new Font("Arial Narrow", Font.PLAIN, 12);
         fm = new Canvas().getFontMetrics(font);
-        
+
         setHeightOfComponent();
         setWidthOfComponent();
     }
@@ -88,14 +88,17 @@ public class RangeMatrixHeaderCorner extends JComponent {
     }
 
     public void drawCorner(double parentCellX, double parentCellY) {
-        
+
         int columnCount = rowHeader.getColumnCount();
         double cellX = parentCellX;
         double cellY = parentCellY;
 
         for (int i = 0; i < columnCount; i++) {
 
-            String columnName = model.getCornerColumnNames().get(i);
+            String columnName = "";
+            if (i < model.getCornerColumnNames().size()) {
+                columnName = model.getCornerColumnNames().get(i);
+            }
 
             double cellWidth = rowHeader.getRowsWidthList().get(i);
 
@@ -104,8 +107,8 @@ public class RangeMatrixHeaderCorner extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
             g2d.drawString(columnName,
-                    (float)(cellX + cellWidth/2 - fm.stringWidth(columnName)/2),
-                    (float)(cellY + cellHeight / 2 - fm.getHeight()/2 + 12));        //12 - высота верхней панели окна
+                    (float) (cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
+                    (float) (cellY + cellHeight / 2 - fm.getHeight() / 2 + 12));        //12 - высота верхней панели окна
 
             cellX += cellWidth;
         }
