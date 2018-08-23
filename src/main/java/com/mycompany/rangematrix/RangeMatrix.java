@@ -40,7 +40,7 @@ public class RangeMatrix extends JComponent {
     private Font font;
 
     public RangeMatrix(RangeMatrixModel model) {
-        setModel(model);        
+        doSetModel(model);        
     }
 
     public RangeMatrixModel getModel() {
