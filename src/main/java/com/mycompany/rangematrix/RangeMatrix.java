@@ -101,7 +101,7 @@ public class RangeMatrix extends JComponent {
                 String value = (model.getValueAt(j, i)).toString();
                 g2d.drawString(value, 
                                (float)(cellXList.get(j) + cellWidthList.get(j)/2 - fm.stringWidth(value)/2 - 1),
-                               (float)(cellYList.get(i) + minimalCellHeight/2 - fm.getHeight()/2 + 12));
+                               (float)(cellYList.get(i) + minimalCellHeight/2 - fm.getHeight()/2 + fm.getAscent()));
             }            
         }
     }

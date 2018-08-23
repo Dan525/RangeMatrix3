@@ -108,7 +108,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
             g2d.draw(rect);
             g2d.drawString(columnName,
                     (float) (cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
-                    (float) (cellY + cellHeight / 2 - fm.getHeight() / 2 + 12));        //12 - высота верхней панели окна
+                    (float) (cellY + cellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));        //12 - высота верхней панели окна
 
             cellX += cellWidth;
         }

@@ -52,10 +52,11 @@ public class RangeMatrixColumnHeader extends JComponent {
         
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
+        setMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         
         setRowCount(null, new ArrayList<>(), 1);
-        setMinimalCellHeight();
+        
         
         setHeightOfComponent();
         setWidthOfComponent();
@@ -69,22 +70,26 @@ public class RangeMatrixColumnHeader extends JComponent {
         return (fm.getHeight() + 2 * spaceAroundName) * heightMultiplier;
     }
 
-    public double getWidthOfColumnName(Object column) {
+    public double getWidthByColumnName(Object column) {
         String columnName = model.getColumnGroupName(column);
-        return fm.stringWidth(columnName) + 2 * spaceAroundName;
+        double columnWidth = fm.stringWidth(columnName) + 2 * spaceAroundName;
+        if (columnWidth > minimalCellHeight) {
+            return columnWidth;
+        } else {
+            return minimalCellHeight;
+        }
     }
 
     public double getWidthOfColumn(Object column) {
         double columnWidth = 0;
-        String name = model.getColumnGroupName(column);
-        double ownColumnWidth = fm.stringWidth(name) + 2 * spaceAroundName;
+        double ownColumnWidth = getWidthByColumnName(column);
 
         ArrayList<Object> leafColumnList = getLeafColumns(column, new ArrayList<>());
         if (leafColumnList.isEmpty()) {
             return ownColumnWidth;
         }
         for (Object leafColumn : leafColumnList) {
-            double leafColumnWidth = getWidthOfColumnName(leafColumn);
+            double leafColumnWidth = getWidthByColumnName(leafColumn);
             columnWidth += leafColumnWidth;
         }
         if (columnWidth > ownColumnWidth) {
@@ -232,7 +237,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             g2d.draw(rect);
             g2d.drawString(columnName,
                     (float)(cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
-                    (float)(cellY + cellHeight / 2 - fm.getHeight() / 2 + 12));        //12 - высота верхней панели окна
+                    (float)(cellY + cellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));
 
             if (isGroup) {
                 rowCounter++;
