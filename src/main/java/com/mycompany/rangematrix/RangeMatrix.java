@@ -43,6 +43,7 @@ public class RangeMatrix extends JComponent {
         this.rowHeader = new RangeMatrixRowHeader(model, columnHeader);
         //this.headerCorner = new RangeMatrixHeaderCorner(model);
         addComponentListener(new RangeMatrixListenerImpl());
+        model.addRangeMatrixListener(new RangeMatrixHandler());
     }
 
     public RangeMatrixModel getModel() {

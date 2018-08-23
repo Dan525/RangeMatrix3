@@ -6,6 +6,8 @@
 package com.mycompany.rangematrix;
 
 import java.io.File;
+import java.util.ArrayList;
+import javax.swing.event.TreeModelListener;
 
 /**
  *
@@ -13,6 +15,8 @@ import java.io.File;
  */
 public class RangeMatrixModelImpl implements RangeMatrixModel {
     
+    private final ArrayList<RangeMatrixListener> listeners = new ArrayList<>();
+
     //Column Group
     
     @Override
@@ -89,6 +93,16 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     public Object getValueAt(int row, int col) {
         return 1;
     }
-
     
+    //Listeners
+
+    @Override
+    public void addRangeMatrixListener(RangeMatrixListener l) {
+        listeners.add(l);
+    }
+    
+    @Override
+    public void removeRangeMatrixListener(RangeMatrixListener l) {
+        listeners.remove(l);
+    }
 }

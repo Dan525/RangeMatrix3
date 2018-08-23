@@ -5,10 +5,6 @@
  */
 package com.mycompany.rangematrix;
 
-import java.io.File;
-import java.util.List;
-import javax.swing.event.TreeModelListener;
-
 /**
  *
  * @author daniil_pozdeev
@@ -40,4 +36,10 @@ public interface RangeMatrixModel {
     //Values
     
     Object getValueAt(int row, int col);
+    
+    //Listeners
+    
+    public void addRangeMatrixListener(RangeMatrixListener l);
+    
+    public void removeRangeMatrixListener(RangeMatrixListener l);
 }
