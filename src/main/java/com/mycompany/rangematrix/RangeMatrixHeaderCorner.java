@@ -95,22 +95,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
 
         for (int i = 0; i < columnCount; i++) {
 
-            String columnName = "";
-
-            switch (i) {
-                case 0: {
-                    columnName = "         ";
-                    break;
-                }
-                case 1: {
-                    columnName = "Название сигнала";
-                    break;
-                }
-                case 2: {
-                    columnName = "Тип сигнала";
-                    break;
-                }
-            }
+            String columnName = model.getCornerColumnNames().get(i);
 
             double cellWidth = rowHeader.getRowsWidthList().get(i);
 

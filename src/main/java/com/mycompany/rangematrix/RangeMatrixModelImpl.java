@@ -7,7 +7,7 @@ package com.mycompany.rangematrix;
 
 import java.io.File;
 import java.util.ArrayList;
-import javax.swing.event.TreeModelListener;
+import java.util.List;
 
 /**
  *
@@ -104,5 +104,14 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public void removeRangeMatrixListener(RangeMatrixListener l) {
         listeners.remove(l);
+    }
+
+    @Override
+    public ArrayList<String> getCornerColumnNames() {
+        ArrayList<String> cornerNames = new ArrayList<>();
+        cornerNames.add("      ");
+        cornerNames.add("Название сигнала");
+        cornerNames.add("Тип сигнала");
+        return cornerNames;
     }
 }

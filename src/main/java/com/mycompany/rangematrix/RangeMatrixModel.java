@@ -5,6 +5,8 @@
  */
 package com.mycompany.rangematrix;
 
+import java.util.List;
+
 /**
  *
  * @author daniil_pozdeev
@@ -32,6 +34,10 @@ public interface RangeMatrixModel {
     boolean isRowGroup(Object row);
     
     String getRowGroupName(Object row);
+    
+    //Corner
+    
+    List<String> getCornerColumnNames();
     
     //Values
     
