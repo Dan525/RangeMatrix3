@@ -5,6 +5,7 @@
  */
 package com.mycompany.rangematrix;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -34,12 +35,14 @@ public class RangeMatrix extends JComponent {
     private double width;
     private double height;
     private BufferedImage buffer;
+    private final double spaceAroundName = 4;
 
     public RangeMatrix(RangeMatrixModel model) {
         columnHeader = new RangeMatrixColumnHeader();
         rowHeader = new RangeMatrixRowHeader();
         headerCorner = new RangeMatrixHeaderCorner(columnHeader, rowHeader);
-        doSetModel(model);        
+        doSetModel(model);
+        
     }
 
     public RangeMatrixModel getModel() {
@@ -52,25 +55,38 @@ public class RangeMatrix extends JComponent {
     }
     
     private void doSetModel(RangeMatrixModel model) {
+        
+        FontMetrics fm = getFontMetrics();
+        
         this.model = model;
-        columnHeader.setModel(model);
-        rowHeader.setModel(model);
+        DefaultRangeMatrixRenderer renderer = new DefaultRangeMatrixRenderer();
+        columnHeader.setModel(model, fm, renderer);
+        rowHeader.setModel(model, fm);
         headerCorner.setModel(model);
-        
-        JLabel label = new JLabel();
-        Font f = label.getFont();
-        FontMetrics fm = label.getFontMetrics(f);
-        
         setRowsWidthList(fm);
-        
-        
-        setWidthOfComponents();
+//        setMinimalCellHeight(fm);
+        setWidthOfComponents(fm);
         setHeightOfComponents();
         
     }
     
-    public void setWidthOfComponents() {
-        columnHeader.setWidthOfComponent();
+    public FontMetrics getFontMetrics() {
+//        Canvas c = new Canvas();
+//        Font f = c.getFont();
+//        return c.getFontMetrics(f);
+        JLabel label = new JLabel();
+        Font f = label.getFont();
+        return label.getFontMetrics(f);
+    }
+    
+//    public void setMinimalCellHeight(FontMetrics fm) {
+//        Double minimalCellHeight =  fm.getHeight() + 2 * spaceAroundName;
+//        columnHeader.setMinimalCellHeight(minimalCellHeight);
+//        rowHeader.setMinimalCellHeight(minimalCellHeight);
+//    }
+    
+    public void setWidthOfComponents(FontMetrics fm) {
+        columnHeader.setWidthOfComponent(fm);
         rowHeader.setWidthOfComponent();
         headerCorner.setWidthOfComponent();
         setWidthOfComponent();
