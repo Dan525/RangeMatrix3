@@ -22,7 +22,7 @@ import javax.swing.JComponent;
 
 /**
  *
- * @author Daniil
+ * @author daniil_pozdeev
  */
 public class RangeMatrixRowHeader extends JComponent {
 
