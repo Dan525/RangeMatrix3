@@ -14,6 +14,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import javax.swing.JComponent;
 
 /**
@@ -25,12 +26,10 @@ public class RangeMatrixHeaderCorner extends JComponent {
     private RangeMatrixModel model;
     private final RangeMatrixColumnHeader columnHeader;
     private final RangeMatrixRowHeader rowHeader;
-    private Graphics2D g2d;
-    private Font font;
-    private FontMetrics fm;
     private BufferedImage buffer;
     private double width;
     private double height;
+    private final int spaceAroundName = 4;
 
     public RangeMatrixHeaderCorner(RangeMatrixColumnHeader columnHeader, RangeMatrixRowHeader rowHeader) {
         this.columnHeader = columnHeader;
@@ -42,16 +41,21 @@ public class RangeMatrixHeaderCorner extends JComponent {
     }
 
     public void setModel(RangeMatrixModel model) {
-        doSetModel(model);
-    }
-
-    private void doSetModel(RangeMatrixModel model) {
         this.model = model;
-        font = new Font("Arial Narrow", Font.PLAIN, 12);
-        fm = new Canvas().getFontMetrics(font);
-
-        setHeightOfComponent();
-        setWidthOfComponent();
+    }
+    
+    public double getWidthOfRowByName(FontMetrics fm, int columnIndex) {
+        String rowName = model.getCornerColumnNames().get(columnIndex);
+        return fm.stringWidth(rowName) + 2 * spaceAroundName;
+    }
+    
+    public ArrayList<Double> calculateRowsWidthList(FontMetrics fm) {
+        ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
+        for (int i = 0; i < rowHeader.getColumnCount(); i++) {
+            double rowWidth = getWidthOfRowByName(fm, i);
+            rowsWidthListTemp.add(rowWidth);
+        }
+        return rowsWidthListTemp;
     }
 
     public void setWidthOfComponent() {
@@ -80,15 +84,14 @@ public class RangeMatrixHeaderCorner extends JComponent {
     void rebuildBuffer() {
         buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
 
-        g2d = buffer.createGraphics();
-        g2d.setFont(font);
+        Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawCorner(0, 0);
+        drawCorner(g2d, 0, 0);
     }
 
-    public void drawCorner(double parentCellX, double parentCellY) {
-
+    public void drawCorner(Graphics2D g2d, double parentCellX, double parentCellY) {
+        FontMetrics fm = g2d.getFontMetrics();    
         int columnCount = rowHeader.getColumnCount();
         double cellX = parentCellX;
         double cellY = parentCellY;
@@ -120,7 +123,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
         if (buffer == null) {
             rebuildBuffer();
         }
-        g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(buffer, 0, 0, this);
     }
 }

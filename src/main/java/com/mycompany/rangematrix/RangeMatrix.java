@@ -5,11 +5,9 @@
  */
 package com.mycompany.rangematrix;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -21,7 +19,8 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
-
+import java.awt.Font;
+import javax.swing.JLabel;
 /**
  *
  * @author daniil_pozdeev
@@ -29,17 +28,17 @@ import javax.swing.SwingUtilities;
 public class RangeMatrix extends JComponent {
 
     private RangeMatrixModel model;
-    private Graphics2D g2d;
-    private RangeMatrixColumnHeader columnHeader;
-    private RangeMatrixRowHeader rowHeader;
-    private RangeMatrixHeaderCorner headerCorner;
+    private final RangeMatrixColumnHeader columnHeader;
+    private final RangeMatrixRowHeader rowHeader;
+    private final RangeMatrixHeaderCorner headerCorner;
     private double width;
     private double height;
     private BufferedImage buffer;
-    private FontMetrics fm;
-    private Font font;
 
     public RangeMatrix(RangeMatrixModel model) {
+        columnHeader = new RangeMatrixColumnHeader();
+        rowHeader = new RangeMatrixRowHeader();
+        headerCorner = new RangeMatrixHeaderCorner(columnHeader, rowHeader);
         doSetModel(model);        
     }
 
@@ -49,27 +48,59 @@ public class RangeMatrix extends JComponent {
     
     public void setModel(RangeMatrixModel model) {
         doSetModel(model);
+        
     }
     
     private void doSetModel(RangeMatrixModel model) {
         this.model = model;
-        font = new Font("Arial Narrow", Font.PLAIN, 12);
-        fm = new Canvas().getFontMetrics(font);
-        
-        columnHeader = new RangeMatrixColumnHeader();
         columnHeader.setModel(model);
-        
-        rowHeader = new RangeMatrixRowHeader();
         rowHeader.setModel(model);
-        
-        headerCorner = new RangeMatrixHeaderCorner(columnHeader, rowHeader);
         headerCorner.setModel(model);
         
-        setHeightOfComponent();
+        JLabel label = new JLabel();
+        Font f = label.getFont();
+        FontMetrics fm = label.getFontMetrics(f);
+        
+        setRowsWidthList(fm);
+        
+        
+        setWidthOfComponents();
+        setHeightOfComponents();
+        
+    }
+    
+    public void setWidthOfComponents() {
+        columnHeader.setWidthOfComponent();
+        rowHeader.setWidthOfComponent();
+        headerCorner.setWidthOfComponent();
         setWidthOfComponent();
     }
+    
+    public void setHeightOfComponents() {
+        columnHeader.setHeightOfComponent();
+        rowHeader.setHeightOfComponent();
+        headerCorner.setHeightOfComponent();
+        setHeightOfComponent();
+    }
+    
+    public ArrayList<Double> getMaxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
+        ArrayList<Double> newList = new ArrayList<>();
+        for (int i = 0; i < rowHeader.getColumnCount(); i++) {
+            newList.add(Math.max(rowsWidthList.get(i), cornerRowsWidthList.get(i)));
+        }
+        return newList;
+    }
+    
+    public void setRowsWidthList(FontMetrics fm) {
+        ArrayList<Double> rowsWidthList = rowHeader.calculateRowsWidthList(fm);
+        ArrayList<Double> cornerRowsWidthList = headerCorner.calculateRowsWidthList(fm);
+        
+        ArrayList<Double> newList = getMaxOfTwoLists(rowsWidthList, cornerRowsWidthList);
+        
+        rowHeader.setRowsWidthList(newList);
+    }
 
-    public void drawVerticalLines() {
+    public void drawVerticalLines(Graphics2D g2d) {
         ArrayList<Double> cellXList = columnHeader.getCellXList();
         ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
         
@@ -80,7 +111,7 @@ public class RangeMatrix extends JComponent {
         }
     }
 
-    public void drawHorizontalLines() {
+    public void drawHorizontalLines(Graphics2D g2d) {
         ArrayList<Double> cellYList = rowHeader.getCellYList();
         
         for (int i = 0; i < cellYList.size(); i++) {
@@ -90,7 +121,8 @@ public class RangeMatrix extends JComponent {
         }
     }
     
-    public void drawValues() {
+    public void drawValues(Graphics2D g2d) {
+        FontMetrics fm = g2d.getFontMetrics();
         ArrayList<Double> cellXList = columnHeader.getCellXList();
         ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
         ArrayList<Double> cellYList = rowHeader.getCellYList();
@@ -157,12 +189,12 @@ public class RangeMatrix extends JComponent {
     private void rebuildBuffer() {
         buffer = new BufferedImage((int)width, (int)height, BufferedImage.TYPE_INT_ARGB);
 
-        g2d = buffer.createGraphics();
+        Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.GRAY);
 
-        drawVerticalLines();
-        drawHorizontalLines();
-        drawValues();
+        drawVerticalLines(g2d);
+        drawHorizontalLines(g2d);
+        drawValues(g2d);
     }
 
     @Override
@@ -171,7 +203,7 @@ public class RangeMatrix extends JComponent {
         if (buffer == null) {
             rebuildBuffer();
         }
-        g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(buffer, 0, 0, this);
     }
 

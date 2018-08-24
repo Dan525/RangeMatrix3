@@ -53,21 +53,15 @@ public class RangeMatrixRowHeader extends JComponent {
         setMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         setColumnCount(null, new ArrayList<>(), 1);
-        
-        rowsWidthList = new ArrayList<>();
-        fillRowsWidthList();
-        
-        setHeightOfComponent();
-        setWidthOfComponent();
     }
 
     public RangeMatrixModel getModel() {
         return model;
     }
 
-    public ArrayList<Double> getRowsWidthList() {
-        return rowsWidthList;
-    }
+//    public ArrayList<Double> getRowsWidthList() {
+//        return rowsWidthList;
+//    }
 
     public void setSpaceAroundName(int newSpace) {
         this.spaceAroundName = newSpace;
@@ -81,12 +75,12 @@ public class RangeMatrixRowHeader extends JComponent {
         return minimalCellHeight;
     }
 
-    public double getWidthOfRowByName(Object row) {
+    public double getWidthOfRowByName(FontMetrics fm, Object row) {
         String rowName = model.getRowGroupName(row);
         return fm.stringWidth(rowName) + 2 * spaceAroundName;
     }
 
-    public double getMaxRowWidthInColumn(int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
+    public double getMaxRowWidthInColumn(FontMetrics fm, int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
         int rowCount = model.getRowGroupCount(null);
 
         for (int i = 0; i < rowCount; i++) {
@@ -96,21 +90,31 @@ public class RangeMatrixRowHeader extends JComponent {
 
             if (isGroup && columnCounter < indexOfColumn) {
                 columnCounter++;
-                getMaxRowWidthInColumn(indexOfColumn, columnCounter, rowsOfColumnList);
+                getMaxRowWidthInColumn(fm, indexOfColumn, columnCounter, rowsOfColumnList);
                 columnCounter--;
 
             } else if (columnCounter == indexOfColumn) {
-                rowsOfColumnList.add(getWidthOfRowByName(child));
+                rowsOfColumnList.add(getWidthOfRowByName(fm, child));
             }
         }
-        return Collections.max(rowsOfColumnList) + 60;
+        return Collections.max(rowsOfColumnList);
     }
     
-    public void fillRowsWidthList() {
+    public ArrayList<Double> calculateRowsWidthList(FontMetrics fm) {
+        ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            double rowWidth = getMaxRowWidthInColumn(i, 0, new ArrayList<>());
-            rowsWidthList.add(rowWidth);
+            double rowWidth = getMaxRowWidthInColumn(fm, i, 0, new ArrayList<>());
+            rowsWidthListTemp.add(rowWidth);
         }
+        return rowsWidthListTemp;
+    }
+
+    public ArrayList<Double> getRowsWidthList() {
+        return rowsWidthList;
+    }
+
+    public void setRowsWidthList(ArrayList<Double> rowsWidthList) {
+        this.rowsWidthList = rowsWidthList;
     }
 
     public double getHeightOfRow(Object row) {

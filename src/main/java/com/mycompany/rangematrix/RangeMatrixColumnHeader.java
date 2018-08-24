@@ -56,10 +56,6 @@ public class RangeMatrixColumnHeader extends JComponent {
         fillCellCoordinateList(null, 0, 0);
         
         setRowCount(null, new ArrayList<>(), 1);
-        
-        
-        setHeightOfComponent();
-        setWidthOfComponent();
     }
 
     public void setSpaceAroundName(int newSpace) {
