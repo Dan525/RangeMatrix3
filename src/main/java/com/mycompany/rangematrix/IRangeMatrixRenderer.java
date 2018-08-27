@@ -8,10 +8,10 @@ import javax.swing.JLabel;
  */
 public interface IRangeMatrixRenderer {
     
-    public JLabel getColumnRendererComponent(Object group);
+    public JLabel getColumnRendererComponent(Object column, String columnName);
     
-    public JLabel getRowRendererComponent(Object group);
+    public JLabel getRowRendererComponent(Object row, String rowName);
     
-    public JLabel getCellRendererComponent(Object row, Object column);
+    public JLabel getCellRendererComponent(int row, int column, String value);
     
 }

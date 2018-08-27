@@ -22,6 +22,7 @@ import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import java.awt.Font;
 import javax.swing.JLabel;
+
 /**
  *
  * @author daniil_pozdeev
@@ -42,48 +43,38 @@ public class RangeMatrix extends JComponent {
         rowHeader = new RangeMatrixRowHeader();
         headerCorner = new RangeMatrixHeaderCorner(columnHeader, rowHeader);
         doSetModel(model);
-        
+
     }
 
     public RangeMatrixModel getModel() {
         return model;
     }
-    
+
     public void setModel(RangeMatrixModel model) {
         doSetModel(model);
-        
+
     }
-    
+
     private void doSetModel(RangeMatrixModel model) {
-        
+
         FontMetrics fm = getFontMetrics();
-        
+
         this.model = model;
         DefaultRangeMatrixRenderer renderer = new DefaultRangeMatrixRenderer();
         columnHeader.setModel(model, fm, renderer);
         rowHeader.setModel(model, fm);
         headerCorner.setModel(model);
         setRowsWidthList(fm);
-//        setMinimalCellHeight(fm);
         setWidthOfComponents(fm);
         setHeightOfComponents();
-        
+
     }
-    
+
     public FontMetrics getFontMetrics() {
-//        Canvas c = new Canvas();
-//        Font f = c.getFont();
-//        return c.getFontMetrics(f);
         JLabel label = new JLabel();
         Font f = label.getFont();
         return label.getFontMetrics(f);
     }
-    
-//    public void setMinimalCellHeight(FontMetrics fm) {
-//        Double minimalCellHeight =  fm.getHeight() + 2 * spaceAroundName;
-//        columnHeader.setMinimalCellHeight(minimalCellHeight);
-//        rowHeader.setMinimalCellHeight(minimalCellHeight);
-//    }
     
     public void setWidthOfComponents(FontMetrics fm) {
         columnHeader.setWidthOfComponent(fm);
@@ -91,14 +82,14 @@ public class RangeMatrix extends JComponent {
         headerCorner.setWidthOfComponent();
         setWidthOfComponent();
     }
-    
+
     public void setHeightOfComponents() {
         columnHeader.setHeightOfComponent();
         rowHeader.setHeightOfComponent();
         headerCorner.setHeightOfComponent();
         setHeightOfComponent();
     }
-    
+
     public ArrayList<Double> getMaxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
         ArrayList<Double> newList = new ArrayList<>();
         for (int i = 0; i < rowHeader.getColumnCount(); i++) {
@@ -106,20 +97,20 @@ public class RangeMatrix extends JComponent {
         }
         return newList;
     }
-    
+
     public void setRowsWidthList(FontMetrics fm) {
         ArrayList<Double> rowsWidthList = rowHeader.calculateRowsWidthList(fm);
         ArrayList<Double> cornerRowsWidthList = headerCorner.calculateRowsWidthList(fm);
-        
+
         ArrayList<Double> newList = getMaxOfTwoLists(rowsWidthList, cornerRowsWidthList);
-        
+
         rowHeader.setRowsWidthList(newList);
     }
 
     public void drawVerticalLines(Graphics2D g2d) {
         ArrayList<Double> cellXList = columnHeader.getCellXList();
         ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
-        
+
         for (int i = 0; i < cellXList.size(); i++) {
             double x = cellXList.get(i) + cellWidthList.get(i) - 1;
             Shape l = new Line2D.Double(x, 0, x, height);
@@ -129,28 +120,33 @@ public class RangeMatrix extends JComponent {
 
     public void drawHorizontalLines(Graphics2D g2d) {
         ArrayList<Double> cellYList = rowHeader.getCellYList();
-        
+
         for (int i = 0; i < cellYList.size(); i++) {
             double y = cellYList.get(i) + rowHeader.getMinimalCellHeight() - 1;
             Shape l = new Line2D.Double(0, y, width, y);
             g2d.draw(l);
         }
     }
-    
+
     public void drawValues(Graphics2D g2d) {
         FontMetrics fm = g2d.getFontMetrics();
         ArrayList<Double> cellXList = columnHeader.getCellXList();
         ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
         ArrayList<Double> cellYList = rowHeader.getCellYList();
-        double minimalCellHeight = rowHeader. getMinimalCellHeight();
-        
+        double minimalCellHeight = rowHeader.getMinimalCellHeight();
+
         for (int i = 0; i < cellYList.size(); i++) {
             for (int j = 0; j < cellXList.size(); j++) {
                 String value = (model.getValueAt(j, i)).toString();
-                g2d.drawString(value, 
-                               (float)(cellXList.get(j) + cellWidthList.get(j)/2 - fm.stringWidth(value)/2 - 1),
-                               (float)(cellYList.get(i) + minimalCellHeight/2 - fm.getHeight()/2 + fm.getAscent()));
-            }            
+
+                JLabel label = new DefaultRangeMatrixRenderer().getCellRendererComponent(j, i, value);
+                label.setBounds(cellXList.get(j).intValue(), cellYList.get(i).intValue(), cellWidthList.get(j).intValue() -1, (int) minimalCellHeight-1);
+                this.add(label);
+
+//                g2d.drawString(value,
+//                        (float) (cellXList.get(j) + cellWidthList.get(j) / 2 - fm.stringWidth(value) / 2 - 1),
+//                        (float) (cellYList.get(i) + minimalCellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));
+            }
         }
     }
 
@@ -161,7 +157,7 @@ public class RangeMatrix extends JComponent {
     public double getWidthOfComponent() {
         return width;
     }
-    
+
     public void setHeightOfComponent() {
         height = rowHeader.getHeightOfComponent();
     }
@@ -203,7 +199,7 @@ public class RangeMatrix extends JComponent {
     }
 
     private void rebuildBuffer() {
-        buffer = new BufferedImage((int)width, (int)height, BufferedImage.TYPE_INT_ARGB);
+        buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.GRAY);
