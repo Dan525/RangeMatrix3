@@ -40,7 +40,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return model;
     }
 
-    public void setModel(RangeMatrixModel model, FontMetrics fm, IRangeMatrixRenderer renderer, CellRendererPane crp) {
+    public void setModel(RangeMatrixModel model, IRangeMatrixRenderer renderer, CellRendererPane crp) {
         this.model = model;
         this.renderer = renderer;
         this.crp = crp;
@@ -48,8 +48,8 @@ public class RangeMatrixColumnHeader extends JComponent {
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
         
-        setMinimalCellHeight(fm);
-        fillCellCoordinateList(fm, null, 0, 0);
+        setMinimalCellHeight();
+        fillCellCoordinateList(null, 0, 0);
         setRowCount(null, new ArrayList<>(), 1);
     }
 
@@ -57,11 +57,11 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.spaceAroundName = newSpace;
     }
 
-    public double getCellHeight(FontMetrics fm, int heightMultiplier) {
-        return (fm.getHeight() + 2 * spaceAroundName) * heightMultiplier;
+    public double getCellHeight(int heightMultiplier) {
+        return minimalCellHeight * heightMultiplier;
     }
 
-    public double getWidthByColumnName(FontMetrics fm, Object column) {
+    public double getWidthByColumnName(Object column) {
 
         String columnName = model.getColumnGroupName(column);
         JLabel label = renderer.getColumnRendererComponent(column, columnName);
@@ -73,16 +73,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public double getWidthOfColumn(FontMetrics fm, Object column) {
+    public double getWidthOfColumn(Object column) {
         double columnWidth = 0;
-        double ownColumnWidth = getWidthByColumnName(fm, column);
+        double ownColumnWidth = getWidthByColumnName(column);
 
         ArrayList<Object> leafColumnList = getLeafColumns(column, new ArrayList<>());
         if (leafColumnList.isEmpty()) {
             return ownColumnWidth;
         }
         for (Object leafColumn : leafColumnList) {
-            double leafColumnWidth = getWidthByColumnName(fm, leafColumn);
+            double leafColumnWidth = getWidthByColumnName(leafColumn);
             columnWidth += leafColumnWidth;
         }
         if (columnWidth > ownColumnWidth) {
@@ -120,7 +120,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public void fillCellCoordinateList(FontMetrics fm, Object parentColumn, double parentCellX, int rowCounter) {
+    public void fillCellCoordinateList(Object parentColumn, double parentCellX, int rowCounter) {
 
         int columnCount = model.getColumnGroupCount(parentColumn);
         double cellX = parentCellX;
@@ -128,13 +128,13 @@ public class RangeMatrixColumnHeader extends JComponent {
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
 
-            double cellWidth = getWidthOfColumn(fm, child);
+            double cellWidth = getWidthOfColumn(child);
 
             boolean isGroup = model.isColumnGroup(child);
 
             if (isGroup) {
                 rowCounter++;
-                fillCellCoordinateList(fm, child, cellX, rowCounter);
+                fillCellCoordinateList(child, cellX, rowCounter);
                 rowCounter--;
             } else {
                 cellXList.add(cellX);
@@ -152,16 +152,17 @@ public class RangeMatrixColumnHeader extends JComponent {
         return cellWidthList;
     }
 
-    public void setMinimalCellHeight(FontMetrics fm) {
-        minimalCellHeight = fm.getHeight() + 2 * spaceAroundName;
+    public void setMinimalCellHeight() {
+        JLabel label = renderer.getColumnRendererComponent(null, " ");
+        minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
     }
 
     public double getMinimalCellHeight() {
         return minimalCellHeight;
     }
 
-    public void setWidthOfComponent(FontMetrics fm) {
-        width = getWidthOfColumn(fm, null);
+    public void setWidthOfComponent() {
+        width = getWidthOfColumn(null);
     }
 
     public double getWidthOfComponent() {
@@ -198,7 +199,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
-    public void drawColumns(Graphics2D g2d, FontMetrics fm, Object parentColumn, double parentCellX, double parentCellY, int rowCounter) {
+    public void drawColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter) {
 
         int columnCount = model.getColumnGroupCount(parentColumn);
         double cellX = parentCellX;
@@ -208,13 +209,13 @@ public class RangeMatrixColumnHeader extends JComponent {
             Object child = model.getColumnGroup(parentColumn, i);
             String columnName = model.getColumnGroupName(child);
 
-            double cellWidth = getWidthOfColumn(fm, child);
+            double cellWidth = getWidthOfColumn(child);
 
             boolean isGroup = model.isColumnGroup(child);
 
             int heightMultiplier = getHeightMultiplier(parentColumn, isGroup, rowCounter);
 
-            double cellHeight = getCellHeight(fm, heightMultiplier);
+            double cellHeight = getCellHeight(heightMultiplier);
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
@@ -225,7 +226,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             if (isGroup) {
                 rowCounter++;
                 cellY += cellHeight;
-                drawColumns(g2d, fm, child, cellX, cellY, rowCounter);
+                drawColumns(g2d, child, cellX, cellY, rowCounter);
                 rowCounter--;
                 cellY -= cellHeight;
             }
@@ -238,9 +239,8 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
-        FontMetrics fm = g2d.getFontMetrics();
 
-        drawColumns(g2d, fm, null, -1, 0, 1);
+        drawColumns(g2d, null, -1, 0, 1);
     }
     
     @Override

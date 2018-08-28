@@ -5,7 +5,6 @@
  */
 package com.mycompany.rangematrix;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -59,19 +58,17 @@ public class RangeMatrix extends JComponent {
 
     private void doSetModel(RangeMatrixModel model) {
 
-        FontMetrics fm = getFontMetrics();
-
         renderer = new DefaultRangeMatrixRenderer();
         crp = new CellRendererPane();
 
         this.model = model;
 
-        columnHeader.setModel(model, fm, renderer, crp);
-        rowHeader.setModel(model, fm, renderer, crp);
+        columnHeader.setModel(model, renderer, crp);
+        rowHeader.setModel(model, renderer, crp);
         headerCorner.setModel(model, renderer, crp);
 
-        setRowsWidthList(fm);
-        setWidthOfComponents(fm);
+        setRowsWidthList();
+        setWidthOfComponents();
         setHeightOfComponents();
 
     }
@@ -82,8 +79,8 @@ public class RangeMatrix extends JComponent {
         return label.getFontMetrics(f);
     }
 
-    public void setWidthOfComponents(FontMetrics fm) {
-        columnHeader.setWidthOfComponent(fm);
+    public void setWidthOfComponents() {
+        columnHeader.setWidthOfComponent();
         rowHeader.setWidthOfComponent();
         headerCorner.setWidthOfComponent();
         setWidthOfComponent();
@@ -104,9 +101,9 @@ public class RangeMatrix extends JComponent {
         return newList;
     }
 
-    public void setRowsWidthList(FontMetrics fm) {
-        ArrayList<Double> rowsWidthList = rowHeader.calculateRowsWidthList(fm);
-        ArrayList<Double> cornerRowsWidthList = headerCorner.calculateRowsWidthList(fm);
+    public void setRowsWidthList() {
+        ArrayList<Double> rowsWidthList = rowHeader.calculateRowsWidthList();
+        ArrayList<Double> cornerRowsWidthList = headerCorner.calculateRowsWidthList();
 
         ArrayList<Double> newList = getMaxOfTwoLists(rowsWidthList, cornerRowsWidthList);
 

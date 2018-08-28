@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 /**
  *
@@ -48,15 +49,16 @@ public class RangeMatrixHeaderCorner extends JComponent {
         this.crp = crp;
     }
     
-    public double getWidthOfRowByName(FontMetrics fm, int columnIndex) {
+    public double getWidthOfRowByName(int columnIndex) {
         String rowName = model.getCornerColumnNames().get(columnIndex);
-        return fm.stringWidth(rowName) + 2 * spaceAroundName;
+        JLabel label = renderer.getColumnRendererComponent(null, rowName);
+        return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
     
-    public ArrayList<Double> calculateRowsWidthList(FontMetrics fm) {
+    public ArrayList<Double> calculateRowsWidthList() {
         ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
         for (int i = 0; i < rowHeader.getColumnCount(); i++) {
-            double rowWidth = getWidthOfRowByName(fm, i);
+            double rowWidth = getWidthOfRowByName(i);
             rowsWidthListTemp.add(rowWidth);
         }
         return rowsWidthListTemp;

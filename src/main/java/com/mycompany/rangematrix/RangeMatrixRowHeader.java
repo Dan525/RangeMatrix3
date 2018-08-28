@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 /**
  *
@@ -37,14 +38,14 @@ public class RangeMatrixRowHeader extends JComponent {
     private double width;
     private double height;
 
-    public void setModel(RangeMatrixModel model, FontMetrics fm, IRangeMatrixRenderer renderer, CellRendererPane crp) {
+    public void setModel(RangeMatrixModel model, IRangeMatrixRenderer renderer, CellRendererPane crp) {
         this.model = model;
         this.renderer = renderer;
         this.crp = crp;
         
         cellYList = new ArrayList<>();
         
-        setMinimalCellHeight(fm);
+        setMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         setColumnCount(null, new ArrayList<>(), 1);
     }
@@ -57,20 +58,22 @@ public class RangeMatrixRowHeader extends JComponent {
         this.spaceAroundName = newSpace;
     }
 
-    public void setMinimalCellHeight(FontMetrics fm) {
-        minimalCellHeight = fm.getHeight() + 2 * spaceAroundName;
+    public void setMinimalCellHeight() {
+        JLabel label = renderer.getRowRendererComponent(null, " ");
+        minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
     }
 
     public double getMinimalCellHeight() {
         return minimalCellHeight;
     }
 
-    public double getWidthOfRowByName(FontMetrics fm, Object row) {
-        String rowName = model.getRowGroupName(row);
-        return fm.stringWidth(rowName) + 2 * spaceAroundName;
+    public double getWidthOfRowByName(Object row) {
+        String rowName = model.getColumnGroupName(row);
+        JLabel label = renderer.getColumnRendererComponent(row, rowName);
+        return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
 
-    public double getMaxRowWidthInColumn(FontMetrics fm, int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
+    public double getMaxRowWidthInColumn(int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
         int rowCount = model.getRowGroupCount(null);
 
         for (int i = 0; i < rowCount; i++) {
@@ -80,20 +83,20 @@ public class RangeMatrixRowHeader extends JComponent {
 
             if (isGroup && columnCounter < indexOfColumn) {
                 columnCounter++;
-                getMaxRowWidthInColumn(fm, indexOfColumn, columnCounter, rowsOfColumnList);
+                getMaxRowWidthInColumn(indexOfColumn, columnCounter, rowsOfColumnList);
                 columnCounter--;
 
             } else if (columnCounter == indexOfColumn) {
-                rowsOfColumnList.add(getWidthOfRowByName(fm, child));
+                rowsOfColumnList.add(getWidthOfRowByName(child));
             }
         }
         return Collections.max(rowsOfColumnList);
     }
 
-    public ArrayList<Double> calculateRowsWidthList(FontMetrics fm) {
+    public ArrayList<Double> calculateRowsWidthList() {
         ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            double rowWidth = getMaxRowWidthInColumn(fm, i, 0, new ArrayList<>());
+            double rowWidth = getMaxRowWidthInColumn(i, 0, new ArrayList<>());
             rowsWidthListTemp.add(rowWidth);
         }
         return rowsWidthListTemp;
@@ -195,9 +198,8 @@ public class RangeMatrixRowHeader extends JComponent {
 
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
-        FontMetrics fm = g2d.getFontMetrics();
 
-        drawRows(g2d, fm, null, 0, -1, 0);
+        drawRows(g2d, null, 0, -1, 0);
         Shape l = new Line2D.Double(width - 1, 0, width - 1, height);
         g2d.draw(l);
     }
@@ -217,7 +219,7 @@ public class RangeMatrixRowHeader extends JComponent {
         return leafRowList;
     }
 
-    public void drawRows(Graphics2D g2d, FontMetrics fm, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
+    public void drawRows(Graphics2D g2d, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
         int rowCount = model.getRowGroupCount(parentRow);
         double cellX = parentCellX;
         double cellY = parentCellY;
@@ -241,7 +243,7 @@ public class RangeMatrixRowHeader extends JComponent {
             if (isGroup) {
                 columnCounter++;
                 cellX += cellWidth;
-                drawRows(g2d, fm, child, cellX, cellY, columnCounter);
+                drawRows(g2d, child, cellX, cellY, columnCounter);
                 columnCounter--;
                 cellX -= cellWidth;
             } else {
