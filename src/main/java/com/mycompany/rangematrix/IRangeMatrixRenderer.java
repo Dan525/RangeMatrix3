@@ -4,7 +4,7 @@ import javax.swing.JLabel;
 
 /**
  *
- * @author oleg_kirienko
+ * @author daniil_pozdeev
  */
 public interface IRangeMatrixRenderer {
     

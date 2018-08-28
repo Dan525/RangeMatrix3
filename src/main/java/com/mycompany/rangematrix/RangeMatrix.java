@@ -8,7 +8,6 @@ package com.mycompany.rangematrix;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -19,9 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
-import java.awt.Font;
 import javax.swing.CellRendererPane;
-import javax.swing.JLabel;
 
 /**
  *
@@ -71,12 +68,6 @@ public class RangeMatrix extends JComponent {
         setWidthOfComponents();
         setHeightOfComponents();
 
-    }
-
-    public FontMetrics getFontMetrics() {
-        JLabel label = new JLabel();
-        Font f = label.getFont();
-        return label.getFontMetrics(f);
     }
 
     public void setWidthOfComponents() {
