@@ -16,6 +16,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
@@ -26,6 +27,8 @@ import javax.swing.JLabel;
 public class RangeMatrixRowHeader extends JComponent {
 
     private RangeMatrixModel model;
+    private IRangeMatrixRenderer renderer;
+    private CellRendererPane crp;
     private ArrayList<Double> cellYList;
     private double minimalCellHeight;
     private int columnCount;
@@ -34,11 +37,14 @@ public class RangeMatrixRowHeader extends JComponent {
     private BufferedImage buffer;
     private double width;
     private double height;
-//    private FontMetrics fm;
 
-    public void setModel(RangeMatrixModel model, FontMetrics fm) {
+    public void setModel(RangeMatrixModel model, FontMetrics fm, IRangeMatrixRenderer renderer, CellRendererPane crp) {
         this.model = model;
+        this.renderer = renderer;
+        this.crp = crp;
+        
         cellYList = new ArrayList<>();
+        
         setMinimalCellHeight(fm);
         fillCellCoordinateList(null, 0, 0);
         setColumnCount(null, new ArrayList<>(), 1);
@@ -229,11 +235,14 @@ public class RangeMatrixRowHeader extends JComponent {
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
+            
+            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName), this,
+                (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
-            JLabel label = new DefaultRangeMatrixRenderer().getRowRendererComponent(child, rowName);
-            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-            label.setHorizontalAlignment(JLabel.CENTER);
-            this.add(label);
+//            JLabel label = new DefaultRangeMatrixRenderer().getRowRendererComponent(child, rowName);
+//            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
+//            label.setHorizontalAlignment(JLabel.CENTER);
+//            this.add(label);
 
 //            g2d.drawString(columnName,
 //                    (float) (cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),

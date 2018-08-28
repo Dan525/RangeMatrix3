@@ -14,6 +14,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
@@ -25,6 +26,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
+    private CellRendererPane crp;
     private double spaceAroundName = 4;
     private ArrayList<Double> cellXList;
     private ArrayList<Double> cellWidthList;
@@ -38,11 +40,14 @@ public class RangeMatrixColumnHeader extends JComponent {
         return model;
     }
 
-    public void setModel(RangeMatrixModel model, FontMetrics fm, IRangeMatrixRenderer renderer) {
+    public void setModel(RangeMatrixModel model, FontMetrics fm, IRangeMatrixRenderer renderer, CellRendererPane crp) {
         this.model = model;
         this.renderer = renderer;
+        this.crp = crp;
+        
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
+        
         setMinimalCellHeight(fm);
         fillCellCoordinateList(fm, null, 0, 0);
         setRowCount(null, new ArrayList<>(), 1);
@@ -225,9 +230,12 @@ public class RangeMatrixColumnHeader extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
             
-            JLabel label = new DefaultRangeMatrixRenderer().getColumnRendererComponent(child, columnName);
-            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-            this.add(label);
+            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName), this,
+                (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
+            
+//            JLabel label = new DefaultRangeMatrixRenderer().getColumnRendererComponent(child, columnName);
+//            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
+//            this.add(label);
 
 //            g2d.drawString(columnName,
 //                    (float)(cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),

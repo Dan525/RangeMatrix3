@@ -21,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import java.awt.Font;
+import javax.swing.CellRendererPane;
 import javax.swing.JLabel;
 
 /**
@@ -33,6 +34,8 @@ public class RangeMatrix extends JComponent {
     private final RangeMatrixColumnHeader columnHeader;
     private final RangeMatrixRowHeader rowHeader;
     private final RangeMatrixHeaderCorner headerCorner;
+    private IRangeMatrixRenderer renderer;
+    private CellRendererPane crp;
     private double width;
     private double height;
     private BufferedImage buffer;
@@ -58,12 +61,17 @@ public class RangeMatrix extends JComponent {
     private void doSetModel(RangeMatrixModel model) {
 
         FontMetrics fm = getFontMetrics();
-
+        
+        renderer = new DefaultRangeMatrixRenderer();
+        crp = new CellRendererPane();
+        
         this.model = model;
-        DefaultRangeMatrixRenderer renderer = new DefaultRangeMatrixRenderer();
-        columnHeader.setModel(model, fm, renderer);
-        rowHeader.setModel(model, fm);
-        headerCorner.setModel(model);
+        
+        
+        columnHeader.setModel(model, fm, renderer, crp);
+        rowHeader.setModel(model, fm, renderer, crp);
+        headerCorner.setModel(model, renderer, crp);
+        
         setRowsWidthList(fm);
         setWidthOfComponents(fm);
         setHeightOfComponents();
@@ -129,7 +137,6 @@ public class RangeMatrix extends JComponent {
     }
 
     public void drawValues(Graphics2D g2d) {
-        FontMetrics fm = g2d.getFontMetrics();
         ArrayList<Double> cellXList = columnHeader.getCellXList();
         ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
         ArrayList<Double> cellYList = rowHeader.getCellYList();
@@ -138,10 +145,16 @@ public class RangeMatrix extends JComponent {
         for (int i = 0; i < cellYList.size(); i++) {
             for (int j = 0; j < cellXList.size(); j++) {
                 String value = (model.getValueAt(j, i)).toString();
+                
+                crp.paintComponent(g2d, renderer.getCellRendererComponent(j, i, value), this,
+                                   cellXList.get(j).intValue(),
+                                   cellYList.get(i).intValue(),
+                                   cellWidthList.get(j).intValue() -1,
+                                   (int) minimalCellHeight-1);
 
-                JLabel label = new DefaultRangeMatrixRenderer().getCellRendererComponent(j, i, value);
-                label.setBounds(cellXList.get(j).intValue(), cellYList.get(i).intValue(), cellWidthList.get(j).intValue() -1, (int) minimalCellHeight-1);
-                this.add(label);
+//                JLabel label = new DefaultRangeMatrixRenderer().getCellRendererComponent(j, i, value);
+//                label.setBounds(cellXList.get(j).intValue(), cellYList.get(i).intValue(), cellWidthList.get(j).intValue() -1, (int) minimalCellHeight-1);
+//                this.add(label);
 
 //                g2d.drawString(value,
 //                        (float) (cellXList.get(j) + cellWidthList.get(j) / 2 - fm.stringWidth(value) / 2 - 1),

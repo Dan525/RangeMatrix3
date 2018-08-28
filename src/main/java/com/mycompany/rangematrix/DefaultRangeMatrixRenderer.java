@@ -1,7 +1,9 @@
 package com.mycompany.rangematrix;
 
+import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
+import javax.swing.border.MatteBorder;
 
 /**
  *
@@ -30,10 +32,6 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
         delegate.setText(value);
         delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
         delegate.setHorizontalAlignment(JLabel.CENTER);
-//        if (row <= 3 && column == 5 || row == 3 && column <= 5) {
-//            delegate.setOpaque(true);
-//            delegate.setBackground(Color.YELLOW);
-//        }
         return delegate;
     }
 
