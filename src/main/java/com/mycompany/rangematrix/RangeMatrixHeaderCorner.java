@@ -15,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 
 /**
  *
@@ -96,7 +95,6 @@ public class RangeMatrixHeaderCorner extends JComponent {
     }
 
     public void drawCorner(Graphics2D g2d, double parentCellX, double parentCellY) {
-        FontMetrics fm = g2d.getFontMetrics();    
         int columnCount = rowHeader.getColumnCount();
         double cellX = parentCellX;
         double cellY = parentCellY;
@@ -115,17 +113,8 @@ public class RangeMatrixHeaderCorner extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
             
-            crp.paintComponent(g2d, renderer.getColumnRendererComponent(null, columnName), this,
-                (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
-            
-//            JLabel label = new JLabel(columnName);
-//            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-//            label.setHorizontalAlignment(JLabel.CENTER);
-//            this.add(label);
-            
-//            g2d.drawString(columnName,
-//                    (float) (cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
-//                    (float) (cellY + cellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));
+            crp.paintComponent(g2d, renderer.getColumnRendererComponent(null, columnName),
+                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
             cellX += cellWidth;
         }

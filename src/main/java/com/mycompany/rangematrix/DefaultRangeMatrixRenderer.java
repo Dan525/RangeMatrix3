@@ -1,13 +1,11 @@
 package com.mycompany.rangematrix;
 
-import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
-import javax.swing.border.MatteBorder;
 
 /**
  *
- * @author oleg_kirienko
+ * @author daniil_pozdeev
  */
 public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
 

@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 
 /**
  *
@@ -236,17 +235,8 @@ public class RangeMatrixRowHeader extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
             
-            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName), this,
-                (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
-
-//            JLabel label = new DefaultRangeMatrixRenderer().getRowRendererComponent(child, rowName);
-//            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-//            label.setHorizontalAlignment(JLabel.CENTER);
-//            this.add(label);
-
-//            g2d.drawString(columnName,
-//                    (float) (cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
-//                    (float) (cellY + cellHeight / 2 - fm.getHeight() / 2) + fm.getAscent());
+            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName),
+                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
             if (isGroup) {
                 columnCounter++;

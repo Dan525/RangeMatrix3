@@ -39,7 +39,6 @@ public class RangeMatrix extends JComponent {
     private double width;
     private double height;
     private BufferedImage buffer;
-    private final double spaceAroundName = 4;
 
     public RangeMatrix(RangeMatrixModel model) {
         columnHeader = new RangeMatrixColumnHeader();
@@ -61,17 +60,16 @@ public class RangeMatrix extends JComponent {
     private void doSetModel(RangeMatrixModel model) {
 
         FontMetrics fm = getFontMetrics();
-        
+
         renderer = new DefaultRangeMatrixRenderer();
         crp = new CellRendererPane();
-        
+
         this.model = model;
-        
-        
+
         columnHeader.setModel(model, fm, renderer, crp);
         rowHeader.setModel(model, fm, renderer, crp);
         headerCorner.setModel(model, renderer, crp);
-        
+
         setRowsWidthList(fm);
         setWidthOfComponents(fm);
         setHeightOfComponents();
@@ -83,7 +81,7 @@ public class RangeMatrix extends JComponent {
         Font f = label.getFont();
         return label.getFontMetrics(f);
     }
-    
+
     public void setWidthOfComponents(FontMetrics fm) {
         columnHeader.setWidthOfComponent(fm);
         rowHeader.setWidthOfComponent();
@@ -145,20 +143,12 @@ public class RangeMatrix extends JComponent {
         for (int i = 0; i < cellYList.size(); i++) {
             for (int j = 0; j < cellXList.size(); j++) {
                 String value = (model.getValueAt(j, i)).toString();
-                
+
                 crp.paintComponent(g2d, renderer.getCellRendererComponent(j, i, value), this,
                                    cellXList.get(j).intValue(),
                                    cellYList.get(i).intValue(),
-                                   cellWidthList.get(j).intValue() -1,
-                                   (int) minimalCellHeight-1);
-
-//                JLabel label = new DefaultRangeMatrixRenderer().getCellRendererComponent(j, i, value);
-//                label.setBounds(cellXList.get(j).intValue(), cellYList.get(i).intValue(), cellWidthList.get(j).intValue() -1, (int) minimalCellHeight-1);
-//                this.add(label);
-
-//                g2d.drawString(value,
-//                        (float) (cellXList.get(j) + cellWidthList.get(j) / 2 - fm.stringWidth(value) / 2 - 1),
-//                        (float) (cellYList.get(i) + minimalCellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));
+                                   cellWidthList.get(j).intValue() - 1,
+                                   (int) minimalCellHeight - 1);
             }
         }
     }

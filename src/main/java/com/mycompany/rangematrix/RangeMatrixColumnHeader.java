@@ -183,17 +183,6 @@ public class RangeMatrixColumnHeader extends JComponent {
         return d;
     }
 
-    void rebuildBuffer() {
-        buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g2d = buffer.createGraphics();
-        //g2d.clipRect(1, 0, (int)width, (int)height);
-        g2d.setColor(Color.BLACK);
-        FontMetrics fm = g2d.getFontMetrics();
-
-        drawColumns(g2d, fm, null, -1, 0, 1);
-    }
-
     public ArrayList<Object> getLeafColumns(Object parentColumn, ArrayList<Object> leafColumnList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
@@ -230,16 +219,9 @@ public class RangeMatrixColumnHeader extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             g2d.draw(rect);
             
-            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName), this,
-                (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
-            
-//            JLabel label = new DefaultRangeMatrixRenderer().getColumnRendererComponent(child, columnName);
-//            label.setBounds((int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-//            this.add(label);
+            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
+                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
-//            g2d.drawString(columnName,
-//                    (float)(cellX + cellWidth / 2 - fm.stringWidth(columnName) / 2),
-//                    (float)(cellY + cellHeight / 2 - fm.getHeight() / 2 + fm.getAscent()));
             if (isGroup) {
                 rowCounter++;
                 cellY += cellHeight;
@@ -251,6 +233,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
+    void rebuildBuffer() {
+        buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = buffer.createGraphics();
+        g2d.setColor(Color.BLACK);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        drawColumns(g2d, fm, null, -1, 0, 1);
+    }
+    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
