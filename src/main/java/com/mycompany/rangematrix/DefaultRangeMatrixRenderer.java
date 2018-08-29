@@ -1,7 +1,10 @@
 package com.mycompany.rangematrix;
 
+import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JLabel;
+import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
 
 /**
  *
@@ -10,11 +13,15 @@ import javax.swing.JLabel;
 public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
 
     private final JLabel delegate = new JLabel();
+    private final Border cellBorder = new MatteBorder(0, 0, 1, 1, Color.GRAY);
 
     @Override
     public JLabel getColumnRendererComponent(Object column, String columnName) {
         delegate.setText(columnName);
         delegate.setHorizontalAlignment(JLabel.CENTER);
+        delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
+        delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
         return delegate;
     }
 
@@ -22,6 +29,8 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     public JLabel getRowRendererComponent(Object row, String rowName) {
         delegate.setText(rowName);
         delegate.setHorizontalAlignment(JLabel.CENTER);
+        delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
+        delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         return delegate;
     }
 
@@ -30,6 +39,8 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
         delegate.setText(value);
         delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
         delegate.setHorizontalAlignment(JLabel.CENTER);
+        delegate.setBackground(java.awt.SystemColor.window);
+        delegate.setBorder(cellBorder);
         return delegate;
     }
 

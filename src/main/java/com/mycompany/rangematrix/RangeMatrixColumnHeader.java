@@ -49,7 +49,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         
         setMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
-        setRowCount(null, new ArrayList<>(), 1);
+        calculateRowCount(null, new ArrayList<>(), 1);
     }
 
     public void setSpaceAroundName(int newSpace) {
@@ -91,7 +91,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public void setRowCount(Object parentColumn, ArrayList<Integer> maxRowIndexList, int maxRowIndex) {
+    public void calculateRowCount(Object parentColumn, ArrayList<Integer> maxRowIndexList, int maxRowIndex) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
@@ -99,7 +99,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             boolean isGroup = model.isColumnGroup(child);
             if (isGroup) {
                 maxRowIndex++;
-                setRowCount(child, maxRowIndexList, maxRowIndex);
+                calculateRowCount(child, maxRowIndexList, maxRowIndex);
                 maxRowIndex--;
             }
             maxRowIndexList.add(maxRowIndex);
@@ -169,7 +169,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
 
     public void setHeightOfComponent() {
-        height = (minimalCellHeight * rowCount) + 1;
+        height = (minimalCellHeight * rowCount);
     }
 
     public double getHeightOfComponent() {
@@ -217,7 +217,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             double cellHeight = getCellHeight(heightMultiplier);
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
-            g2d.draw(rect);
+            //g2d.draw(rect);
             
             crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
                                this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
@@ -239,7 +239,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawColumns(g2d, null, -1, 0, 1);
+        drawColumns(g2d, null, 0, 0, 1);
     }
     
     @Override

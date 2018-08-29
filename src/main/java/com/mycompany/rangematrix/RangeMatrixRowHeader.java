@@ -46,7 +46,7 @@ public class RangeMatrixRowHeader extends JComponent {
         
         setMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
-        setColumnCount(null, new ArrayList<>(), 1);
+        calculateColumnCount(null, new ArrayList<>(), 1);
     }
 
     public RangeMatrixModel getModel() {
@@ -72,30 +72,32 @@ public class RangeMatrixRowHeader extends JComponent {
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
 
-    public double getMaxRowWidthInColumn(int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
-        int rowCount = model.getRowGroupCount(null);
+    public ArrayList<Double> getMaxRowWidthInColumn(Object parent, int indexOfColumn, int columnCounter, ArrayList<Double> rowsOfColumnList) {
+        int rowCount = model.getRowGroupCount(parent);
 
         for (int i = 0; i < rowCount; i++) {
-            Object child = model.getRowGroup(null, i);
+            Object child = model.getRowGroup(parent, i);
 
             boolean isGroup = model.isColumnGroup(child);
-
-            if (isGroup && columnCounter < indexOfColumn) {
-                columnCounter++;
-                getMaxRowWidthInColumn(indexOfColumn, columnCounter, rowsOfColumnList);
-                columnCounter--;
-
-            } else if (columnCounter == indexOfColumn) {
+            
+            if (columnCounter == indexOfColumn) {
                 rowsOfColumnList.add(getWidthOfRowByName(child));
             }
+            if (isGroup) {
+                columnCounter++;
+                getMaxRowWidthInColumn(child, indexOfColumn, columnCounter, rowsOfColumnList);
+                columnCounter--;
+
+            }
         }
-        return Collections.max(rowsOfColumnList);
+        return rowsOfColumnList;
     }
 
     public ArrayList<Double> calculateRowsWidthList() {
         ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            double rowWidth = getMaxRowWidthInColumn(i, 0, new ArrayList<>());
+            ArrayList<Double> rowsOfColumnList = getMaxRowWidthInColumn(null, i, 0, new ArrayList<>());
+            double rowWidth = Collections.max(rowsOfColumnList);
             rowsWidthListTemp.add(rowWidth);
         }
         return rowsWidthListTemp;
@@ -119,7 +121,7 @@ public class RangeMatrixRowHeader extends JComponent {
         }
     }
 
-    public void setColumnCount(Object parentRow, ArrayList<Integer> maxColumnIndexList, int maxColumnIndex) {
+    public void calculateColumnCount(Object parentRow, ArrayList<Integer> maxColumnIndexList, int maxColumnIndex) {
         int rowCount = model.getRowGroupCount(parentRow);
 
         for (int i = 0; i < rowCount; i++) {
@@ -127,7 +129,7 @@ public class RangeMatrixRowHeader extends JComponent {
             boolean isGroup = model.isRowGroup(child);
             if (isGroup) {
                 maxColumnIndex++;
-                setColumnCount(child, maxColumnIndexList, maxColumnIndex);
+                calculateColumnCount(child, maxColumnIndexList, maxColumnIndex);
                 maxColumnIndex--;
             }
             maxColumnIndexList.add(maxColumnIndex);
@@ -170,7 +172,7 @@ public class RangeMatrixRowHeader extends JComponent {
         for (double rowWidth : rowsWidthList) {
             width += rowWidth;
         }
-        width += 1;
+        //width += 1;
     }
 
     public double getWidthOfComponent() {
@@ -198,9 +200,9 @@ public class RangeMatrixRowHeader extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawRows(g2d, null, 0, -1, 0);
+        drawRows(g2d, null, 0, 0, 0);
         Shape l = new Line2D.Double(width - 1, 0, width - 1, height);
-        g2d.draw(l);
+        //g2d.draw(l);
     }
 
     public ArrayList<Object> getLeafRows(Object parentRow, ArrayList<Object> leafRowList) {
@@ -216,6 +218,31 @@ public class RangeMatrixRowHeader extends JComponent {
             }
         }
         return leafRowList;
+    }
+    
+    public void drawEmptyRows(Graphics2D g2d, double parentCellX, double parentCellY, int columnCounter) {
+
+        if (columnCounter < columnCount) {
+            
+            String rowName = " ";
+            double cellX = parentCellX;
+            double cellWidth = rowsWidthList.get(columnCounter);
+
+            Rectangle2D rect = new Rectangle2D.Double(parentCellX, parentCellY, cellWidth, minimalCellHeight);
+            //g2d.draw(rect);
+
+            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, rowName),
+                    this, (int) cellX, (int) parentCellY, (int) cellWidth, (int) minimalCellHeight);
+            
+            cellX += cellWidth;
+            columnCounter++;
+
+            drawEmptyRows(g2d, cellX, parentCellY, columnCounter);
+
+            columnCounter--;
+            cellX -= cellWidth;
+        }
+
     }
 
     public void drawRows(Graphics2D g2d, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
@@ -234,7 +261,7 @@ public class RangeMatrixRowHeader extends JComponent {
             double cellHeight = getHeightOfRow(child);
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
-            g2d.draw(rect);
+            //g2d.draw(rect);
             
             crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName),
                                this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
@@ -245,9 +272,19 @@ public class RangeMatrixRowHeader extends JComponent {
                 drawRows(g2d, child, cellX, cellY, columnCounter);
                 columnCounter--;
                 cellX -= cellWidth;
-            } else {
-                Shape l = new Line2D.Double(cellX + cellWidth, cellY, getWidthOfComponent(), cellY);
-                g2d.draw(l);
+            } else if (!isGroup && columnCounter < columnCount) {
+                
+                cellX += cellWidth;
+                columnCounter++;
+                
+                
+                drawEmptyRows(g2d, cellX, cellY, columnCounter);
+                
+                columnCounter--;
+                cellX -= cellWidth;
+            }  else {
+//                Shape l = new Line2D.Double(cellX + cellWidth, cellY, getWidthOfComponent(), cellY);
+//                g2d.draw(l);
             }
             cellY += cellHeight;
         }

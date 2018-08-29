@@ -135,8 +135,8 @@ public class RangeMatrix extends JComponent {
                 crp.paintComponent(g2d, renderer.getCellRendererComponent(j, i, value), this,
                                    cellXList.get(j).intValue(),
                                    cellYList.get(i).intValue(),
-                                   cellWidthList.get(j).intValue() - 1,
-                                   (int) minimalCellHeight - 1);
+                                   cellWidthList.get(j).intValue(),
+                                   (int) minimalCellHeight);
             }
         }
     }
@@ -195,8 +195,8 @@ public class RangeMatrix extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.GRAY);
 
-        drawVerticalLines(g2d);
-        drawHorizontalLines(g2d);
+        //drawVerticalLines(g2d);
+        //drawHorizontalLines(g2d);
         drawValues(g2d);
     }
 
