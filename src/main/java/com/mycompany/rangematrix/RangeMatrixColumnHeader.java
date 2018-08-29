@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -51,6 +53,8 @@ public class RangeMatrixColumnHeader extends JComponent {
         calculateMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
+        
+        this.addMouseListener(new RangeMatrixMouseHandler());
     }
 
     public RangeMatrixModel getModel() {
@@ -256,5 +260,34 @@ public class RangeMatrixColumnHeader extends JComponent {
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.drawImage(buffer, 0, 0, this);
+    }
+    
+    protected class RangeMatrixMouseHandler implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            System.out.println("Column header coordinates: " + e.getX() + ", " + e.getY());
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            
+        }
+        
     }
 }

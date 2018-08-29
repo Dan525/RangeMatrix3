@@ -11,6 +11,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -45,7 +47,6 @@ public class RangeMatrix extends JComponent {
         crp = new CellRendererPane();
         
         doSetModel(model);
-
     }
 
     public RangeMatrixModel getModel() {
@@ -67,6 +68,8 @@ public class RangeMatrix extends JComponent {
         setupRowsWidthList();
         calculateWidthOfComponents();
         calculateHeightOfComponents();
+        
+        this.addMouseListener(new RangeMatrixMouseHandler());
 
     }
 
@@ -245,5 +248,34 @@ public class RangeMatrix extends JComponent {
         public void valueChanged(RangeMatrixEvent e) {
             rebuildBuffer();
         }
+    }
+    
+    protected class RangeMatrixMouseHandler implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            System.out.println("Table coordinates: " + e.getX() + ", " + e.getY());
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            
+        }
+        
     }
 }
