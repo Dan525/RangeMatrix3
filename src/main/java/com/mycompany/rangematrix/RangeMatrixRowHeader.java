@@ -25,6 +25,7 @@ import javax.swing.JLabel;
  */
 public class RangeMatrixRowHeader extends JComponent {
 
+    private final RangeMatrix rm;
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
@@ -36,11 +37,15 @@ public class RangeMatrixRowHeader extends JComponent {
     private BufferedImage buffer;
     private double width;
     private double height;
+    
+    public RangeMatrixRowHeader(RangeMatrix rm) {
+        this.rm = rm;
+    }
 
-    public void setModel(RangeMatrixModel model, IRangeMatrixRenderer renderer, CellRendererPane crp) {
-        this.model = model;
-        this.renderer = renderer;
-        this.crp = crp;
+    public void setModel() {
+        this.model = rm.getModel();
+        this.renderer = rm.getRenderer();
+        this.crp = rm.getCrp();
         
         cellYList = new ArrayList<>();
         

@@ -23,6 +23,7 @@ import javax.swing.JLabel;
  */
 public class RangeMatrixColumnHeader extends JComponent {
 
+    private final RangeMatrix rm;
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
@@ -34,15 +35,15 @@ public class RangeMatrixColumnHeader extends JComponent {
     private double width;
     private double height;
     private double minimalCellHeight;
-
-    public RangeMatrixModel getModel() {
-        return model;
+    
+    public RangeMatrixColumnHeader(RangeMatrix rm) {
+        this.rm = rm;
     }
 
-    public void setModel(RangeMatrixModel model, IRangeMatrixRenderer renderer, CellRendererPane crp) {
-        this.model = model;
-        this.renderer = renderer;
-        this.crp = crp;
+    public void setModel() {
+        this.model = rm.getModel();
+        this.renderer = rm.getRenderer();
+        this.crp = rm.getCrp();
         
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
@@ -50,6 +51,10 @@ public class RangeMatrixColumnHeader extends JComponent {
         calculateMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
+    }
+
+    public RangeMatrixModel getModel() {
+        return model;
     }
 
     public void setSpaceAroundName(int newSpace) {

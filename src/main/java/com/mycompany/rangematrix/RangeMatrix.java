@@ -37,9 +37,13 @@ public class RangeMatrix extends JComponent {
     private BufferedImage buffer;
 
     public RangeMatrix(RangeMatrixModel model) {
-        columnHeader = new RangeMatrixColumnHeader();
-        rowHeader = new RangeMatrixRowHeader();
-        headerCorner = new RangeMatrixHeaderCorner(columnHeader, rowHeader);
+        columnHeader = new RangeMatrixColumnHeader(this);
+        rowHeader = new RangeMatrixRowHeader(this);
+        headerCorner = new RangeMatrixHeaderCorner(this, columnHeader, rowHeader);
+        
+        renderer = new DefaultRangeMatrixRenderer();
+        crp = new CellRendererPane();
+        
         doSetModel(model);
 
     }
@@ -54,20 +58,32 @@ public class RangeMatrix extends JComponent {
     }
 
     private void doSetModel(RangeMatrixModel model) {
-
-        renderer = new DefaultRangeMatrixRenderer();
-        crp = new CellRendererPane();
-
+        
         this.model = model;
-
-        columnHeader.setModel(model, renderer, crp);
-        rowHeader.setModel(model, renderer, crp);
-        headerCorner.setModel(model, renderer, crp);
+        columnHeader.setModel();
+        rowHeader.setModel();
+        headerCorner.setModel();
 
         setupRowsWidthList();
         calculateWidthOfComponents();
         calculateHeightOfComponents();
 
+    }
+
+    public IRangeMatrixRenderer getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(IRangeMatrixRenderer renderer) {
+        this.renderer = renderer;
+    }
+
+    public CellRendererPane getCrp() {
+        return crp;
+    }
+
+    public void setCrp(CellRendererPane crp) {
+        this.crp = crp;
     }
 
     public void calculateWidthOfComponents() {

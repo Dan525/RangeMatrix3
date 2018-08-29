@@ -22,6 +22,7 @@ import javax.swing.JLabel;
  */
 public class RangeMatrixHeaderCorner extends JComponent {
 
+    private final RangeMatrix rm;
     private RangeMatrixModel model;
     private final RangeMatrixColumnHeader columnHeader;
     private final RangeMatrixRowHeader rowHeader;
@@ -32,20 +33,20 @@ public class RangeMatrixHeaderCorner extends JComponent {
     private double height;
     private final int spaceAroundName = 4;
 
-    public RangeMatrixHeaderCorner(RangeMatrixColumnHeader columnHeader, RangeMatrixRowHeader rowHeader) {
+    public RangeMatrixHeaderCorner(RangeMatrix rm, RangeMatrixColumnHeader columnHeader, RangeMatrixRowHeader rowHeader) {
+        this.rm = rm;
         this.columnHeader = columnHeader;
         this.rowHeader = rowHeader;
-        
+    }
+
+    public void setModel() {
+        this.model = rm.getModel();
+        this.renderer = rm.getRenderer();
+        this.crp = rm.getCrp();
     }
 
     public RangeMatrixModel getModel() {
         return model;
-    }
-
-    public void setModel(RangeMatrixModel model, IRangeMatrixRenderer renderer, CellRendererPane crp) {
-        this.model = model;
-        this.renderer = renderer;
-        this.crp = crp;
     }
     
     public double calculateWidthOfRowByName(int columnIndex) {
