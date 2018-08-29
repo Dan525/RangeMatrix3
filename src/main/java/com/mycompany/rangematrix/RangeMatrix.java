@@ -194,6 +194,9 @@ public class RangeMatrix extends JComponent {
                 scrollPane.setColumnHeaderView(columnHeader);
                 scrollPane.setRowHeaderView(rowHeader);
                 scrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, headerCorner);
+                
+                scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+                scrollPane.getHorizontalScrollBar().setUnitIncrement(10);
             }
         }
     }
