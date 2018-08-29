@@ -83,7 +83,7 @@ public class RangeMatrixRowHeader extends JComponent {
             if (columnCounter == indexOfColumn) {
                 rowsOfColumnList.add(getWidthOfRowByName(child));
             }
-            if (isGroup) {
+            if (isGroup && columnCounter < indexOfColumn) {
                 columnCounter++;
                 getMaxRowWidthInColumn(child, indexOfColumn, columnCounter, rowsOfColumnList);
                 columnCounter--;
