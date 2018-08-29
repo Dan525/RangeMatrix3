@@ -64,27 +64,27 @@ public class RangeMatrix extends JComponent {
         rowHeader.setModel(model, renderer, crp);
         headerCorner.setModel(model, renderer, crp);
 
-        setRowsWidthList();
-        setWidthOfComponents();
-        setHeightOfComponents();
+        setupRowsWidthList();
+        calculateWidthOfComponents();
+        calculateHeightOfComponents();
 
     }
 
-    public void setWidthOfComponents() {
-        columnHeader.setWidthOfComponent();
-        rowHeader.setWidthOfComponent();
-        headerCorner.setWidthOfComponent();
-        setWidthOfComponent();
+    public void calculateWidthOfComponents() {
+        columnHeader.calculateWidthOfComponent();
+        rowHeader.calculateWidthOfComponent();
+        headerCorner.calculateWidthOfComponent();
+        calculateWidthOfComponent();
     }
 
-    public void setHeightOfComponents() {
-        columnHeader.setHeightOfComponent();
-        rowHeader.setHeightOfComponent();
-        headerCorner.setHeightOfComponent();
+    public void calculateHeightOfComponents() {
+        columnHeader.calculateHeightOfComponent();
+        rowHeader.calculateHeightOfComponent();
+        headerCorner.calculateHeightOfComponent();
         setHeightOfComponent();
     }
 
-    public ArrayList<Double> getMaxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
+    public ArrayList<Double> maxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
         ArrayList<Double> newList = new ArrayList<>();
         for (int i = 0; i < rowHeader.getColumnCount(); i++) {
             newList.add(Math.max(rowsWidthList.get(i), cornerRowsWidthList.get(i)));
@@ -92,11 +92,11 @@ public class RangeMatrix extends JComponent {
         return newList;
     }
 
-    public void setRowsWidthList() {
-        ArrayList<Double> rowsWidthList = rowHeader.calculateRowsWidthList();
-        ArrayList<Double> cornerRowsWidthList = headerCorner.calculateRowsWidthList();
+    public void setupRowsWidthList() {
+        ArrayList<Double> rowsWidthList = rowHeader.fillRowsWidthList();
+        ArrayList<Double> cornerRowsWidthList = headerCorner.fillRowsWidthList();
 
-        ArrayList<Double> newList = getMaxOfTwoLists(rowsWidthList, cornerRowsWidthList);
+        ArrayList<Double> newList = maxOfTwoLists(rowsWidthList, cornerRowsWidthList);
 
         rowHeader.setRowsWidthList(newList);
     }
@@ -141,7 +141,7 @@ public class RangeMatrix extends JComponent {
         }
     }
 
-    public void setWidthOfComponent() {
+    public void calculateWidthOfComponent() {
         width = columnHeader.getWidthOfComponent();
     }
 

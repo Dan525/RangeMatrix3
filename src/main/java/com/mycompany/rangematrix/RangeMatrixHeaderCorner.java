@@ -48,7 +48,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
         this.crp = crp;
     }
     
-    public double getWidthOfRowByName(int columnIndex) {
+    public double calculateWidthOfRowByName(int columnIndex) {
         String rowName = "";
         
         if (columnIndex < model.getCornerColumnNames().size()) {
@@ -59,16 +59,16 @@ public class RangeMatrixHeaderCorner extends JComponent {
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
     
-    public ArrayList<Double> calculateRowsWidthList() {
+    public ArrayList<Double> fillRowsWidthList() {
         ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
         for (int i = 0; i < rowHeader.getColumnCount(); i++) {
-            double rowWidth = getWidthOfRowByName(i);
+            double rowWidth = calculateWidthOfRowByName(i);
             rowsWidthListTemp.add(rowWidth);
         }
         return rowsWidthListTemp;
     }
 
-    public void setWidthOfComponent() {
+    public void calculateWidthOfComponent() {
         width = rowHeader.getWidthOfComponent();
     }
 
@@ -76,7 +76,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
         return width;
     }
 
-    public void setHeightOfComponent() {
+    public void calculateHeightOfComponent() {
         height = columnHeader.getHeightOfComponent();
     }
 

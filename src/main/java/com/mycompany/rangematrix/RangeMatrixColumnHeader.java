@@ -47,7 +47,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
         
-        setMinimalCellHeight();
+        calculateMinimalCellHeight();
         fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
     }
@@ -56,11 +56,11 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.spaceAroundName = newSpace;
     }
 
-    public double getCellHeight(int heightMultiplier) {
+    public double calculateCellHeight(int heightMultiplier) {
         return minimalCellHeight * heightMultiplier;
     }
 
-    public double getWidthByColumnName(Object column) {
+    public double calculateWidthByColumnName(Object column) {
 
         String columnName = model.getColumnGroupName(column);
         JLabel label = renderer.getColumnRendererComponent(column, columnName);
@@ -72,16 +72,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public double getWidthOfColumn(Object column) {
+    public double calculateWidthOfColumn(Object column) {
         double columnWidth = 0;
-        double ownColumnWidth = getWidthByColumnName(column);
+        double ownColumnWidth = calculateWidthByColumnName(column);
 
-        ArrayList<Object> leafColumnList = getLeafColumns(column, new ArrayList<>());
+        ArrayList<Object> leafColumnList = fillLeafColumnList(column, new ArrayList<>());
         if (leafColumnList.isEmpty()) {
             return ownColumnWidth;
         }
         for (Object leafColumn : leafColumnList) {
-            double leafColumnWidth = getWidthByColumnName(leafColumn);
+            double leafColumnWidth = calculateWidthByColumnName(leafColumn);
             columnWidth += leafColumnWidth;
         }
         if (columnWidth > ownColumnWidth) {
@@ -111,7 +111,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return rowCount;
     }
 
-    public int getHeightMultiplier(Object parentColumn, boolean isGroup, int rowIndex) {
+    public int calculateHeightMultiplier(Object parentColumn, boolean isGroup, int rowIndex) {
         if (!isGroup) {
             return (rowCount - rowIndex) + 1;
         } else {
@@ -127,7 +127,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
 
-            double cellWidth = getWidthOfColumn(child);
+            double cellWidth = calculateWidthOfColumn(child);
 
             boolean isGroup = model.isColumnGroup(child);
 
@@ -151,7 +151,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return cellWidthList;
     }
 
-    public void setMinimalCellHeight() {
+    public void calculateMinimalCellHeight() {
         JLabel label = renderer.getColumnRendererComponent(null, " ");
         minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
     }
@@ -160,15 +160,15 @@ public class RangeMatrixColumnHeader extends JComponent {
         return minimalCellHeight;
     }
 
-    public void setWidthOfComponent() {
-        width = getWidthOfColumn(null);
+    public void calculateWidthOfComponent() {
+        width = calculateWidthOfColumn(null);
     }
 
     public double getWidthOfComponent() {
         return width;
     }
 
-    public void setHeightOfComponent() {
+    public void calculateHeightOfComponent() {
         height = (minimalCellHeight * rowCount);
     }
 
@@ -183,14 +183,14 @@ public class RangeMatrixColumnHeader extends JComponent {
         return d;
     }
 
-    public ArrayList<Object> getLeafColumns(Object parentColumn, ArrayList<Object> leafColumnList) {
+    public ArrayList<Object> fillLeafColumnList(Object parentColumn, ArrayList<Object> leafColumnList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
             boolean isGroup = model.isColumnGroup(child);
             if (isGroup) {
-                getLeafColumns(child, leafColumnList);
+                fillLeafColumnList(child, leafColumnList);
             } else {
                 leafColumnList.add(child);
             }
@@ -208,13 +208,13 @@ public class RangeMatrixColumnHeader extends JComponent {
             Object child = model.getColumnGroup(parentColumn, i);
             String columnName = model.getColumnGroupName(child);
 
-            double cellWidth = getWidthOfColumn(child);
+            double cellWidth = calculateWidthOfColumn(child);
 
             boolean isGroup = model.isColumnGroup(child);
 
-            int heightMultiplier = getHeightMultiplier(parentColumn, isGroup, rowCounter);
+            int heightMultiplier = calculateHeightMultiplier(parentColumn, isGroup, rowCounter);
 
-            double cellHeight = getCellHeight(heightMultiplier);
+            double cellHeight = calculateCellHeight(heightMultiplier);
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             //g2d.draw(rect);
