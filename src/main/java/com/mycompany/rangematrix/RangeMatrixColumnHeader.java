@@ -9,8 +9,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     private final RangeMatrix rm;
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
+    private ColumnHeaderButtons buttons;
     private CellRendererPane crp;
     private double spaceAroundName = 4;
     private ArrayList<Double> cellXList;
@@ -46,6 +49,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.model = rm.getModel();
         this.renderer = rm.getRenderer();
         this.crp = rm.getCrp();
+        buttons = new ColumnHeaderButtons();
         
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
@@ -224,6 +228,8 @@ public class RangeMatrixColumnHeader extends JComponent {
             int heightMultiplier = calculateHeightMultiplier(parentColumn, isGroup, rowCounter);
 
             double cellHeight = calculateCellHeight(heightMultiplier);
+            
+            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int)cellX,(int)cellY), cellWidth, cellHeight));
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             //g2d.draw(rect);
@@ -266,6 +272,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            System.out.println(buttons.getButtonAt(e.getPoint()));
             System.out.println("Column header coordinates: " + e.getX() + ", " + e.getY());
         }
 
