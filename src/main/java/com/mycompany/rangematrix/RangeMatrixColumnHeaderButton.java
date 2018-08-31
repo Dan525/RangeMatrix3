@@ -7,6 +7,7 @@ package com.mycompany.rangematrix;
 
 import com.google.common.base.Objects;
 import java.awt.Point;
+import java.io.File;
 
 /**
  *
@@ -16,11 +17,16 @@ public class RangeMatrixColumnHeaderButton {
     private final Point corner;
     private final double width;
     private final double height;
+    private final Object child;
+    private final int heightMultiplier;
     
-    public RangeMatrixColumnHeaderButton(Point corner, double width, double height) {
+    
+    public RangeMatrixColumnHeaderButton(Point corner, double width, double height, int heightMultiplier, Object child) {
         this.corner = corner;
         this.width = width;
         this.height = height;
+        this.child = child;
+        this.heightMultiplier = heightMultiplier;
     }
 
     public Point getCorner() {
@@ -36,15 +42,15 @@ public class RangeMatrixColumnHeaderButton {
     }
     
     public boolean contains(Point click) {
-        if (!(click.getX() > corner.getX() && click.getX() < corner.getX() + width)) {
+        if (!(click.getX() >= corner.getX() && click.getX() <= corner.getX() + width)) {
             return false;
         }
-        return click.getY() > corner.getY() && click.getY() < corner.getY() + height;
+        return click.getY() >= corner.getY() && click.getY() <= corner.getY() + height;
     }
     
     @Override
     public String toString() {
-        return corner.getX() + ", " + corner.getY();
+        return ((File)child).getName() + ", " + corner.getX() + ", " + corner.getY();
     }
     
     @Override

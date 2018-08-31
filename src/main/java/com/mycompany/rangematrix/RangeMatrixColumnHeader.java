@@ -10,8 +10,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -229,11 +231,10 @@ public class RangeMatrixColumnHeader extends JComponent {
 
             double cellHeight = calculateCellHeight(heightMultiplier);
             
-            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int)cellX,(int)cellY), cellWidth, cellHeight));
+            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int)cellX,(int)cellY), cellWidth, cellHeight, heightMultiplier, child));
 
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             //g2d.draw(rect);
-            
             crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
                                this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
@@ -272,7 +273,14 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            System.out.println(buttons.getButtonAt(e.getPoint()));
+            Point click = e.getPoint();
+            Shape l = new Line2D.Double(click,click);
+            int newY = buttons.getYCoordinate(click);
+            
+            System.out.println("New Y coordinate: " + newY);
+            Point fixedClick = new Point((int)click.getX(), newY);
+            
+            System.out.println("Button's corner coordinates: " + buttons.getButtonAt(click, newY, minimalCellHeight));
             System.out.println("Column header coordinates: " + e.getX() + ", " + e.getY());
         }
 

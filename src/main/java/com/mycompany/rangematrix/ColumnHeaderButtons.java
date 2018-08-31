@@ -6,6 +6,8 @@
 package com.mycompany.rangematrix;
 
 import java.awt.Point;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -15,38 +17,40 @@ import java.util.TreeMap;
  * @author daniil_pozdeev
  */
 public class ColumnHeaderButtons {
-    public final TreeMap<Point, RangeMatrixColumnHeaderButton> buttons;
-    
+
+    public final TreeMap<Point, RangeMatrixColumnHeaderButton> buttonsMap;
+    public final PointComparator pointComparator;
+
     public ColumnHeaderButtons() {
-        buttons = new TreeMap<>(new Comparator<Point>()
-        {
-            @Override
-            public int compare(Point o1, Point o2)
-            {
-                if (o1.getX() < o2.getX() && o1.getY() < o2.getY()) {
-                    return -1;
-                }
-                if (o1.getX() > o2.getX() && o1.getY() > o2.getY()) {
-                    return +1;
-                }
-                return 0;
-            } 
-    });
+        pointComparator = new PointComparator();
+        buttonsMap = new TreeMap<>(pointComparator);
     }
     
     public void add(RangeMatrixColumnHeaderButton button) {
         Point p = button.getCorner();
-        buttons.put(p, button);
+        buttonsMap.put(p, button);
     }
     
-    public RangeMatrixColumnHeaderButton getButtonAt(Point click) {
-        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttons.ceilingEntry(click);
+    public int getYCoordinate(Point clickY) {
+        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(clickY);
+        if (entry == null) {
+            return 0;
+        }
+        int newY = (int) entry.getValue().getCorner().getY();
+        return newY;
+    }
+
+    public RangeMatrixColumnHeaderButton getButtonAt(Point click, int newY, double minimalCellHeight) {
+        
+        Point fixedClick = new Point((int)click.getX(), newY);
+        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(fixedClick);
         if (entry == null) {
             return null;
         }
         RangeMatrixColumnHeaderButton button = entry.getValue();
         if (!button.contains(click)) {
-            return null;
+            newY = (int) (newY - minimalCellHeight);
+            this.getButtonAt(fixedClick, newY, minimalCellHeight);
         }
         return button;
     }
