@@ -89,6 +89,10 @@ public class RangeMatrix extends JComponent {
         this.crp = crp;
     }
 
+    public RangeMatrixHeaderCorner getHeaderCorner() {
+        return headerCorner;
+    }
+
     public void calculateWidthOfComponents() {
         columnHeader.calculateWidthOfComponent();
         rowHeader.calculateWidthOfComponent();
@@ -100,7 +104,7 @@ public class RangeMatrix extends JComponent {
         columnHeader.calculateHeightOfComponent();
         rowHeader.calculateHeightOfComponent();
         headerCorner.calculateHeightOfComponent();
-        setHeightOfComponent();
+        calculateHeightOfComponent();
     }
 
     public ArrayList<Double> maxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
@@ -168,7 +172,7 @@ public class RangeMatrix extends JComponent {
         return width;
     }
 
-    public void setHeightOfComponent() {
+    public void calculateHeightOfComponent() {
         height = rowHeader.getHeightOfComponent();
     }
 
@@ -211,7 +215,7 @@ public class RangeMatrix extends JComponent {
         return d;
     }
 
-    private void rebuildBuffer() {
+    public void rebuildBuffer() {
         buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g2d = buffer.createGraphics();

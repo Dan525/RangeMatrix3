@@ -6,9 +6,6 @@
 package com.mycompany.rangematrix;
 
 import java.awt.Point;
-import java.awt.geom.Line2D;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -25,33 +22,41 @@ public class ColumnHeaderButtons {
         pointComparator = new PointComparator();
         buttonsMap = new TreeMap<>(pointComparator);
     }
-    
+
     public void add(RangeMatrixColumnHeaderButton button) {
         Point p = button.getCorner();
         buttonsMap.put(p, button);
     }
-    
-    public int getYCoordinate(Point clickY) {
-        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(clickY);
+
+    public int getClosestYCoordinate(Point click) {
+        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(click);
         if (entry == null) {
             return 0;
         }
         int newY = (int) entry.getValue().getCorner().getY();
         return newY;
     }
+    
+    public void clearButtonsMap() {
+        buttonsMap.clear();
+    }
 
     public RangeMatrixColumnHeaderButton getButtonAt(Point click, int newY, double minimalCellHeight) {
-        
-        Point fixedClick = new Point((int)click.getX(), newY);
-        Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(fixedClick);
-        if (entry == null) {
-            return null;
-        }
-        RangeMatrixColumnHeaderButton button = entry.getValue();
-        if (!button.contains(click)) {
+
+        boolean isNotContain;
+        RangeMatrixColumnHeaderButton button;
+
+        do {
+            Point fixedClick = new Point((int) click.getX(), newY);
+            Entry<Point, RangeMatrixColumnHeaderButton> entry = buttonsMap.floorEntry(fixedClick);
+            if (entry == null) {
+                return null;
+            }
+            button = entry.getValue();
+            isNotContain = !button.contains(fixedClick);
             newY = (int) (newY - minimalCellHeight);
-            this.getButtonAt(fixedClick, newY, minimalCellHeight);
-        }
+        } while (isNotContain);
+
         return button;
     }
 }
