@@ -22,6 +22,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     @Override
     public JLabel getColumnRendererComponent(Object column, String columnName) {
         delegate.setText(columnName);
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
         delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -31,6 +32,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     @Override
     public JLabel getRowRendererComponent(Object row, String rowName) {
         delegate.setText(rowName);
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
         delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));

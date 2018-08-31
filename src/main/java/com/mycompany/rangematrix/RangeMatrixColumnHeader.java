@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -33,7 +34,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     private double spaceAroundName = 4;
     private ArrayList<Double> cellXList;
     private ArrayList<Double> cellWidthList;
-    private ArrayList<Object> collapsedColumns;
+    private LinkedList<Object> collapsedColumns;
     private int rowCount;
     private BufferedImage buffer;
     private double width;
@@ -53,7 +54,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
-        collapsedColumns = new ArrayList<>();
+        collapsedColumns = new LinkedList<>();
 
         calculateParams();
 
@@ -116,12 +117,12 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
-            boolean isGroup = model.isColumnGroup(child);;
-//            if (collapsedColumns.contains(child)) {
-//                isGroup = false;
-//            } else {
-//                isGroup = model.isColumnGroup(child);
-//            }
+            boolean isGroup;// = model.isColumnGroup(child);;
+            if (collapsedColumns.contains(child)) {
+                isGroup = false;
+            } else {
+                isGroup = model.isColumnGroup(child);
+            }
             if (isGroup) {
                 maxRowIndex++;
                 calculateRowCount(child, maxRowIndexList, maxRowIndex);
