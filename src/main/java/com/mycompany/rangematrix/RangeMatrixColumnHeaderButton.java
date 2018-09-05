@@ -5,7 +5,6 @@
  */
 package com.mycompany.rangematrix;
 
-import com.google.common.base.Objects;
 import java.awt.Point;
 import java.io.File;
 
