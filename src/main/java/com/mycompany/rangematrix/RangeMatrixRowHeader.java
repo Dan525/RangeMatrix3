@@ -69,6 +69,7 @@ public class RangeMatrixRowHeader extends JComponent {
     
     public void calculateParams() {
         calculateMinimalCellHeight();
+        fillCellCoordinateList(null, 0, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
     }
 
