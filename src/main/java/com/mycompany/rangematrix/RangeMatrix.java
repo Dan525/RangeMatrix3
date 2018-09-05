@@ -18,6 +18,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -131,8 +132,8 @@ public class RangeMatrix extends JComponent {
     }
 
     public void drawVerticalLines(Graphics2D g2d) {
-        ArrayList<Double> cellXList = columnHeader.getCellXList();
-        ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
+        List<Double> cellXList = columnHeader.getCellXList();
+        List<Double> cellWidthList = columnHeader.getCellWidthList();
 
         for (int i = 0; i < cellXList.size(); i++) {
             double x = cellXList.get(i) + cellWidthList.get(i) - 1;
@@ -152,8 +153,8 @@ public class RangeMatrix extends JComponent {
     }
 
     public void drawValues(Graphics2D g2d) {
-        ArrayList<Double> cellXList = columnHeader.getCellXList();
-        ArrayList<Double> cellWidthList = columnHeader.getCellWidthList();
+        List<Double> cellXList = columnHeader.getCellXList();
+        List<Double> cellWidthList = columnHeader.getCellWidthList();
         ArrayList<Double> cellYList = rowHeader.getCellYList();
         double minimalCellHeight = rowHeader.getMinimalCellHeight();
 

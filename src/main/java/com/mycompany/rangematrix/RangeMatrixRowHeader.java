@@ -14,14 +14,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -40,6 +39,7 @@ public class RangeMatrixRowHeader extends JComponent {
     
     private ArrayList<Double> cellYList;
     private ArrayList<RangeMatrixHeaderButton> buttonList;
+    private Map<Object,RangeMatrixHeaderButton> buttonMap;
     private double minimalCellHeight;
     private int columnCount;
     private ArrayList<Double> rowsWidthList;
@@ -60,6 +60,7 @@ public class RangeMatrixRowHeader extends JComponent {
         rTree.init(null);
 
         buttonList = new ArrayList<>();
+        buttonMap = new HashMap<>();
         cellYList = new ArrayList<>();
         
         calculateParams();
@@ -234,21 +235,36 @@ public class RangeMatrixRowHeader extends JComponent {
     }
     
     public void calculateRows(Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
+        boolean isGroup;
+        double cellHeight;
+                
         int rowCount = model.getRowGroupCount(parentRow);
         double cellX = parentCellX;
         double cellY = parentCellY;
 
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
-            String rowName = model.getRowGroupName(child);
+            RangeMatrixHeaderButton button = findButtonInMap(child);
 
+            if (button.isCollapsed()) {
+                isGroup = false;
+                cellHeight = minimalCellHeight;
+                
+            } else {
+                isGroup = model.isColumnGroup(child);
+                cellHeight = calculateHeightOfRow(child);
+            }
             double cellWidth = rowsWidthList.get(columnCounter);
+            
+            button.setX(cellX);
+            button.setY(cellY);
+            button.setGroup(isGroup);
+            button.setWidth(cellWidth);
+            button.setHeight(cellHeight);
 
-            boolean isGroup = model.isColumnGroup(child);
 
-            double cellHeight = calculateHeightOfRow(child);
 
-            RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, rowName, isGroup);
+            //RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, rowName, isGroup);
             buttonList.add(button);
             
             Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
@@ -282,12 +298,18 @@ public class RangeMatrixRowHeader extends JComponent {
 
         if (columnCounter < columnCount) {
             
-            String rowName = "";
+            RangeMatrixHeaderButton button = findButtonInMap(null);
             double cellX = parentCellX;
             double cellWidth = rowsWidthList.get(columnCounter);
             boolean isGroup = false;
+            
+            button.setX(cellX);
+            button.setY(parentCellY);
+            button.setGroup(isGroup);
+            button.setWidth(cellWidth);
+            button.setHeight(minimalCellHeight);
 
-            RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, parentCellY, cellWidth, minimalCellHeight, null, rowName, isGroup);
+            //RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, parentCellY, cellWidth, minimalCellHeight, null, rowName, isGroup);
             buttonList.add(button);
             
             Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
@@ -303,6 +325,22 @@ public class RangeMatrixRowHeader extends JComponent {
             cellX -= cellWidth;
         }
 
+    }
+    
+    private RangeMatrixHeaderButton findButtonInMap(Object child) {
+        String rowName;
+        if (child == null) {
+            rowName = "";
+        } else {
+            rowName = model.getRowGroupName(child);
+        }
+        RangeMatrixHeaderButton button = buttonMap.get(child);
+
+        if (button == null) {
+            button = new RangeMatrixHeaderButton(child, rowName);
+            buttonMap.put(child, button);
+        }
+        return button;
     }
     
     public void drawRows(Graphics2D g2d) {
@@ -409,6 +447,15 @@ public class RangeMatrixRowHeader extends JComponent {
         g2d.drawImage(buffer, 0, 0, this);
     }
     
+        public void processingClickOnColumn(RangeMatrixHeaderButton button) {
+        if (button.isCollapsed()) {
+            button.setCollapsed(false);
+        } else {
+            button.setCollapsed(true);
+        }
+    }
+
+    
     protected class RangeMatrixMouseHandler implements MouseListener {
 
         @Override
@@ -418,9 +465,23 @@ public class RangeMatrixRowHeader extends JComponent {
                 @Override
                 public boolean execute(int i) {
                     System.out.println(buttonList.get(i));
+                    //RangeMatrixHeaderButton button = buttonList.get(i);
+                    //processingClickOnColumn(button);
                     return false;              // return true here to continue receiving results
                 }
             }, Float.MAX_VALUE);
+//            rTree = new RTree();
+//            rTree.init(null);
+//            calculateParams();
+//            rebuildBuffer();
+//            repaint();
+//            rm.calculateHeightOfComponent();
+//            rm.calculateWidthOfComponent();
+//            rm.rebuildBuffer();
+//            rm.repaint();
+//            rm.getHeaderCorner().calculateHeightOfComponent();
+//            rm.getHeaderCorner().rebuildBuffer();
+//            rm.getHeaderCorner().repaint();
         }
 
         @Override

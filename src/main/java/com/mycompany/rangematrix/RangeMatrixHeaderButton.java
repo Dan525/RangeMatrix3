@@ -5,61 +5,89 @@
  */
 package com.mycompany.rangematrix;
 
+import java.io.File;
+import java.util.Objects;
+
 /**
  *
  * @author daniil_pozdeev
  */
 public class RangeMatrixHeaderButton {
-    private final double x;
-    private final double y;
-    private final double width;
-    private final double height;
+    private double x;
+    private double y;
+    private double width;
+    private double height;
     private final Object buttonObject;
     private final String buttonName;
     private boolean collapsed;
-    private final boolean group;
+    private boolean group;
 
-    public RangeMatrixHeaderButton(double x, double y, double width, double height, Object buttonObject, String buttonName, boolean group) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    public RangeMatrixHeaderButton(Object buttonObject, String buttonName) {
+//        this.x = x;
+//        this.y = y;
+//        this.width = width;
+//        this.height = height;
         this.buttonObject = buttonObject;
         this.buttonName = buttonName;
-        this.group = group;
+//        this.group = group;
     }
 
-    
-    
-//    public boolean contains(Point click) {
-//        if (!(click.getX() >= corner.getX() && click.getX() <= corner.getX() + width)) {
-//            return false;
-//        }
-//        return click.getY() >= corner.getY() && click.getY() <= corner.getY() + height;
-//    }
     
     @Override
     public String toString() {
-        return buttonName + "   " + x + ", " + y;
+        return buttonObject + "   " + x + ", " + y;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 23 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 23 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+        hash = 23 * hash + (int) (Double.doubleToLongBits(this.width) ^ (Double.doubleToLongBits(this.width) >>> 32));
+        hash = 23 * hash + (int) (Double.doubleToLongBits(this.height) ^ (Double.doubleToLongBits(this.height) >>> 32));
+        hash = 23 * hash + Objects.hashCode(this.buttonObject);
+        hash = 23 * hash + (this.collapsed ? 1 : 0);
+        hash = 23 * hash + (this.group ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RangeMatrixHeaderButton other = (RangeMatrixHeaderButton) obj;
+        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.width) != Double.doubleToLongBits(other.width)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.height) != Double.doubleToLongBits(other.height)) {
+            return false;
+        }
+        if (this.collapsed != other.collapsed) {
+            return false;
+        }
+        if (this.group != other.group) {
+            return false;
+        }
+        if (!Objects.equals(this.buttonObject, other.buttonObject)) {
+            return false;
+        }
+        return true;
+    }
+
     
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (obj == null || !(obj instanceof RangeMatrixColumnHeaderButton)) {
-//            return false;
-//        }
-//        RangeMatrixColumnHeaderButton button = (RangeMatrixColumnHeaderButton) obj;
-//        if (!corner.equals(button.getCorner())) {
-//            return false;
-//        }
-//        if (width != button.getWidth()) {
-//            return false;
-//        }
-//        return height == button.getHeight();
-//    }
 
     public double getX() {
         return x;
@@ -81,10 +109,6 @@ public class RangeMatrixHeaderButton {
         return buttonObject;
     }
 
-    public String getButtonName() {
-        return buttonName;
-    }
-
     public boolean isCollapsed() {
         return collapsed;
     }
@@ -95,5 +119,29 @@ public class RangeMatrixHeaderButton {
     
     public boolean isGroup() {
         return group;
+    }
+
+    public void setGroup(boolean group) {
+        this.group = group;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    public String getButtonName() {
+        return buttonName;
     }
 }
