@@ -5,6 +5,10 @@
  */
 package com.mycompany.rangematrix;
 
+import com.infomatiq.jsi.Rectangle;
+import com.infomatiq.jsi.SpatialIndex;
+import com.infomatiq.jsi.rtree.RTree;
+import gnu.trove.TIntProcedure;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -31,7 +35,10 @@ public class RangeMatrixColumnHeader extends JComponent {
     private IRangeMatrixRenderer renderer;
     private ColumnHeaderButtons buttons;
     private CellRendererPane crp;
+    private SpatialIndex si;
+    
     private double spaceAroundName = 4;
+    private ArrayList<Rectangle> rectList;
     private ArrayList<Double> cellXList;
     private ArrayList<Double> cellWidthList;
     private LinkedList<Object> collapsedColumns;
@@ -50,8 +57,10 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.renderer = rm.getRenderer();
         this.crp = rm.getCrp();
         buttons = new ColumnHeaderButtons();
+        si = new RTree();
+        si.init(null);
 
-        
+        rectList = new ArrayList<>();
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
         collapsedColumns = new LinkedList<>();
@@ -239,8 +248,8 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
         return leafColumnList;
     }
-
-    public void drawColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter) {
+    
+    public void calculateColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter, int rectID) {
 
         boolean isGroup;
         double cellWidth;
@@ -270,6 +279,9 @@ public class RangeMatrixColumnHeader extends JComponent {
             double cellHeight = calculateCellHeight(heightMultiplier);
 
             buttons.add(new RangeMatrixColumnHeaderButton(new Point((int) cellX, (int) cellY), cellWidth, cellHeight, child));
+            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
+            rectList.add(rect);
+            si.add(rect, rectList.indexOf(rect));
 
             crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
                     this, (int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
@@ -277,11 +289,61 @@ public class RangeMatrixColumnHeader extends JComponent {
             if (isGroup) {
                 rowCounter++;
                 cellY += cellHeight;
-                drawColumns(g2d, child, cellX, cellY, rowCounter);
+                drawColumns(g2d, child, cellX, cellY, rowCounter, rectID);
                 rowCounter--;
                 cellY -= cellHeight;
             }
             cellX += cellWidth;
+            rectID++;
+        }
+    }
+
+    public void drawColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter, int rectID) {
+
+        boolean isGroup;
+        double cellWidth;
+
+        int columnCount = model.getColumnGroupCount(parentColumn);
+        double cellX = parentCellX;
+        double cellY = parentCellY;
+
+        for (int i = 0; i < columnCount; i++) {
+            Object child = model.getColumnGroup(parentColumn, i);
+            String columnName = model.getColumnGroupName(child);
+
+            if (collapsedColumns.contains(child)) {
+                isGroup = false;
+
+                cellWidth = calculateWidthByColumnName(child);
+
+            } else {
+                isGroup = model.isColumnGroup(child);
+
+                cellWidth = calculateWidthOfColumn(child);
+
+            }
+
+            int heightMultiplier = calculateHeightMultiplier(parentColumn, isGroup, rowCounter);
+
+            double cellHeight = calculateCellHeight(heightMultiplier);
+
+            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int) cellX, (int) cellY), cellWidth, cellHeight, child));
+            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
+            rectList.add(rect);
+            si.add(rect, rectList.indexOf(rect));
+
+            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
+                    this, (int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
+
+            if (isGroup) {
+                rowCounter++;
+                cellY += cellHeight;
+                drawColumns(g2d, child, cellX, cellY, rowCounter, rectID);
+                rowCounter--;
+                cellY -= cellHeight;
+            }
+            cellX += cellWidth;
+            rectID++;
         }
     }
 
@@ -291,7 +353,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawColumns(g2d, null, 0, 0, 1);
+        drawColumns(g2d, null, 0, 0, 1, 0);
     }
 
     @Override
@@ -317,13 +379,20 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            Point click = e.getPoint();
+            //Point click = e.getPoint();
+            com.infomatiq.jsi.Point rPoint = new com.infomatiq.jsi.Point(e.getX(), e.getY());
+            si.nearest(rPoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+                public boolean execute(int i) {
+                    System.out.println("Rectangle " + i + " " + rectList.get(i) + ", distance=" + rectList.get(i).distance(rPoint));
+                    return false;              // return true here to continue receiving results
+                }
+            }, Float.MAX_VALUE);
 
-            int newY = buttons.getClosestYCoordinate(click);
-            System.out.println("Button's corner coordinates: " + buttons.getButtonAt(click, newY, minimalCellHeight));
-            Object column = buttons.getButtonAt(click, newY, minimalCellHeight).getColumn();
-            processingClickOnColumn(column);
-            buttons.clearButtonsMap();
+//            int newY = buttons.getClosestYCoordinate(click);
+//            System.out.println("Button's corner coordinates: " + buttons.getButtonAt(click, newY, minimalCellHeight));
+//            Object column = buttons.getButtonAt(click, newY, minimalCellHeight).getColumn();
+//            processingClickOnColumn(column);
+//            buttons.clearButtonsMap();
             calculateParams();
             rebuildBuffer();
             repaint();
