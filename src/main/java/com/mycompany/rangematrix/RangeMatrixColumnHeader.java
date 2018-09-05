@@ -74,10 +74,10 @@ public class RangeMatrixColumnHeader extends JComponent {
     
     public void calculateParams() {
         calculateMinimalCellHeight();
-        //fillCellCoordinateList(null, 0, 0);
+        fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
-        calculateWidthOfComponent();
-        calculateHeightOfComponent();
+        //calculateWidthOfComponent();
+        //calculateHeightOfComponent();
         calculateColumns(null, 0, 0, 1);
     }
 
@@ -150,6 +150,41 @@ public class RangeMatrixColumnHeader extends JComponent {
             return (rowCount - rowIndex) + 1;
         } else {
             return 1;
+        }
+    }
+    
+    public void fillCellCoordinateList(Object parentColumn, double parentCellX, int rowCounter) {
+
+        int columnCount = model.getColumnGroupCount(parentColumn);
+        double cellX = parentCellX;
+
+        for (int i = 0; i < columnCount; i++) {
+            Object child = model.getColumnGroup(parentColumn, i);
+
+            double cellWidth;
+
+            boolean isGroup;
+            if (collapsedColumns.contains(child)) {
+                isGroup = false;
+
+                cellWidth = calculateWidthByColumnName(child);
+
+            } else {
+                isGroup = model.isColumnGroup(child);
+
+                cellWidth = calculateWidthOfColumn(child);
+
+            }
+
+            if (isGroup) {
+                rowCounter++;
+                fillCellCoordinateList(child, cellX, rowCounter);
+                rowCounter--;
+            } else {
+                cellXList.add(cellX);
+                cellWidthList.add(cellWidth);
+            }
+            cellX += cellWidth;
         }
     }
 
