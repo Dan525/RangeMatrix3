@@ -5,11 +5,18 @@
  */
 package com.mycompany.rangematrix;
 
+import com.infomatiq.jsi.Point;
+import com.infomatiq.jsi.Rectangle;
+import com.infomatiq.jsi.SpatialIndex;
+import com.infomatiq.jsi.rtree.RTree;
+import gnu.trove.TIntProcedure;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -29,7 +36,10 @@ public class RangeMatrixRowHeader extends JComponent {
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
+    private SpatialIndex rTree;
+    
     private ArrayList<Double> cellYList;
+    private ArrayList<RangeMatrixHeaderButton> buttonList;
     private double minimalCellHeight;
     private int columnCount;
     private ArrayList<Double> rowsWidthList;
@@ -46,11 +56,19 @@ public class RangeMatrixRowHeader extends JComponent {
         this.model = rm.getModel();
         this.renderer = rm.getRenderer();
         this.crp = rm.getCrp();
-        
+        rTree = new RTree();
+        rTree.init(null);
+
+        buttonList = new ArrayList<>();
         cellYList = new ArrayList<>();
         
+        calculateParams();
+        
+        this.addMouseListener(new RangeMatrixMouseHandler());
+    }
+    
+    public void calculateParams() {
         calculateMinimalCellHeight();
-        fillCellCoordinateList(null, 0, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
     }
 
@@ -214,32 +232,7 @@ public class RangeMatrixRowHeader extends JComponent {
         return leafRowList;
     }
     
-    public void drawEmptyRows(Graphics2D g2d, double parentCellX, double parentCellY, int columnCounter) {
-
-        if (columnCounter < columnCount) {
-            
-            String rowName = " ";
-            double cellX = parentCellX;
-            double cellWidth = rowsWidthList.get(columnCounter);
-
-            Rectangle2D rect = new Rectangle2D.Double(parentCellX, parentCellY, cellWidth, minimalCellHeight);
-            //g2d.draw(rect);
-
-            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, rowName),
-                    this, (int) cellX, (int) parentCellY, (int) cellWidth, (int) minimalCellHeight);
-            
-            cellX += cellWidth;
-            columnCounter++;
-
-            drawEmptyRows(g2d, cellX, parentCellY, columnCounter);
-
-            columnCounter--;
-            cellX -= cellWidth;
-        }
-
-    }
-
-    public void drawRows(Graphics2D g2d, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
+    public void calculateRows(Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
         int rowCount = model.getRowGroupCount(parentRow);
         double cellX = parentCellX;
         double cellY = parentCellY;
@@ -254,35 +247,146 @@ public class RangeMatrixRowHeader extends JComponent {
 
             double cellHeight = calculateHeightOfRow(child);
 
-            Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
-            //g2d.draw(rect);
+            RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, rowName, isGroup);
+            buttonList.add(button);
             
-            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName),
-                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
+            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
+            
+            rTree.add(rect, buttonList.indexOf(button));
 
             if (isGroup) {
                 
                 columnCounter++;
                 cellX += cellWidth;
-                drawRows(g2d, child, cellX, cellY, columnCounter);
+                calculateRows(child, cellX, cellY, columnCounter);
                 columnCounter--;
                 cellX -= cellWidth;
                 
             } else if (!isGroup && columnCounter < columnCount) {
                 
-                cellX += cellWidth;
                 columnCounter++;
-                drawEmptyRows(g2d, cellX, cellY, columnCounter);
+                cellX += cellWidth;
+                calculateEmptyRows(cellX, cellY, columnCounter);
                 columnCounter--;
                 cellX -= cellWidth;
                 
             }  else {
-//                Shape l = new Line2D.Double(cellX + cellWidth, cellY, getWidthOfComponent(), cellY);
-//                g2d.draw(l);
+                cellYList.add(cellY);
             }
             cellY += cellHeight;
         }
     }
+    
+    public void calculateEmptyRows(double parentCellX, double parentCellY, int columnCounter) {
+
+        if (columnCounter < columnCount) {
+            
+            String rowName = "";
+            double cellX = parentCellX;
+            double cellWidth = rowsWidthList.get(columnCounter);
+            boolean isGroup = false;
+
+            RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, parentCellY, cellWidth, minimalCellHeight, null, rowName, isGroup);
+            buttonList.add(button);
+            
+            Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
+            
+            rTree.add(rect, buttonList.indexOf(button));
+            
+            cellX += cellWidth;
+            columnCounter++;
+
+            calculateEmptyRows(cellX, parentCellY, columnCounter);
+
+            columnCounter--;
+            cellX -= cellWidth;
+        }
+
+    }
+    
+    public void drawRows(Graphics2D g2d) {
+        
+        for (RangeMatrixHeaderButton button : buttonList) {
+            crp.paintComponent(g2d, 
+                               renderer.getColumnRendererComponent(button.getButtonObject(),
+                                                                   button.getButtonName()),
+                               this,
+                               (int) button.getX(),
+                               (int) button.getY(),
+                               (int) button.getWidth(),
+                               (int) button.getHeight());
+        }
+        
+    }
+    
+//    public void drawEmptyRows(Graphics2D g2d, double parentCellX, double parentCellY, int columnCounter) {
+//
+//        if (columnCounter < columnCount) {
+//            
+//            String rowName = " ";
+//            double cellX = parentCellX;
+//            double cellWidth = rowsWidthList.get(columnCounter);
+//
+//            Rectangle2D rect = new Rectangle2D.Double(parentCellX, parentCellY, cellWidth, minimalCellHeight);
+//            //g2d.draw(rect);
+//
+//            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, rowName),
+//                    this, (int) cellX, (int) parentCellY, (int) cellWidth, (int) minimalCellHeight);
+//            
+//            cellX += cellWidth;
+//            columnCounter++;
+//
+//            drawEmptyRows(g2d, cellX, parentCellY, columnCounter);
+//
+//            columnCounter--;
+//            cellX -= cellWidth;
+//        }
+//
+//    }
+//
+//    public void drawRows(Graphics2D g2d, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
+//        int rowCount = model.getRowGroupCount(parentRow);
+//        double cellX = parentCellX;
+//        double cellY = parentCellY;
+//
+//        for (int i = 0; i < rowCount; i++) {
+//            Object child = model.getRowGroup(parentRow, i);
+//            String rowName = model.getRowGroupName(child);
+//
+//            double cellWidth = rowsWidthList.get(columnCounter);
+//
+//            boolean isGroup = model.isColumnGroup(child);
+//
+//            double cellHeight = calculateHeightOfRow(child);
+//
+//            Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
+//            //g2d.draw(rect);
+//            
+//            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName),
+//                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
+//
+//            if (isGroup) {
+//                
+//                columnCounter++;
+//                cellX += cellWidth;
+//                drawRows(g2d, child, cellX, cellY, columnCounter);
+//                columnCounter--;
+//                cellX -= cellWidth;
+//                
+//            } else if (!isGroup && columnCounter < columnCount) {
+//                
+//                columnCounter++;
+//                cellX += cellWidth;
+//                drawEmptyRows(g2d, cellX, cellY, columnCounter);
+//                columnCounter--;
+//                cellX -= cellWidth;
+//                
+//            }  else {
+//
+//            }
+//            cellY += cellHeight;
+//        }
+//    }
 
     void rebuildBuffer() {
         buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);
@@ -290,9 +394,8 @@ public class RangeMatrixRowHeader extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawRows(g2d, null, 0, 0, 0);
-        Shape l = new Line2D.Double(width - 1, 0, width - 1, height);
-        //g2d.draw(l);
+        calculateRows(null, 0, 0, 0);
+        drawRows(g2d);
     }
 
     @Override
@@ -303,5 +406,41 @@ public class RangeMatrixRowHeader extends JComponent {
         }
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(buffer, 0, 0, this);
+    }
+    
+    protected class RangeMatrixMouseHandler implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            Point rTreePoint = new Point(e.getX(), e.getY());
+            rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+                @Override
+                public boolean execute(int i) {
+                    System.out.println(buttonList.get(i));
+                    return false;              // return true here to continue receiving results
+                }
+            }, Float.MAX_VALUE);
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+
     }
 }

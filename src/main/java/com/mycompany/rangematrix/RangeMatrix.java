@@ -5,6 +5,8 @@
  */
 package com.mycompany.rangematrix;
 
+import com.infomatiq.jsi.SpatialIndex;
+import com.infomatiq.jsi.rtree.RTree;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -34,6 +36,8 @@ public class RangeMatrix extends JComponent {
     private final RangeMatrixHeaderCorner headerCorner;
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
+    private SpatialIndex rTree;
+    
     private double width;
     private double height;
     private BufferedImage buffer;
@@ -42,6 +46,8 @@ public class RangeMatrix extends JComponent {
         columnHeader = new RangeMatrixColumnHeader(this);
         rowHeader = new RangeMatrixRowHeader(this);
         headerCorner = new RangeMatrixHeaderCorner(this, columnHeader, rowHeader);
+        rTree = new RTree();
+        rTree.init(null);
         
         renderer = new DefaultRangeMatrixRenderer();
         crp = new CellRendererPane();

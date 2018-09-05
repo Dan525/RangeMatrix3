@@ -5,6 +5,7 @@
  */
 package com.mycompany.rangematrix;
 
+import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
 import com.infomatiq.jsi.SpatialIndex;
 import com.infomatiq.jsi.rtree.RTree;
@@ -13,7 +14,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -33,12 +33,11 @@ public class RangeMatrixColumnHeader extends JComponent {
     private final RangeMatrix rm;
     private RangeMatrixModel model;
     private IRangeMatrixRenderer renderer;
-    private ColumnHeaderButtons buttons;
     private CellRendererPane crp;
-    private SpatialIndex si;
+    private SpatialIndex rTree;
     
     private double spaceAroundName = 4;
-    private ArrayList<Rectangle> rectList;
+    private ArrayList<RangeMatrixHeaderButton> buttonList;
     private ArrayList<Double> cellXList;
     private ArrayList<Double> cellWidthList;
     private LinkedList<Object> collapsedColumns;
@@ -56,11 +55,10 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.model = rm.getModel();
         this.renderer = rm.getRenderer();
         this.crp = rm.getCrp();
-        buttons = new ColumnHeaderButtons();
-        si = new RTree();
-        si.init(null);
+        rTree = new RTree();
+        rTree.init(null);
 
-        rectList = new ArrayList<>();
+        buttonList = new ArrayList<>();
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
         collapsedColumns = new LinkedList<>();
@@ -76,10 +74,11 @@ public class RangeMatrixColumnHeader extends JComponent {
     
     public void calculateParams() {
         calculateMinimalCellHeight();
-        fillCellCoordinateList(null, 0, 0);
+        //fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
         calculateWidthOfComponent();
         calculateHeightOfComponent();
+        calculateColumns(null, 0, 0, 1);
     }
 
     public void setSpaceAroundName(int newSpace) {
@@ -154,41 +153,6 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public void fillCellCoordinateList(Object parentColumn, double parentCellX, int rowCounter) {
-
-        int columnCount = model.getColumnGroupCount(parentColumn);
-        double cellX = parentCellX;
-
-        for (int i = 0; i < columnCount; i++) {
-            Object child = model.getColumnGroup(parentColumn, i);
-
-            double cellWidth;
-
-            boolean isGroup;
-            if (collapsedColumns.contains(child)) {
-                isGroup = false;
-
-                cellWidth = calculateWidthByColumnName(child);
-
-            } else {
-                isGroup = model.isColumnGroup(child);
-
-                cellWidth = calculateWidthOfColumn(child);
-
-            }
-
-            if (isGroup) {
-                rowCounter++;
-                fillCellCoordinateList(child, cellX, rowCounter);
-                rowCounter--;
-            } else {
-                cellXList.add(cellX);
-                cellWidthList.add(cellWidth);
-            }
-            cellX += cellWidth;
-        }
-    }
-
     public ArrayList<Double> getCellXList() {
         return cellXList;
     }
@@ -249,7 +213,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
-    public void calculateColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter, int rectID) {
+    public void calculateColumns(Object parentColumn, double parentCellX, double parentCellY, int rowCounter) {
 
         boolean isGroup;
         double cellWidth;
@@ -259,6 +223,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         double cellY = parentCellY;
 
         for (int i = 0; i < columnCount; i++) {
+            
             Object child = model.getColumnGroup(parentColumn, i);
             String columnName = model.getColumnGroupName(child);
 
@@ -278,73 +243,40 @@ public class RangeMatrixColumnHeader extends JComponent {
 
             double cellHeight = calculateCellHeight(heightMultiplier);
 
-            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int) cellX, (int) cellY), cellWidth, cellHeight, child));
+            RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, columnName, isGroup);
+            buttonList.add(button);
+            
             Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
-            rectList.add(rect);
-            si.add(rect, rectList.indexOf(rect));
-
-            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
-                    this, (int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
+            
+            rTree.add(rect, buttonList.indexOf(button));
 
             if (isGroup) {
                 rowCounter++;
                 cellY += cellHeight;
-                drawColumns(g2d, child, cellX, cellY, rowCounter, rectID);
+                calculateColumns(child, cellX, cellY, rowCounter);
                 rowCounter--;
                 cellY -= cellHeight;
+            } else {
+                cellXList.add(cellX);
+                cellWidthList.add(cellWidth);
             }
             cellX += cellWidth;
-            rectID++;
         }
     }
-
-    public void drawColumns(Graphics2D g2d, Object parentColumn, double parentCellX, double parentCellY, int rowCounter, int rectID) {
-
-        boolean isGroup;
-        double cellWidth;
-
-        int columnCount = model.getColumnGroupCount(parentColumn);
-        double cellX = parentCellX;
-        double cellY = parentCellY;
-
-        for (int i = 0; i < columnCount; i++) {
-            Object child = model.getColumnGroup(parentColumn, i);
-            String columnName = model.getColumnGroupName(child);
-
-            if (collapsedColumns.contains(child)) {
-                isGroup = false;
-
-                cellWidth = calculateWidthByColumnName(child);
-
-            } else {
-                isGroup = model.isColumnGroup(child);
-
-                cellWidth = calculateWidthOfColumn(child);
-
-            }
-
-            int heightMultiplier = calculateHeightMultiplier(parentColumn, isGroup, rowCounter);
-
-            double cellHeight = calculateCellHeight(heightMultiplier);
-
-            buttons.add(new RangeMatrixColumnHeaderButton(new Point((int) cellX, (int) cellY), cellWidth, cellHeight, child));
-            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
-            rectList.add(rect);
-            si.add(rect, rectList.indexOf(rect));
-
-            crp.paintComponent(g2d, renderer.getColumnRendererComponent(child, columnName),
-                    this, (int) cellX, (int) cellY, (int) cellWidth, (int) cellHeight);
-
-            if (isGroup) {
-                rowCounter++;
-                cellY += cellHeight;
-                drawColumns(g2d, child, cellX, cellY, rowCounter, rectID);
-                rowCounter--;
-                cellY -= cellHeight;
-            }
-            cellX += cellWidth;
-            rectID++;
+    
+    public void drawColumns(Graphics2D g2d) {
+        
+        for (RangeMatrixHeaderButton button : buttonList) {
+            crp.paintComponent(g2d, 
+                               renderer.getColumnRendererComponent(button.getButtonObject(),
+                                                                   button.getButtonName()),
+                               this,
+                               (int) button.getX(),
+                               (int) button.getY(),
+                               (int) button.getWidth(),
+                               (int) button.getHeight());
         }
+        
     }
 
     void rebuildBuffer() {
@@ -353,7 +285,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         Graphics2D g2d = buffer.createGraphics();
         g2d.setColor(Color.BLACK);
 
-        drawColumns(g2d, null, 0, 0, 1, 0);
+        drawColumns(g2d);
     }
 
     @Override
@@ -379,11 +311,11 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            //Point click = e.getPoint();
-            com.infomatiq.jsi.Point rPoint = new com.infomatiq.jsi.Point(e.getX(), e.getY());
-            si.nearest(rPoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+            Point rTreePoint = new Point(e.getX(), e.getY());
+            rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+                @Override
                 public boolean execute(int i) {
-                    System.out.println("Rectangle " + i + " " + rectList.get(i) + ", distance=" + rectList.get(i).distance(rPoint));
+                    System.out.println(buttonList.get(i));
                     return false;              // return true here to continue receiving results
                 }
             }, Float.MAX_VALUE);
@@ -393,16 +325,16 @@ public class RangeMatrixColumnHeader extends JComponent {
 //            Object column = buttons.getButtonAt(click, newY, minimalCellHeight).getColumn();
 //            processingClickOnColumn(column);
 //            buttons.clearButtonsMap();
-            calculateParams();
-            rebuildBuffer();
-            repaint();
-            rm.calculateHeightOfComponent();
-            rm.calculateWidthOfComponent();
-            rm.rebuildBuffer();
-            rm.repaint();
-            rm.getHeaderCorner().calculateHeightOfComponent();
-            rm.getHeaderCorner().rebuildBuffer();
-            rm.getHeaderCorner().repaint();            
+//            calculateParams();
+//            rebuildBuffer();
+//            repaint();
+//            rm.calculateHeightOfComponent();
+//            rm.calculateWidthOfComponent();
+//            rm.rebuildBuffer();
+//            rm.repaint();
+//            rm.getHeaderCorner().calculateHeightOfComponent();
+//            rm.getHeaderCorner().rebuildBuffer();
+//            rm.getHeaderCorner().repaint();            
         }
 
         @Override
