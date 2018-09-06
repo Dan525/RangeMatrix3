@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.rangematrix;
 
 import com.infomatiq.jsi.Point;
@@ -92,8 +87,12 @@ public class RangeMatrixColumnHeader extends JComponent {
 
     public double calculateWidthByColumnName(Object column) {
 
-        String columnName = model.getColumnGroupName(column);
-        JLabel label = renderer.getColumnRendererComponent(column, columnName);
+        //String columnName = model.getColumnGroupName(column);
+        RangeMatrixHeaderButton button = findButtonInMap(column);
+        JLabel label = renderer.getColumnRendererComponent(button.getButtonObject(),
+                                                           button.getButtonName(),
+                                                           button.isCollapsed(), 
+                                                           button.isGroup());
         double columnWidth = label.getPreferredSize().getWidth() + 2 * spaceAroundName;
         if (columnWidth > minimalCellHeight) {
             return columnWidth;
@@ -200,7 +199,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
 
     public void calculateMinimalCellHeight() {
-        JLabel label = renderer.getColumnRendererComponent(null, " ");
+        JLabel label = renderer.getColumnRendererComponent(null, " ", false, false);
         minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
     }
 
@@ -264,6 +263,14 @@ public class RangeMatrixColumnHeader extends JComponent {
         return button;
     }
     
+    public void calculateButtonGroupAttribute(Object child, RangeMatrixHeaderButton button) {
+        if (model.isColumnGroup(child)) {
+            button.setGroup(true);
+        } else {
+            button.setGroup(false);
+        }
+    }
+    
     public void calculateColumns(Object parentColumn, double parentCellX, double parentCellY, int rowCounter) {
 
         boolean isGroup;
@@ -280,13 +287,12 @@ public class RangeMatrixColumnHeader extends JComponent {
             RangeMatrixHeaderButton button = findButtonInMap(child);
 
             if (button.isCollapsed()) {
+                calculateButtonGroupAttribute(child, button);
                 isGroup = false;
-
                 cellWidth = calculateWidthByColumnName(child);
-
             } else {
+                calculateButtonGroupAttribute(child, button);
                 isGroup = model.isColumnGroup(child);
-
                 cellWidth = calculateWidthOfColumn(child);
             }
 
@@ -295,13 +301,10 @@ public class RangeMatrixColumnHeader extends JComponent {
             double cellHeight = calculateCellHeight(heightMultiplier);
             
             button.setX(cellX);
-            button.setY(cellY);
-            button.setGroup(isGroup);
+            button.setY(cellY);            
             button.setWidth(cellWidth);
             button.setHeight(cellHeight);
             
-
-            //RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, columnName, isGroup);
             buttonList.add(button);
             
             Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
@@ -314,9 +317,6 @@ public class RangeMatrixColumnHeader extends JComponent {
                 calculateColumns(child, cellX, cellY, rowCounter);
                 rowCounter--;
                 cellY -= cellHeight;
-            } else {
-//                cellXList.add(cellX);
-//                cellWidthList.add(cellWidth);
             }
             cellX += cellWidth;
         }
@@ -327,7 +327,9 @@ public class RangeMatrixColumnHeader extends JComponent {
         for (RangeMatrixHeaderButton button : buttonList) {
             crp.paintComponent(g2d, 
                                renderer.getColumnRendererComponent(button.getButtonObject(),
-                                                                   button.getButtonName()),
+                                                                   button.getButtonName(),
+                                                                   button.isCollapsed(), 
+                                                                   button.isGroup()),
                                this,
                                (int) button.getX(),
                                (int) button.getY(),
@@ -370,7 +372,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         if (button.isCollapsed()) {
             button.setCollapsed(false);
         } else {
-            button.setCollapsed(true);
+            button.setCollapsed(true);            
         }
     }
 
@@ -379,26 +381,24 @@ public class RangeMatrixColumnHeader extends JComponent {
         @Override
         public void mouseClicked(MouseEvent e) {
             Point rTreePoint = new Point(e.getX(), e.getY());
-            rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
-                @Override
-                public boolean execute(int i) {
-                    System.out.println(buttonList.get(i));
-                    //RangeMatrixHeaderButton button = buttonList.get(i);
-                    //processingClickOnColumn(button);
-                    return false;              // return true here to continue receiving results
-                }
-            }, Float.MAX_VALUE);
-
-//            int newY = buttons.getClosestYCoordinate(click);
-//            System.out.println("Button's corner coordinates: " + buttons.getButtonAt(click, newY, minimalCellHeight));
-//            Object column = buttons.getButtonAt(click, newY, minimalCellHeight).getColumn();
-//            processingClickOnColumn(column);
-//            buttons.clearButtonsMap();
-//            rTree = new RTree();
-//            rTree.init(null);
-//            calculateParams();
-//            rebuildBuffer();
-//            repaint();
+            
+            rTree.nearest(rTreePoint, 
+                          new TIntProcedure() {
+                            @Override
+                            public boolean execute(int i) {
+                                System.out.println(buttonList.get(i));
+                                RangeMatrixHeaderButton button = buttonList.get(i);
+                                processingClickOnColumn(button);
+                                return false;
+                            }
+                          },
+                          Float.MAX_VALUE);
+            
+            rTree = new RTree();
+            rTree.init(null);
+            calculateParams();
+            rebuildBuffer();
+            repaint();
 //            rm.calculateHeightOfComponent();
 //            rm.calculateWidthOfComponent();
 //            rm.rebuildBuffer();

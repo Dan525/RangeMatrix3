@@ -93,7 +93,7 @@ public class RangeMatrixRowHeader extends JComponent {
 
     public double calculateWidthOfRowByName(Object row) {
         String rowName = model.getColumnGroupName(row);
-        JLabel label = renderer.getColumnRendererComponent(row, rowName);
+        JLabel label = renderer.getRowRendererComponent(row, rowName);
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
 
@@ -347,7 +347,7 @@ public class RangeMatrixRowHeader extends JComponent {
         
         for (RangeMatrixHeaderButton button : buttonList) {
             crp.paintComponent(g2d, 
-                               renderer.getColumnRendererComponent(button.getButtonObject(),
+                               renderer.getRowRendererComponent(button.getButtonObject(),
                                                                    button.getButtonName()),
                                this,
                                (int) button.getX(),

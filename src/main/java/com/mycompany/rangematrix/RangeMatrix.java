@@ -131,26 +131,26 @@ public class RangeMatrix extends JComponent {
         rowHeader.setRowsWidthList(newList);
     }
 
-    public void drawVerticalLines(Graphics2D g2d) {
-        List<Double> cellXList = columnHeader.getCellXList();
-        List<Double> cellWidthList = columnHeader.getCellWidthList();
-
-        for (int i = 0; i < cellXList.size(); i++) {
-            double x = cellXList.get(i) + cellWidthList.get(i) - 1;
-            Shape l = new Line2D.Double(x, 0, x, height);
-            g2d.draw(l);
-        }
-    }
-
-    public void drawHorizontalLines(Graphics2D g2d) {
-        ArrayList<Double> cellYList = rowHeader.getCellYList();
-
-        for (int i = 0; i < cellYList.size(); i++) {
-            double y = cellYList.get(i) + rowHeader.getMinimalCellHeight() - 1;
-            Shape l = new Line2D.Double(0, y, width, y);
-            g2d.draw(l);
-        }
-    }
+//    public void drawVerticalLines(Graphics2D g2d) {
+//        List<Double> cellXList = columnHeader.getCellXList();
+//        List<Double> cellWidthList = columnHeader.getCellWidthList();
+//
+//        for (int i = 0; i < cellXList.size(); i++) {
+//            double x = cellXList.get(i) + cellWidthList.get(i) - 1;
+//            Shape l = new Line2D.Double(x, 0, x, height);
+//            g2d.draw(l);
+//        }
+//    }
+//
+//    public void drawHorizontalLines(Graphics2D g2d) {
+//        ArrayList<Double> cellYList = rowHeader.getCellYList();
+//
+//        for (int i = 0; i < cellYList.size(); i++) {
+//            double y = cellYList.get(i) + rowHeader.getMinimalCellHeight() - 1;
+//            Shape l = new Line2D.Double(0, y, width, y);
+//            g2d.draw(l);
+//        }
+//    }
 
     public void drawValues(Graphics2D g2d) {
         List<Double> cellXList = columnHeader.getCellXList();
