@@ -12,13 +12,13 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -38,6 +38,9 @@ public class RangeMatrix extends JComponent {
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
     private SpatialIndex rTree;
+    private Map<Integer,List<Integer>> columnMap;
+    private Map<Integer,List<Integer>> rowMap;
+    private List<RangeMatrixTableButton> cellList;
     
     private double width;
     private double height;
@@ -72,6 +75,9 @@ public class RangeMatrix extends JComponent {
         rowHeader.setModel();
         headerCorner.setModel();
 
+        columnMap = new HashMap<>();
+        rowMap = new HashMap<>();
+        cellList = new ArrayList<>();
         setupRowsWidthList();
         calculateWidthOfComponents();
         calculateHeightOfComponents();
@@ -149,6 +155,33 @@ public class RangeMatrix extends JComponent {
 //            double y = cellYList.get(i) + rowHeader.getMinimalCellHeight() - 1;
 //            Shape l = new Line2D.Double(0, y, width, y);
 //            g2d.draw(l);
+//        }
+//    }
+    
+//    public RangeMatrixTableButton findButtonInList(int column, int row) {
+//
+//        List<Integer> columnCellIndices = columnMap.get(column);
+//
+//        if (button == null) {
+//            button = new RangeMatrixHeaderButton(child, columnName);
+//            columnMap.put(child, button);
+//        }
+//        return button;
+//    }
+//    
+//    public void calculateCells() {
+//        List<Double> cellXList = columnHeader.getCellXList();
+//        List<Double> cellWidthList = columnHeader.getCellWidthList();
+//        ArrayList<Double> cellYList = rowHeader.getCellYList();
+//        double minimalCellHeight = rowHeader.getMinimalCellHeight();
+//
+//        for (int i = 0; i < cellYList.size(); i++) {
+//            for (int j = 0; j < cellXList.size(); j++) {
+//                RangeMatrixTableButton button = findButtonInList(value);
+//                String value = (model.getValueAt(j, i)).toString();
+//
+//                
+//            }
 //        }
 //    }
 

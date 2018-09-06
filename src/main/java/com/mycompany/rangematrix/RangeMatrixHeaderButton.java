@@ -22,15 +22,9 @@ public class RangeMatrixHeaderButton {
     private boolean group;
 
     public RangeMatrixHeaderButton(Object buttonObject, String buttonName) {
-//        this.x = x;
-//        this.y = y;
-//        this.width = width;
-//        this.height = height;
         this.buttonObject = buttonObject;
         this.buttonName = buttonName;
-//        this.group = group;
     }
-
     
     @Override
     public String toString() {
