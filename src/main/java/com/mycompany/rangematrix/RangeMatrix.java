@@ -5,6 +5,8 @@
  */
 package com.mycompany.rangematrix;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.infomatiq.jsi.SpatialIndex;
 import com.infomatiq.jsi.rtree.RTree;
 import java.awt.Color;
@@ -15,15 +17,21 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.CellRendererPane;
+import javax.swing.JLabel;
 
 /**
  *
@@ -38,9 +46,7 @@ public class RangeMatrix extends JComponent {
     private IRangeMatrixRenderer renderer;
     private CellRendererPane crp;
     private SpatialIndex rTree;
-    private Map<Integer,List<Integer>> columnMap;
-    private Map<Integer,List<Integer>> rowMap;
-    private List<RangeMatrixTableButton> cellList;
+    private Table<Integer, Integer, RangeMatrixTableButton> buttonTable;
     
     private double width;
     private double height;
@@ -75,12 +81,11 @@ public class RangeMatrix extends JComponent {
         rowHeader.setModel();
         headerCorner.setModel();
 
-        columnMap = new HashMap<>();
-        rowMap = new HashMap<>();
-        cellList = new ArrayList<>();
+        buttonTable = HashBasedTable.create();
         setupRowsWidthList();
         calculateWidthOfComponents();
         calculateHeightOfComponents();
+        calculateCells();
         
         this.addMouseListener(new RangeMatrixMouseHandler());
 
@@ -158,32 +163,58 @@ public class RangeMatrix extends JComponent {
 //        }
 //    }
     
-//    public RangeMatrixTableButton findButtonInList(int column, int row) {
-//
-//        List<Integer> columnCellIndices = columnMap.get(column);
-//
-//        if (button == null) {
-//            button = new RangeMatrixHeaderButton(child, columnName);
-//            columnMap.put(child, button);
-//        }
-//        return button;
-//    }
-//    
-//    public void calculateCells() {
-//        List<Double> cellXList = columnHeader.getCellXList();
-//        List<Double> cellWidthList = columnHeader.getCellWidthList();
-//        ArrayList<Double> cellYList = rowHeader.getCellYList();
-//        double minimalCellHeight = rowHeader.getMinimalCellHeight();
-//
-//        for (int i = 0; i < cellYList.size(); i++) {
-//            for (int j = 0; j < cellXList.size(); j++) {
-//                RangeMatrixTableButton button = findButtonInList(value);
-//                String value = (model.getValueAt(j, i)).toString();
-//
-//                
-//            }
-//        }
-//    }
+    public RangeMatrixTableButton findButtonInTable(int column, int row) {
+        
+        RangeMatrixTableButton button = buttonTable.get(column, row);
+        if (button == null) {
+            Object value = model.getValueAt(column, row);
+            button = new RangeMatrixTableButton(value);
+            //////////
+            button.setColumn(column);
+            button.setRow(row);
+            button.setButtonName(value.toString());
+            //////////
+            buttonTable.put(column, row, button);
+        }
+        return button;
+    }
+    
+    public void calculateCells() {
+        List<Double> cellXList = columnHeader.getCellXList();
+        List<Double> cellWidthList = columnHeader.getCellWidthList();
+        ArrayList<Double> cellYList = rowHeader.getCellYList();
+        double minimalCellHeight = rowHeader.getMinimalCellHeight();
+
+        for (int column = 0; column < cellXList.size(); column++) {
+            for (int row = 0; row < cellYList.size(); row++) {
+                
+                RangeMatrixTableButton button = findButtonInTable(column, row);
+                ///////////
+                button.setHeight(minimalCellHeight);
+                button.setWidth(cellWidthList.get(column));
+                button.setX(cellXList.get(column));
+                button.setY(cellYList.get(row));
+                ///////////
+                BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = bufferedCell.createGraphics();
+                
+                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName());
+                label.setBounds((int)button.getX(),
+                            (int)button.getY(),
+                            (int)button.getWidth(),
+                            (int)button.getHeight());
+                label.paint(g2d);
+                button.setImg(bufferedCell);
+//                File outputfile = new File("image" + column + row + ".png");
+//                try {
+//                    ImageIO.write(bufferedCell, "png", outputfile);
+//                } catch (IOException ex) {
+//                    Logger.getLogger(RangeMatrix.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+            }
+        }
+    }
+    
 
     public void drawValues(Graphics2D g2d) {
         List<Double> cellXList = columnHeader.getCellXList();
@@ -191,15 +222,11 @@ public class RangeMatrix extends JComponent {
         ArrayList<Double> cellYList = rowHeader.getCellYList();
         double minimalCellHeight = rowHeader.getMinimalCellHeight();
 
-        for (int i = 0; i < cellYList.size(); i++) {
-            for (int j = 0; j < cellXList.size(); j++) {
-                String value = (model.getValueAt(j, i)).toString();
+        for (int column = 0; column < cellXList.size(); column++) {
+            for (int row = 0; row < cellYList.size(); row++) {
+                RangeMatrixTableButton button = findButtonInTable(column, row);
 
-                crp.paintComponent(g2d, renderer.getCellRendererComponent(j, i, value), this,
-                                   cellXList.get(j).intValue(),
-                                   cellYList.get(i).intValue(),
-                                   cellWidthList.get(j).intValue(),
-                                   (int) minimalCellHeight);
+                g2d.drawImage(button.getImg(), (int)button.getX(), (int)button.getY(), this);
             }
         }
     }
@@ -273,7 +300,8 @@ public class RangeMatrix extends JComponent {
             rebuildBuffer();
         }
         Graphics2D g2d = (Graphics2D) g;
-        g2d.drawImage(buffer, 0, 0, this);
+        drawValues(g2d);
+        //g2d.drawImage(buffer, 0, 0, this);
     }
 
     protected class RangeMatrixHandler implements RangeMatrixListener {

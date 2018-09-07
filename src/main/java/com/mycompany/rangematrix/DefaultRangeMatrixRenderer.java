@@ -51,7 +51,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getCellRendererComponent(int row, int column, String value) {
+    public JLabel getCellRendererComponent(int column, int row, String value) {
         delegate.setText(value);
         delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
         delegate.setHorizontalAlignment(JLabel.CENTER);

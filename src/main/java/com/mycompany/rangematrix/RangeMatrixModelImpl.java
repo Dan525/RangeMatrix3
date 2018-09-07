@@ -100,7 +100,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     //Values
 
     @Override
-    public Object getValueAt(int row, int col) {
+    public Object getValueAt(int column, int row) {
         return 1;
     }
     
