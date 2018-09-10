@@ -15,8 +15,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -36,6 +38,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     private double spaceAroundName = 4;
     private List<RangeMatrixHeaderButton> buttonList;
     private Map<Object,RangeMatrixHeaderButton> buttonMap;
+    private Map<Double, Integer> columnMap;
     private List<Double> cellXList;
     private List<Double> cellWidthList;
     private int rowCount;
@@ -57,6 +60,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         buttonList = new ArrayList<>();
         buttonMap = new HashMap<>();
+        columnMap = new LinkedHashMap<>();
         cellXList = new ArrayList<>();
         cellWidthList = new ArrayList<>();
 
@@ -71,6 +75,8 @@ public class RangeMatrixColumnHeader extends JComponent {
     
     public void calculateParams() {
         calculateMinimalCellHeight();
+        cellXList.clear();
+        cellWidthList.clear();
         fillCellCoordinateList(null, 0, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
         calculateWidthOfComponent();
@@ -183,6 +189,8 @@ public class RangeMatrixColumnHeader extends JComponent {
                 fillCellCoordinateList(child, cellX, rowCounter);
                 rowCounter--;
             } else {
+//                columnMap.put(cellX, columnCounter);
+//                columnCounter++;
                 cellXList.add(cellX);
                 cellWidthList.add(cellWidth);
             }
@@ -369,11 +377,37 @@ public class RangeMatrixColumnHeader extends JComponent {
 //    }
     
     public void processingClickOnColumn(RangeMatrixHeaderButton button) {
-        if (button.isCollapsed()) {
+        
+        int columnIndex = cellXList.indexOf(button.getX());//columnMap.get(button.getX());//
+        //Widtths of column
+        double widthByName = calculateWidthByColumnName(button.getButtonObject());
+        double widthOfChild = calculateWidthOfColumn(model.getColumnGroup(button.getButtonObject(), 0));
+        //For shift
+        double widthByChilds = calculateWidthOfColumn(button.getButtonObject());
+        double shift = widthByChilds - widthByName;
+        
+        if (button.isCollapsed() && button.isGroup()) {
+            
             button.setCollapsed(false);
-        } else {
-            button.setCollapsed(true);            
+            rm.collapseColumn(columnIndex, widthOfChild, false);
+            rm.shiftColumnsAfterCollapse(shift, columnIndex);
+            
+        } else if (!button.isCollapsed() && button.isGroup()) {
+            
+            button.setCollapsed(true);
+            rm.collapseColumn(columnIndex, widthByName, true);
+            rm.shiftColumnsAfterCollapse(-shift, columnIndex);
         }
+    }
+    
+    public void processingCollapseTableColumn(RangeMatrixHeaderButton button, boolean isCollapsed) {
+        int columnIndex = columnMap.get(button.getX());
+        Map<Integer, RangeMatrixTableButton> column = rm.getButtonTable().column(columnIndex);
+        for (RangeMatrixTableButton entry : column.values()) {
+            entry.setCollapsed(isCollapsed);
+            entry.setWidth(button.getWidth());
+        }
+        
     }
 
     protected class RangeMatrixMouseHandler implements MouseListener {
@@ -399,10 +433,11 @@ public class RangeMatrixColumnHeader extends JComponent {
             calculateParams();
             rebuildBuffer();
             repaint();
-//            rm.calculateHeightOfComponent();
-//            rm.calculateWidthOfComponent();
-//            rm.rebuildBuffer();
-//            rm.repaint();
+            rm.calculateHeightOfComponent();
+            rm.calculateWidthOfComponent();
+            //rm.calculateCells();
+            rm.rebuildBuffer();
+            rm.repaint();
 //            rm.getHeaderCorner().calculateHeightOfComponent();
 //            rm.getHeaderCorner().rebuildBuffer();
 //            rm.getHeaderCorner().repaint();            

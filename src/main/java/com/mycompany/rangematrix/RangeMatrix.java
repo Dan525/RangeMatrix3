@@ -7,6 +7,7 @@ package com.mycompany.rangematrix;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 import com.infomatiq.jsi.SpatialIndex;
 import com.infomatiq.jsi.rtree.RTree;
 import java.awt.Color;
@@ -111,6 +112,10 @@ public class RangeMatrix extends JComponent {
         return headerCorner;
     }
 
+    public Table<Integer, Integer, RangeMatrixTableButton> getButtonTable() {
+        return buttonTable;
+    }
+
     public void calculateWidthOfComponents() {
         columnHeader.calculateWidthOfComponent();
         rowHeader.calculateWidthOfComponent();
@@ -165,7 +170,7 @@ public class RangeMatrix extends JComponent {
     
     public RangeMatrixTableButton findButtonInTable(int column, int row) {
         
-        RangeMatrixTableButton button = buttonTable.get(column, row);
+        RangeMatrixTableButton button = buttonTable.get(row, column);
         if (button == null) {
             Object value = model.getValueAt(column, row);
             button = new RangeMatrixTableButton(value);
@@ -174,9 +179,42 @@ public class RangeMatrix extends JComponent {
             button.setRow(row);
             button.setButtonName(value.toString());
             //////////
-            buttonTable.put(column, row, button);
+            buttonTable.put(row, column, button);
         }
         return button;
+    }
+    
+    public void collapseColumn(int columnIndex, double cellWidth, boolean isCollapsed) {
+        Map<Integer, RangeMatrixTableButton> column = buttonTable.column(columnIndex);
+        Graphics2D g = (Graphics2D) this.getGraphics();
+        for (int row = 0; row < column.size(); row++) {
+            RangeMatrixTableButton button = column.get(row);
+            button.setCollapsed(isCollapsed);
+            button.setWidth(cellWidth);
+            BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = bufferedCell.createGraphics();
+                
+                JLabel label = renderer.getCellRendererComponent(columnIndex, row, button.getButtonName());
+                label.setBounds((int)button.getX(),
+                            (int)button.getY(),
+                            (int)button.getWidth(),
+                            (int)button.getHeight());
+                label.paint(g2d);
+                button.setImg(bufferedCell);
+        }
+    }
+    
+    public void shiftColumnsAfterCollapse(double shift, int columnIndex) {
+        for (Cell<Integer, Integer, RangeMatrixTableButton> cell : buttonTable.cellSet()) {
+            RangeMatrixTableButton button = cell.getValue();
+            if (button.getColumn() > columnIndex+15) {
+                button.setX(button.getX() + shift);
+            }
+        }
+//        buttonTable.cellSet().stream()
+//                .filter(cell -> (cell.getValue().getColumn() > columnIndex))
+//                .map(cell -> (cell.getValue().setX(width-100)));
+//        buffer.getSubimage(x, 0, buffer.getWidth()-x, buffer.getHeight());
     }
     
     public void calculateCells() {
@@ -226,7 +264,10 @@ public class RangeMatrix extends JComponent {
             for (int row = 0; row < cellYList.size(); row++) {
                 RangeMatrixTableButton button = findButtonInTable(column, row);
 
-                g2d.drawImage(button.getImg(), (int)button.getX(), (int)button.getY(), this);
+                if (!button.isCollapsed()) {
+                    g2d.drawImage(button.getImg(), (int)button.getX(), (int)button.getY(), this);
+                }
+                
             }
         }
     }
