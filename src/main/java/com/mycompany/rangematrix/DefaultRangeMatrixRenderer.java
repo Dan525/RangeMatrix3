@@ -51,9 +51,15 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getCellRendererComponent(int column, int row, String value) {
-        delegate.setText(value);
-        delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
+    public JLabel getCellRendererComponent(int column, int row, String value, boolean isLeading) {
+        if (isLeading) {
+            delegate.setText("<...>");
+            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
+        } else {
+            delegate.setText(value);
+            delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
+        }
+        
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
         delegate.setBorder(cellBorder);

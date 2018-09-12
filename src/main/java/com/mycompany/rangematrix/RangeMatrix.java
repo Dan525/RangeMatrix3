@@ -184,17 +184,28 @@ public class RangeMatrix extends JComponent {
         return button;
     }
     
-    public void collapseColumn(int columnIndex, double cellWidth, boolean isCollapsed) {
+    public void ignorePaintColumns(RangeMatrixHeaderButton button, int collapsedCount, int columnIndex, boolean isCollapsed) {
+        //int collapsedCount = model.getColumnGroupCount(button.getButtonObject());
+        for (int i = 1; i < collapsedCount; i++) {
+            Map<Integer, RangeMatrixTableButton> column = buttonTable.column(columnIndex + i);
+            for (RangeMatrixTableButton entry : column.values()) {
+                entry.setCollapsed(isCollapsed);
+            }
+        }
+    }
+    
+    public void makeColumnLeading(int columnIndex, double cellWidth, boolean isLeading) {
         Map<Integer, RangeMatrixTableButton> column = buttonTable.column(columnIndex);
-        Graphics2D g = (Graphics2D) this.getGraphics();
+        //Graphics2D g = (Graphics2D) this.getGraphics();
+        
         for (int row = 0; row < column.size(); row++) {
             RangeMatrixTableButton button = column.get(row);
-            button.setCollapsed(isCollapsed);
+            button.setLeading(isLeading);
             button.setWidth(cellWidth);
             BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(columnIndex, row, button.getButtonName());
+                JLabel label = renderer.getCellRendererComponent(columnIndex, row, button.getButtonName(), button.isLeading());
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -207,7 +218,7 @@ public class RangeMatrix extends JComponent {
     public void shiftColumnsAfterCollapse(double shift, int columnIndex) {
         for (Cell<Integer, Integer, RangeMatrixTableButton> cell : buttonTable.cellSet()) {
             RangeMatrixTableButton button = cell.getValue();
-            if (button.getColumn() > columnIndex+15) {
+            if (button.getColumn() > columnIndex) {
                 button.setX(button.getX() + shift);
             }
         }
@@ -236,7 +247,7 @@ public class RangeMatrix extends JComponent {
                 BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName());
+                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName(), button.isLeading());
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -341,8 +352,8 @@ public class RangeMatrix extends JComponent {
             rebuildBuffer();
         }
         Graphics2D g2d = (Graphics2D) g;
-        drawValues(g2d);
-        //g2d.drawImage(buffer, 0, 0, this);
+        //drawValues(g2d);
+        g2d.drawImage(buffer, 0, 0, this);
     }
 
     protected class RangeMatrixHandler implements RangeMatrixListener {

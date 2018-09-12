@@ -18,6 +18,7 @@ public class RangeMatrixTableButton {
     private String buttonName;
     private BufferedImage img;
     private boolean collapsed;
+    private boolean leading;
     
     public RangeMatrixTableButton(Object buttonObject) {
         this.buttonObject = buttonObject;
@@ -93,6 +94,14 @@ public class RangeMatrixTableButton {
 
     public void setCollapsed(boolean collapsed) {
         this.collapsed = collapsed;
+    }
+
+    public boolean isLeading() {
+        return leading;
+    }
+
+    public void setLeading(boolean leading) {
+        this.leading = leading;
     }
 
     public Object getButtonObject() {

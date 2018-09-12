@@ -259,6 +259,28 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
+    public int calculateColumnCount(Object parentColumn, int columnCounter) {
+        
+        int columnCount = model.getColumnGroupCount(parentColumn);
+
+        for (int i = 0; i < columnCount; i++) {
+            Object child = model.getColumnGroup(parentColumn, i);
+            boolean isGroup;
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+            if (button.isCollapsed()) {
+                isGroup = false;
+            } else {
+                isGroup = model.isColumnGroup(child);
+            }
+            if (isGroup) {
+                columnCounter = calculateColumnCount(child, columnCounter);
+            } else {
+                columnCounter++;
+            }
+        }
+        return columnCounter;
+    }
+    
     public RangeMatrixHeaderButton findButtonInMap(Object child) {
 
         String columnName = model.getColumnGroupName(child);
@@ -386,29 +408,35 @@ public class RangeMatrixColumnHeader extends JComponent {
         double widthByChilds = calculateWidthOfColumn(button.getButtonObject());
         double shift = widthByChilds - widthByName;
         
+        int collapsedCount = calculateColumnCount(button.getButtonObject(), 0);
+        
         if (button.isCollapsed() && button.isGroup()) {
             
             button.setCollapsed(false);
-            rm.collapseColumn(columnIndex, widthOfChild, false);
+            rm.ignorePaintColumns(button, collapsedCount, columnIndex, false);
+            rm.makeColumnLeading(columnIndex, widthOfChild, false);
             rm.shiftColumnsAfterCollapse(shift, columnIndex);
             
         } else if (!button.isCollapsed() && button.isGroup()) {
             
             button.setCollapsed(true);
-            rm.collapseColumn(columnIndex, widthByName, true);
+            rm.ignorePaintColumns(button, collapsedCount, columnIndex, true);
+            rm.makeColumnLeading(columnIndex, widthByName, true);
             rm.shiftColumnsAfterCollapse(-shift, columnIndex);
         }
     }
     
-    public void processingCollapseTableColumn(RangeMatrixHeaderButton button, boolean isCollapsed) {
-        int columnIndex = columnMap.get(button.getX());
-        Map<Integer, RangeMatrixTableButton> column = rm.getButtonTable().column(columnIndex);
-        for (RangeMatrixTableButton entry : column.values()) {
-            entry.setCollapsed(isCollapsed);
-            entry.setWidth(button.getWidth());
-        }
-        
-    }
+//    public void processingCollapseTableColumn(RangeMatrixHeaderButton button, boolean isCollapsed) {
+//        int columnIndex = columnMap.get(button.getX());
+//        int collapsedCount = model.getColumnGroupCount(button.getButtonObject());
+//        for (int i = 1; i <= collapsedCount; i++) {
+//            Map<Integer, RangeMatrixTableButton> column = rm.getButtonTable().column(columnIndex + collapsedCount);
+//            for (RangeMatrixTableButton entry : column.values()) {
+//                entry.setCollapsed(isCollapsed);
+//                entry.setWidth(button.getWidth());
+//            }
+//        }
+//    }
 
     protected class RangeMatrixMouseHandler implements MouseListener {
 

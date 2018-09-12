@@ -12,6 +12,6 @@ public interface IRangeMatrixRenderer {
     
     public JLabel getRowRendererComponent(Object row, String rowName);
     
-    public JLabel getCellRendererComponent(int row, int column, String value);
+    public JLabel getCellRendererComponent(int row, int column, String value, boolean isLeading);
     
 }
