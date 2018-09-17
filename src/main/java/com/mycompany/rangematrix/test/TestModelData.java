@@ -11,20 +11,43 @@ public class TestModelData {
     
     int column;
     int row;
-    //List<M[]> columnHeaderData;
+    M[][] columnHeaderData;
     
     
     public TestModelData(int column, int row) {
         this.column = column;
         this.row = row;
-        //columnHeaderData = new ArrayList();
+        columnHeaderData = new M[][] {fillSourceModule(column), fillDestinationModule(column)};
     }
 
-    M[][] columnHeaderData = new M[][] {sourceModule, destinationModule};
+    public M[][] getColumnHeaderData() {
+        return columnHeaderData;
+    }
     
-       
-    public static M[] sourceModule = new M[]{
-        new M("M6-CPU-A1 [Плата №1]",
+    public M[] fillSourceModule(int count) {
+        M[] sourceModule = new M[count * sourceModuleTypes.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < sourceModuleTypes.length; j++) {
+                sourceModule[i*sourceModuleTypes.length + j] = sourceModuleTypes[j];
+                sourceModule[i*sourceModuleTypes.length + j].name += " [Плата №" + (i*sourceModuleTypes.length + j) + "]";
+            }
+        }
+        return sourceModule;
+    }
+    
+    public M[] fillDestinationModule(int count) {
+        M[] destinationModule = new M[count * destinationModuleTypes.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < destinationModuleTypes.length; j++) {
+                destinationModule[i*destinationModuleTypes.length + j] = destinationModuleTypes[j];
+                destinationModule[i*destinationModuleTypes.length + j].name += " [Плата №" + (i*destinationModuleTypes.length + j) + "]";
+            }
+        }
+        return destinationModule;
+    }
+    
+    public static M[] sourceModuleTypes = new M[]{
+        new M("M6-CPU-A1",
                 new G[] {
                     new G("Функциональные клавиши",
                             new S[] {
@@ -46,7 +69,7 @@ public class TestModelData {
                     new G("CAN2 (из другого модуля)")
                 }
         ),
-        new M("M6-8RO-16DI220 [Плата №3]", 
+        new M("M6-8RO-16DI220", 
                 new G[] {
                     new G("Дискретные входы",
                             new S[]{
@@ -72,7 +95,7 @@ public class TestModelData {
                     new G("CAN2 (из другого модуля)")
                 }
         ),
-        new M("M6-xVT-zCT [Плата №4]", 
+        new M("M6-xVT-zCT", 
                 new G[] {
                     new G("Логика"),
                     new G("CAN2 (из другого модуля)")
@@ -80,8 +103,8 @@ public class TestModelData {
         )
     };
     
-    public static M[] destinationModule = new M[]{
-        new M("M6-CPU-A1 [Плата №1]",
+    public static M[] destinationModuleTypes = new M[]{
+        new M("M6-CPU-A1",
                 new G[] {
                     new G("Логика"),
                     new G("61850 MMS"),
@@ -110,7 +133,7 @@ public class TestModelData {
                     )
                 }
         ),
-        new M("M6-8RO-16DI220 [Плата №3]", 
+        new M("M6-8RO-16DI220", 
                 new G[] {
                     new G("Дискретные выходы",
                             new S[]{
@@ -128,7 +151,7 @@ public class TestModelData {
                     new G("CAN2 (в другой модуль)")
                 }
         ),
-        new M("M6-xVT-zCT [Плата №4]", 
+        new M("M6-xVT-zCT", 
                 new G[] {
                     new G("Логика"),
                     new G("CAN2 (в другой модуль)")
