@@ -20,7 +20,8 @@ public class RangeMatrixApp extends JFrame {
     
     public RangeMatrixApp() {
         super("Матрица ранжирования");
-        RangeMatrixModel model = new RangeMatrixModelCycleImpl();
+        TestModelData2 data = new TestModelData2();
+        RangeMatrixModel model = new RangeMatrixModelCycleImpl(data);
         RangeMatrix rangeMatrix = new RangeMatrix(model);
         JScrollPane rmScrollPane = new JScrollPane(rangeMatrix);
         

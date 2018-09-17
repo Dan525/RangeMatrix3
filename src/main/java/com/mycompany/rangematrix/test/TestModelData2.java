@@ -11,7 +11,13 @@ package com.mycompany.rangematrix.test;
  */
 public class TestModelData2 {
     
-    public static M sourceModuleTypes = new M ("Источник сигнала", new M[] {
+    public M[] columnHeaderDataSource;
+    
+    public TestModelData2() {
+        columnHeaderDataSource = new M[]{new M("Источник сигнала", fillSourceModuleGroup(1)), new M("Назначение сигнала", fillDestinationModule(1))};
+    }
+    
+    public static final M[] SOURCE_MODULE_TYPES = new M[] {
         new M("M6-CPU-A1",
                 new M[] {
                     new M("Функциональные клавиши",
@@ -66,9 +72,9 @@ public class TestModelData2 {
                     new M("CAN2 (из другого модуля)")
                 }
         )
-    });
+    };
     
-    public static M destinationModuleTypes = new M ("Назначение сигнала", new M[]{
+    public static final M[] DESTINATION_MODULE_TYPES = new M[]{
         new M("M6-CPU-A1",
                 new M[] {
                     new M("Логика"),
@@ -122,11 +128,11 @@ public class TestModelData2 {
                     new M("CAN2 (в другой модуль)")
                 }
         )
-    });
+    };
     
-    public static M[] columnHeaderDataSource = new M[]{sourceModuleTypes,destinationModuleTypes};
+    //public M[] columnHeaderDataSource = new M[]{new M("Источник сигнала", fillSourceModuleGroup(2)), new M("Назначение сигнала", fillDestinationModule(2))};
     
-    public static M[] rowHeaderDataSource = new M[] {
+    public M[] rowHeaderDataSource = new M[] {
         new M("PTOC1",
                 new M[] {
                     new M("ENA", new M[]{new M("BOOL")}),
@@ -164,6 +170,28 @@ public class TestModelData2 {
                 }
         )
     };
+    
+    public M[] fillSourceModuleGroup(int count) {
+        M[] sourceModuleGroup = new M[count * SOURCE_MODULE_TYPES.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < SOURCE_MODULE_TYPES.length; j++) {
+                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j] = SOURCE_MODULE_TYPES[j];
+                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j].name += " [Плата №" + (i*SOURCE_MODULE_TYPES.length + j) + "]";
+            }
+        }
+        return sourceModuleGroup;
+    }
+    
+    public M[] fillDestinationModule(int count) {
+        M[] destinationModuleGroup = new M[count * DESTINATION_MODULE_TYPES.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < DESTINATION_MODULE_TYPES.length; j++) {
+                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j] = DESTINATION_MODULE_TYPES[j];
+                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j].name += " [Плата №" + (i*DESTINATION_MODULE_TYPES.length + j) + "]";
+            }
+        }
+        return destinationModuleGroup;
+    }
     
     public static class M {
 

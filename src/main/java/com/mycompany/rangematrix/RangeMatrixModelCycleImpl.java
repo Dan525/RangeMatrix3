@@ -12,13 +12,19 @@ import java.util.ArrayList;
 public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     
     private final ArrayList<RangeMatrixListener> listeners = new ArrayList<>();
+    private final TestModelData2 data;
+    
+    RangeMatrixModelCycleImpl(TestModelData2 data) {
+        this.data = data;
+    }
+    
 
     //Column Group
     
     @Override
     public int getColumnGroupCount(Object column) {
         if (column == null) {
-            return TestModelData2.columnHeaderDataSource.length;
+            return data.columnHeaderDataSource.length;
         } else if (((M)column).groups == null) {
             return 0;
         } else {
@@ -29,7 +35,7 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     @Override
     public Object getColumnGroup(Object column, int index) {
         if (column == null) {
-            return TestModelData2.columnHeaderDataSource[index];
+            return data.columnHeaderDataSource[index];
         }
         return ((M)column).groups[index];
     }
@@ -56,7 +62,7 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     @Override
     public int getRowGroupCount(Object row) {
         if (row == null) {
-            return TestModelData2.rowHeaderDataSource.length;
+            return data.rowHeaderDataSource.length;
         } else if (((M)row).groups == null) {
             return 0;
         } else {
@@ -67,7 +73,7 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     @Override
     public Object getRowGroup(Object row, int index) {
         if (row == null) {
-            return TestModelData2.rowHeaderDataSource[index];
+            return data.rowHeaderDataSource[index];
         }
         return ((M)row).groups[index];
     }
