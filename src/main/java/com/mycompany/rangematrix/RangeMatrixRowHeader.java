@@ -5,6 +5,8 @@
  */
 package com.mycompany.rangematrix;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
 import com.infomatiq.jsi.SpatialIndex;
@@ -20,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
@@ -256,15 +259,14 @@ public class RangeMatrixRowHeader extends JComponent {
             }
             double cellWidth = rowsWidthList.get(columnCounter);
             
+            //////////////////////////////////
             button.setX(cellX);
             button.setY(cellY);
             button.setGroup(isGroup);
             button.setWidth(cellWidth);
             button.setHeight(cellHeight);
-
-
-
-            //RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, cellY, cellWidth, cellHeight, child, rowName, isGroup);
+            //////////////////////////////////
+            
             buttonList.add(button);
             
             Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
@@ -308,8 +310,7 @@ public class RangeMatrixRowHeader extends JComponent {
             button.setGroup(isGroup);
             button.setWidth(cellWidth);
             button.setHeight(minimalCellHeight);
-
-            //RangeMatrixHeaderButton button = new RangeMatrixHeaderButton(cellX, parentCellY, cellWidth, minimalCellHeight, null, rowName, isGroup);
+            
             buttonList.add(button);
             
             Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
@@ -328,15 +329,18 @@ public class RangeMatrixRowHeader extends JComponent {
     }
     
     private RangeMatrixHeaderButton findButtonInMap(Object child) {
-        String rowName;
-        if (child == null) {
-            rowName = "";
-        } else {
-            rowName = model.getRowGroupName(child);
-        }
+        
         RangeMatrixHeaderButton button = buttonMap.get(child);
 
         if (button == null) {
+            
+            String rowName;
+            if (child == null) {
+                rowName = "";
+            } else {
+                rowName = model.getRowGroupName(child);
+            }
+
             button = new RangeMatrixHeaderButton(child, rowName);
             buttonMap.put(child, button);
         }
@@ -357,75 +361,6 @@ public class RangeMatrixRowHeader extends JComponent {
         }
         
     }
-    
-//    public void drawEmptyRows(Graphics2D g2d, double parentCellX, double parentCellY, int columnCounter) {
-//
-//        if (columnCounter < columnCount) {
-//            
-//            String rowName = " ";
-//            double cellX = parentCellX;
-//            double cellWidth = rowsWidthList.get(columnCounter);
-//
-//            Rectangle2D rect = new Rectangle2D.Double(parentCellX, parentCellY, cellWidth, minimalCellHeight);
-//            //g2d.draw(rect);
-//
-//            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, rowName),
-//                    this, (int) cellX, (int) parentCellY, (int) cellWidth, (int) minimalCellHeight);
-//            
-//            cellX += cellWidth;
-//            columnCounter++;
-//
-//            drawEmptyRows(g2d, cellX, parentCellY, columnCounter);
-//
-//            columnCounter--;
-//            cellX -= cellWidth;
-//        }
-//
-//    }
-//
-//    public void drawRows(Graphics2D g2d, Object parentRow, double parentCellX, double parentCellY, int columnCounter) {
-//        int rowCount = model.getRowGroupCount(parentRow);
-//        double cellX = parentCellX;
-//        double cellY = parentCellY;
-//
-//        for (int i = 0; i < rowCount; i++) {
-//            Object child = model.getRowGroup(parentRow, i);
-//            String rowName = model.getRowGroupName(child);
-//
-//            double cellWidth = rowsWidthList.get(columnCounter);
-//
-//            boolean isGroup = model.isColumnGroup(child);
-//
-//            double cellHeight = calculateHeightOfRow(child);
-//
-//            Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
-//            //g2d.draw(rect);
-//            
-//            crp.paintComponent(g2d, renderer.getRowRendererComponent(child, rowName),
-//                               this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
-//
-//            if (isGroup) {
-//                
-//                columnCounter++;
-//                cellX += cellWidth;
-//                drawRows(g2d, child, cellX, cellY, columnCounter);
-//                columnCounter--;
-//                cellX -= cellWidth;
-//                
-//            } else if (!isGroup && columnCounter < columnCount) {
-//                
-//                columnCounter++;
-//                cellX += cellWidth;
-//                drawEmptyRows(g2d, cellX, cellY, columnCounter);
-//                columnCounter--;
-//                cellX -= cellWidth;
-//                
-//            }  else {
-//
-//            }
-//            cellY += cellHeight;
-//        }
-//    }
 
     void rebuildBuffer() {
         buffer = new BufferedImage((int) width, (int) height, BufferedImage.TYPE_INT_ARGB);

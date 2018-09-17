@@ -137,13 +137,13 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
-            boolean isGroup = model.isColumnGroup(child);
-//            RangeMatrixHeaderButton button = findButtonInMap(child);
-//            if (button.isCollapsed()) {
-//                isGroup = false;
-//            } else {
-//                isGroup = model.isColumnGroup(child);
-//            }
+            boolean isGroup;// = model.isColumnGroup(child);
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+            if (button.isCollapsed()) {
+                isGroup = false;
+            } else {
+                isGroup = model.isColumnGroup(child);
+            }
             if (isGroup) {
                 maxRowIndex++;
                 calculateRowCount(child, maxRowIndexList, maxRowIndex);
@@ -384,11 +384,11 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
     
     public RangeMatrixHeaderButton findButtonInMap(Object child) {
-
-        String columnName = model.getColumnGroupName(child);
+        
         RangeMatrixHeaderButton button = buttonMap.get(child);
 
         if (button == null) {
+            String columnName = model.getColumnGroupName(child);
             button = new RangeMatrixHeaderButton(child, columnName);
             buttonMap.put(child, button);
         }
@@ -564,9 +564,9 @@ public class RangeMatrixColumnHeader extends JComponent {
             rm.revalidate();
             rm.repaint();
             //rm.repaintScrollPane();
-//            rm.getHeaderCorner().calculateHeightOfComponent();
-//            rm.getHeaderCorner().rebuildBuffer();
-//            rm.getHeaderCorner().repaint();            
+            rm.getHeaderCorner().calculateHeightOfComponent();
+            rm.getHeaderCorner().rebuildBuffer();
+            rm.getHeaderCorner().repaint();            
         }
 
         @Override
