@@ -1,7 +1,7 @@
 package com.mycompany.rangematrix;
 
-import com.mycompany.rangematrix.test.TestModelData2;
-import com.mycompany.rangematrix.test.TestModelData2.M;
+import com.mycompany.rangematrix.test.TestModelData;
+import com.mycompany.rangematrix.test.TestModelData.M;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -12,9 +12,9 @@ import java.util.ArrayList;
 public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     
     private final ArrayList<RangeMatrixListener> listeners = new ArrayList<>();
-    private final TestModelData2 data;
+    private final TestModelData data;
     
-    RangeMatrixModelCycleImpl(TestModelData2 data) {
+    RangeMatrixModelCycleImpl(TestModelData data) {
         this.data = data;
     }
     
@@ -57,6 +57,14 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
         return ((M)column).name;
     }
     
+    @Override
+    public String getColumnGroupType(Object column) {
+        if (column == null) {
+            return "";
+        }
+        return ((M)column).type;
+    }
+    
     //Row Group
 
     @Override
@@ -93,6 +101,23 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
             return "";
         }
         return ((M)row).name;
+    }
+    
+    @Override
+    public String getRowGroupType(Object row) {
+        if (row == null) {
+            return "";
+        }
+        return ((M)row).type;
+    }
+    
+    @Override
+    public boolean hasType(Object row) {
+        if (((M)row).type == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
     
     //Corner

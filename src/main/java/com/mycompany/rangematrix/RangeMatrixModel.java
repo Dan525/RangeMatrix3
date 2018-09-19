@@ -25,6 +25,8 @@ public interface RangeMatrixModel {
     
     String getColumnGroupName(Object column);
     
+    String getColumnGroupType(Object column);
+    
     //Row Group
     
     int getRowGroupCount(Object row);
@@ -34,6 +36,10 @@ public interface RangeMatrixModel {
     boolean isRowGroup(Object row);
     
     String getRowGroupName(Object row);
+    
+    String getRowGroupType(Object row);
+    
+    boolean hasType(Object row);
     
     //Corner
     

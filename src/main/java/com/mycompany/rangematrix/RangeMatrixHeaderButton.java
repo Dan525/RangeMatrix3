@@ -20,7 +20,7 @@ public class RangeMatrixHeaderButton {
     private final String buttonName;
     private boolean collapsed;
     private boolean group;
-    private int column;
+    private int cellIndex;
 
     public RangeMatrixHeaderButton(Object buttonObject, String buttonName) {
         this.buttonObject = buttonObject;
@@ -135,12 +135,12 @@ public class RangeMatrixHeaderButton {
         this.height = height;
     }
 
-    public int getColumn() {
-        return column;
+    public int getCellIndex() {
+        return cellIndex;
     }
 
-    public void setColumn(int column) {
-        this.column = column;
+    public void setCellIndex(int cellIndex) {
+        this.cellIndex = cellIndex;
     }
 
     public String getButtonName() {

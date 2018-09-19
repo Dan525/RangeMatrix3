@@ -1,201 +1,234 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.mycompany.rangematrix.test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
- * @author oleg_kirienko
+ * @author daniil_pozdeev
  */
 public class TestModelData {
     
-    int column;
-    int row;
-    M[][] columnHeaderData;
+    public M[] columnHeaderDataSource;
     
-    
-    public TestModelData(int column, int row) {
-        this.column = column;
-        this.row = row;
-        columnHeaderData = new M[][] {fillSourceModule(column), fillDestinationModule(column)};
-    }
-
-    public M[][] getColumnHeaderData() {
-        return columnHeaderData;
+    public TestModelData() {
+        columnHeaderDataSource = new M[]{new M("Источник сигнала", fillSourceModuleGroup(1)), new M("Назначение сигнала", fillDestinationModule(1))};
     }
     
-    public M[] fillSourceModule(int count) {
-        M[] sourceModule = new M[count * sourceModuleTypes.length];
-        for (int i = 0; i < count; i++) {
-            for (int j = 0; j < sourceModuleTypes.length; j++) {
-                sourceModule[i*sourceModuleTypes.length + j] = sourceModuleTypes[j];
-                sourceModule[i*sourceModuleTypes.length + j].name += " [Плата №" + (i*sourceModuleTypes.length + j) + "]";
-            }
-        }
-        return sourceModule;
-    }
-    
-    public M[] fillDestinationModule(int count) {
-        M[] destinationModule = new M[count * destinationModuleTypes.length];
-        for (int i = 0; i < count; i++) {
-            for (int j = 0; j < destinationModuleTypes.length; j++) {
-                destinationModule[i*destinationModuleTypes.length + j] = destinationModuleTypes[j];
-                destinationModule[i*destinationModuleTypes.length + j].name += " [Плата №" + (i*destinationModuleTypes.length + j) + "]";
-            }
-        }
-        return destinationModule;
-    }
-    
-    public static M[] sourceModuleTypes = new M[]{
+    public static final M[] SOURCE_MODULE_TYPES = new M[] {
         new M("M6-CPU-A1",
-                new G[] {
-                    new G("Функциональные клавиши",
-                            new S[] {
-                                new S("F1", "BOOL"),
-                                new S("F2", "BOOL"),
-                                new S("F3", "BOOL"),
-                                new S("F4", "BOOL"),
-                                new S("F5", "BOOL"),
-                                new S("F6", "BOOL"),
-                                new S("F7", "BOOL"),
-                                new S("F8", "BOOL"),
-                                new S("F9", "BOOL")
+                new M[] {
+                    new M("Функциональные клавиши",
+                            new M[] {
+                                new M("F1", "BOOL"),
+                                new M("F2", "BOOL"),
+                                new M("F3", "BOOL"),
+                                new M("F4", "BOOL"),
+                                new M("F5", "BOOL"),
+                                new M("F6", "BOOL"),
+                                new M("F7", "BOOL"),
+                                new M("F8", "BOOL"),
+                                new M("F9", "BOOL")
                             }
                     ),
-                    new G("Логика"),
-                    new G("61850 MMS"),
-                    new G("61850 GOOSE"),
-                    new G("Дисплей"),
-                    new G("CAN2 (из другого модуля)")
+                    new M("Логика"),
+                    new M("61850 MMS"),
+                    new M("61850 GOOSE"),
+                    new M("Дисплей"),
+                    new M("CAN2 (из другого модуля)")
                 }
         ),
         new M("M6-8RO-16DI220", 
-                new G[] {
-                    new G("Дискретные входы",
-                            new S[]{
-                                new S("IN1", "BOOL"),
-                                new S("IN2", "BOOL"),
-                                new S("IN3", "BOOL"),
-                                new S("IN4", "BOOL"),
-                                new S("IN5", "BOOL"),
-                                new S("IN6", "BOOL"),
-                                new S("IN7", "BOOL"),
-                                new S("IN8", "BOOL"),
-                                new S("IN9", "BOOL"),
-                                new S("IN10", "BOOL"),
-                                new S("IN11", "BOOL"),
-                                new S("IN12", "BOOL"),
-                                new S("IN13", "BOOL"),
-                                new S("IN14", "BOOL"),
-                                new S("IN15", "BOOL"),
-                                new S("IN16", "BOOL")
+                new M[] {
+                    new M("Дискретные входы",
+                            new M[]{
+                                new M("IN1", "BOOL"),
+                                new M("IN2", "BOOL"),
+                                new M("IN3", "BOOL"),
+                                new M("IN4", "BOOL"),
+                                new M("IN5", "BOOL"),
+                                new M("IN6", "BOOL"),
+                                new M("IN7", "BOOL"),
+                                new M("IN8", "BOOL"),
+                                new M("IN9", "BOOL"),
+                                new M("IN10", "BOOL"),
+                                new M("IN11", "BOOL"),
+                                new M("IN12", "BOOL"),
+                                new M("IN13", "BOOL"),
+                                new M("IN14", "BOOL"),
+                                new M("IN15", "BOOL"),
+                                new M("IN16", "BOOL")
                             }
                     ),
-                    new G("Логика"),
-                    new G("CAN2 (из другого модуля)")
+                    new M("Логика"),
+                    new M("CAN2 (из другого модуля)")
                 }
         ),
         new M("M6-xVT-zCT", 
-                new G[] {
-                    new G("Логика"),
-                    new G("CAN2 (из другого модуля)")
+                new M[] {
+                    new M("Логика"),
+                    new M("CAN2 (из другого модуля)")
                 }
         )
     };
     
-    public static M[] destinationModuleTypes = new M[]{
+    public static final M[] DESTINATION_MODULE_TYPES = new M[]{
         new M("M6-CPU-A1",
-                new G[] {
-                    new G("Логика"),
-                    new G("61850 MMS"),
-                    new G("61850 GOOSE"),
-                    new G("Дисплей"),
-                    new G("CAN2 (в другой модуль)"),
-                    new G("Светодиоды",
-                            new S[] {
-                                new S("1", "BOOL"),
-                                new S("2", "BOOL"),
-                                new S("3", "BOOL"),
-                                new S("4", "BOOL"),
-                                new S("5", "BOOL"),
-                                new S("6", "BOOL"),
-                                new S("7", "BOOL"),
-                                new S("8", "BOOL"),
-                                new S("9", "BOOL"),
-                                new S("10", "BOOL"),
-                                new S("11", "BOOL"),
-                                new S("12", "BOOL"),
-                                new S("13", "BOOL"),
-                                new S("14", "BOOL"),
-                                new S("15", "BOOL"),
-                                new S("16", "BOOL")
+                new M[] {
+                    new M("Логика"),
+                    new M("61850 MMS"),
+                    new M("61850 GOOSE"),
+                    new M("Дисплей"),
+                    new M("CAN2 (в другой модуль)"),
+                    new M("Светодиоды",
+                            new M[] {
+                                new M("1", "BOOL"),
+                                new M("2", "BOOL"),
+                                new M("3", "BOOL"),
+                                new M("4", "BOOL"),
+                                new M("5", "BOOL"),
+                                new M("6", "BOOL"),
+                                new M("7", "BOOL"),
+                                new M("8", "BOOL"),
+                                new M("9", "BOOL"),
+                                new M("10", "BOOL"),
+                                new M("11", "BOOL"),
+                                new M("12", "BOOL"),
+                                new M("13", "BOOL"),
+                                new M("14", "BOOL"),
+                                new M("15", "BOOL"),
+                                new M("16", "BOOL")
                             }
                     )
                 }
         ),
         new M("M6-8RO-16DI220", 
-                new G[] {
-                    new G("Дискретные выходы",
-                            new S[]{
-                                new S("OUT1", "BOOL"),
-                                new S("OUT2", "BOOL"),
-                                new S("OUT3", "BOOL"),
-                                new S("OUT4", "BOOL"),
-                                new S("OUT5", "BOOL"),
-                                new S("OUT6", "BOOL"),
-                                new S("OUT7", "BOOL"),
-                                new S("OUT8", "BOOL")
+                new M[] {
+                    new M("Дискретные выходы",
+                            new M[]{
+                                new M("OUT1", "BOOL"),
+                                new M("OUT2", "BOOL"),
+                                new M("OUT3", "BOOL"),
+                                new M("OUT4", "BOOL"),
+                                new M("OUT5", "BOOL"),
+                                new M("OUT6", "BOOL"),
+                                new M("OUT7", "BOOL"),
+                                new M("OUT8", "BOOL")
                             }
                     ),
-                    new G("Логика"),
-                    new G("CAN2 (в другой модуль)")
+                    new M("Логика"),
+                    new M("CAN2 (в другой модуль)")
                 }
         ),
         new M("M6-xVT-zCT", 
-                new G[] {
-                    new G("Логика"),
-                    new G("CAN2 (в другой модуль)")
+                new M[] {
+                    new M("Логика"),
+                    new M("CAN2 (в другой модуль)")
                 }
         )
     };
-
     
-    private static class M {
-
-        public String name;
-        public G[] groups;
-
-        public M(String name, G[] groups) {
-            this.name = name;
-            this.groups = groups;
+    //public M[] columnHeaderDataSource = new M[]{new M("Источник сигнала", fillSourceModuleGroup(2)), new M("Назначение сигнала", fillDestinationModule(2))};
+    
+    public M[] rowHeaderDataSource = new M[] {
+        new M("PTOC1",
+                new M[] {
+//                    new M("ENA", new M[]{new M("BOOL")}),
+//                    new M("BLOCK", new M[]{new M("BOOL")}),
+//                    new M("ENA_INT", new M[]{new M("INT")}),
+//                    new M("STR_INT", new M[]{new M("INT")}),
+//                    new M("OP_INT", new M[]{new M("INT")}),
+//                    new M("STR", new M[]{new M("BOOL")}),
+//                    new M("OP", new M[]{new M("BOOL")})
+                    new M("ENA", "BOOL"),
+                    new M("BLOCK", "BOOL"),
+                    new M("ENA_INT", "INT",
+                            new M[]{
+                                new M("B124", "int"),
+                                new M("B324L", "integer"),
+                                new M("BOerL", "long"),
+                            }),
+                    new M("STR_INT", "INT"),
+                    new M("OP_INT", "INT"),
+                    new M("STR", "BOOL"),
+                    new M("OP", "BOOL")
+                }
+        ),
+        new M("PROTO",
+                new M[] {
+                    new M("I1", ""),
+                    new M("I2", ""),
+                    new M("I3", ""),
+                    new M("I4", "")
+                }
+        ),
+        new M("PROTO",
+                new M[] {
+                    new M("U1", ""),
+                    new M("U2", ""),
+                    new M("U3", ""),
+                    new M("U4", ""),
+                    new M("U5", "")
+                }
+        ),
+        new M("PROTO",
+                new M[] {
+                    new M("I5", ""),
+                    new M("I6", ""),
+                    new M("I7", ""),
+                    new M("I8", "")
+                }
+        )
+    };
+    
+    public M[] fillSourceModuleGroup(int count) {
+        M[] sourceModuleGroup = new M[count * SOURCE_MODULE_TYPES.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < SOURCE_MODULE_TYPES.length; j++) {
+                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j] = SOURCE_MODULE_TYPES[j];
+                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j].name += " [Плата №" + (i*SOURCE_MODULE_TYPES.length + j) + "]";
+            }
         }
-
+        return sourceModuleGroup;
     }
-
-    private static class G {
-
-        public String name;
-        public S[] signals;
-
-        public G(String name, S[] signals) {
-            this.name = name;
-            this.signals = signals;
+    
+    public M[] fillDestinationModule(int count) {
+        M[] destinationModuleGroup = new M[count * DESTINATION_MODULE_TYPES.length];
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < DESTINATION_MODULE_TYPES.length; j++) {
+                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j] = DESTINATION_MODULE_TYPES[j];
+                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j].name += " [Плата №" + (i*DESTINATION_MODULE_TYPES.length + j) + "]";
+            }
         }
-        
-        public G(String name) {
-            this.name = name;
-        }
-
+        return destinationModuleGroup;
     }
-
-    private static class S {
+    
+    public static class M {
 
         public String name;
         public String type;
+        public M[] groups;
 
-        public S(String name, String type) {
+        public M(String name, M[] groups) {
+            this.name = name;
+            this.groups = groups;
+        }
+        
+        public M(String name) {
+            this.name = name;
+        }
+        
+        public M(String name, String type) {
             this.name = name;
             this.type = type;
+        }
+        
+        public M(String name, String type, M[] groups) {
+            this.name = name;
+            this.type = type;
+            this.groups = groups;
         }
     }
 }

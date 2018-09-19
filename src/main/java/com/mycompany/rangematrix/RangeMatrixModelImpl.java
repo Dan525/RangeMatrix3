@@ -51,6 +51,14 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
         return ((File)column).getName();
     }
     
+    @Override
+    public String getColumnGroupType(Object column) {
+        if (column == null) {
+            return new File("src\\res\\Заголовок колонок - копия").getName();
+        }
+        return ((File)column).getPath();
+    }
+    
     //Row Group
 
     @Override
@@ -84,6 +92,14 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
             return new File("src\\res\\rows - копия").getName();
         }
         return ((File)row).getName();
+    }
+    
+    @Override
+    public String getRowGroupType(Object row) {
+        if (row == null) {
+            return new File("src\\res\\rows - копия").getName();
+        }
+        return ((File)row).getPath();
     }
     
     //Corner

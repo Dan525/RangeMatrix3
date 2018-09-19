@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -43,6 +44,8 @@ public class RangeMatrixRowHeader extends JComponent {
     private ArrayList<Double> cellYList;
     private ArrayList<RangeMatrixHeaderButton> buttonList;
     private Map<Object,RangeMatrixHeaderButton> buttonMap;
+    private Map<Object,RangeMatrixHeaderButton> typeButtonMap;
+    private List<Object> leafButtonList;
     private double minimalCellHeight;
     private int columnCount;
     private ArrayList<Double> rowsWidthList;
@@ -64,7 +67,9 @@ public class RangeMatrixRowHeader extends JComponent {
 
         buttonList = new ArrayList<>();
         buttonMap = new HashMap<>();
+        typeButtonMap = new HashMap<>();
         cellYList = new ArrayList<>();
+        leafButtonList = new ArrayList<>();
         
         calculateParams();
         
@@ -72,9 +77,11 @@ public class RangeMatrixRowHeader extends JComponent {
     }
     
     public void calculateParams() {
+        leafButtonList.clear();
         calculateMinimalCellHeight();
-        fillCellCoordinateList(null, 0, 0);
+        calculateRowCoordinates(null, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
+        calculateRowIndices(null, 0);
     }
 
     public RangeMatrixModel getModel() {
@@ -95,8 +102,18 @@ public class RangeMatrixRowHeader extends JComponent {
     }
 
     public double calculateWidthOfRowByName(Object row) {
-        String rowName = model.getColumnGroupName(row);
-        JLabel label = renderer.getRowRendererComponent(row, rowName);
+        //String rowName = model.getColumnGroupName(row);
+        RangeMatrixHeaderButton button = findButtonInMap(row);
+        JLabel label = renderer.getRowRendererComponent(button.getButtonObject(),
+                                                        button.getButtonName());
+        return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
+    }
+    
+    public double calculateWidthOfRowByType(Object row) {
+        //String rowName = model.getColumnGroupType(row);
+        RangeMatrixHeaderButton button = findTypeButtonInMap(row);
+        JLabel label = renderer.getRowRendererComponent(button.getButtonObject(),
+                                                        button.getButtonName());
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
 
@@ -106,16 +123,38 @@ public class RangeMatrixRowHeader extends JComponent {
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parent, i);
 
-            boolean isGroup = model.isColumnGroup(child);
+            boolean isGroup;// = model.isColumnGroup(child);
+            boolean hasType = model.hasType(child);
+            
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+            
+            if (button.isCollapsed()) {
+                isGroup = false;
+            } else {
+                isGroup = model.isRowGroup(child);
+            }
             
             if (columnCounter == indexOfColumn) {
                 rowsOfColumnList.add(calculateWidthOfRowByName(child));
             }
-            if (isGroup && columnCounter < indexOfColumn) {
+            if (hasType) {
                 columnCounter++;
-                fillRowsWidthInColumnList(child, indexOfColumn, columnCounter, rowsOfColumnList);
+                if (columnCounter == indexOfColumn) {
+                    rowsOfColumnList.add(calculateWidthOfRowByType(child));
+                }
                 columnCounter--;
-
+            }
+            if (isGroup && columnCounter < indexOfColumn) {
+                if (hasType) {
+                    columnCounter+=2;
+                    fillRowsWidthInColumnList(child, indexOfColumn, columnCounter, rowsOfColumnList);
+                    columnCounter-=2;
+                } else {
+                    columnCounter++;
+                    fillRowsWidthInColumnList(child, indexOfColumn, columnCounter, rowsOfColumnList);
+                    columnCounter--;
+                }
+                
             }
         }
         return rowsOfColumnList;
@@ -154,13 +193,38 @@ public class RangeMatrixRowHeader extends JComponent {
 
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
-            boolean isGroup = model.isRowGroup(child);
-            if (isGroup) {
-                maxColumnIndex++;
-                calculateColumnCount(child, maxColumnIndexList, maxColumnIndex);
-                maxColumnIndex--;
+            
+            boolean isGroup;
+            boolean hasType = model.hasType(child);
+            
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+            
+            if (button.isCollapsed()) {
+                isGroup = false;
+            } else {
+                isGroup = model.isRowGroup(child);
             }
-            maxColumnIndexList.add(maxColumnIndex);
+            
+            if (isGroup) {
+                if (hasType) {
+                    maxColumnIndex+=2;
+                    calculateColumnCount(child, maxColumnIndexList, maxColumnIndex);
+                    maxColumnIndex-=2;
+                } else {
+                    maxColumnIndex++;
+                    calculateColumnCount(child, maxColumnIndexList, maxColumnIndex);
+                    maxColumnIndex--;
+                }                
+            } else {
+                if (hasType) {
+                    maxColumnIndex++;
+                    maxColumnIndexList.add(maxColumnIndex);
+                    maxColumnIndex--;
+                } else {
+                    maxColumnIndexList.add(maxColumnIndex);
+                }
+            }
+            
         }
         columnCount = Collections.max(maxColumnIndexList);
     }
@@ -169,22 +233,69 @@ public class RangeMatrixRowHeader extends JComponent {
         return columnCount;
     }
 
-    public void fillCellCoordinateList(Object parentRow, double parentCellY, int columnCounter) {
+    public List<Object> getLeafButtonList() {
+        return leafButtonList;
+    }
+    
+    public int calculateRowIndices(Object parentRow, int rowCounter) {
+        int rowCount = model.getRowGroupCount(parentRow);
+
+        for (int i = 0; i < rowCount; i++) {
+            Object child = model.getRowGroup(parentRow, i);
+            
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+
+            boolean isGroup = model.isRowGroup(child);
+
+            if (isGroup) {
+                rowCounter = calculateRowIndices(child, rowCounter);
+            } else {
+                button.setCellIndex(rowCounter);
+                //leafButtonMap.put(columnCounter, button);
+                leafButtonList.add(child);
+                rowCounter++;
+            }
+        }
+        return rowCounter;
+    }
+
+    public void calculateRowCoordinates(Object parentRow, double parentCellY) {
 
         int rowCount = model.getRowGroupCount(parentRow);
         double cellY = parentCellY;
 
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
+            
+            double cellHeight;
+            boolean isGroup;
+            boolean hasType = model.hasType(child);
+            
+            RangeMatrixHeaderButton button = findButtonInMap(child);
 
-            boolean isGroup = model.isColumnGroup(child);
+            if (button.isCollapsed()) {
+                isGroup = false;
 
-            double cellHeight = calculateHeightOfRow(child);
+                cellHeight = minimalCellHeight;
 
+            } else {
+                isGroup = model.isRowGroup(child);
+
+                cellHeight = calculateHeightOfRow(child);
+
+            }
+            
+            button.setHeight(cellHeight);
+            button.setY(cellY);
+            
+            if (hasType) {
+                RangeMatrixHeaderButton typeButton = findTypeButtonInMap(child);
+                typeButton.setHeight(cellHeight);
+                typeButton.setY(cellY);
+            }
+            
             if (isGroup) {
-                columnCounter++;
-                fillCellCoordinateList(child, cellY, columnCounter);
-                columnCounter--;
+                calculateRowCoordinates(child, cellY);
             } else {
                 cellYList.add(cellY);
             }
@@ -197,10 +308,11 @@ public class RangeMatrixRowHeader extends JComponent {
     }
 
     public void calculateWidthOfComponent() {
+        width = 0;
         for (double rowWidth : rowsWidthList) {
             width += rowWidth;
         }
-        //width += 1;
+        //width += 300;
     }
 
     public double getWidthOfComponent() {
@@ -227,7 +339,17 @@ public class RangeMatrixRowHeader extends JComponent {
 
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
-            boolean isGroup = model.isRowGroup(child);
+            
+            boolean isGroup;
+            
+            RangeMatrixHeaderButton button = findButtonInMap(child);
+            
+            if (button.isCollapsed()) {
+                isGroup = false;
+            } else {
+                isGroup = model.isRowGroup(child);
+            }
+            
             if (isGroup) {
                 fillLeafRows(child, leafRowList);
             } else {
@@ -248,6 +370,7 @@ public class RangeMatrixRowHeader extends JComponent {
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
             RangeMatrixHeaderButton button = findButtonInMap(child);
+            boolean hasType = model.hasType(child);
 
             if (button.isCollapsed()) {
                 isGroup = false;
@@ -258,6 +381,7 @@ public class RangeMatrixRowHeader extends JComponent {
                 cellHeight = calculateHeightOfRow(child);
             }
             double cellWidth = rowsWidthList.get(columnCounter);
+            double cellWidthType = 0;
             
             //////////////////////////////////
             button.setX(cellX);
@@ -267,68 +391,93 @@ public class RangeMatrixRowHeader extends JComponent {
             button.setHeight(cellHeight);
             //////////////////////////////////
             
+            if (hasType) {
+                columnCounter++;
+                RangeMatrixHeaderButton typeButton = findTypeButtonInMap(child);
+                
+                cellWidthType = rowsWidthList.get(columnCounter);
+                double cellXType = cellX + cellWidth;
+
+                //////////////////////////////////
+                typeButton.setX(cellXType);
+                typeButton.setY(cellY);
+                typeButton.setGroup(isGroup);
+                typeButton.setWidth(cellWidthType);
+                typeButton.setHeight(cellHeight);
+                //////////////////////////////////
+                
+                columnCounter--;
+            }
+            
             buttonList.add(button);
             
-            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth), (float)(cellY + cellHeight));
+            Rectangle rect = new Rectangle((float)cellX, (float)cellY, (float)(cellX + cellWidth + cellWidthType), (float)(cellY + cellHeight));
             
             rTree.add(rect, buttonList.indexOf(button));
 
             if (isGroup) {
-                
-                columnCounter++;
-                cellX += cellWidth;
-                calculateRows(child, cellX, cellY, columnCounter);
-                columnCounter--;
-                cellX -= cellWidth;
+                if (hasType) {
+                    columnCounter+=2;
+                    cellX += (cellWidth + cellWidthType);
+                    calculateRows(child, cellX, cellY, columnCounter);
+                    columnCounter-=2;
+                    cellX -= (cellWidth + cellWidthType);
+                } else {
+                    columnCounter++;
+                    cellX += (cellWidth + cellWidthType);
+                    calculateRows(child, cellX, cellY, columnCounter);
+                    columnCounter--;
+                    cellX -= (cellWidth + cellWidthType);
+                }
                 
             } else if (!isGroup && columnCounter < columnCount) {
                 
-                columnCounter++;
-                cellX += cellWidth;
-                calculateEmptyRows(cellX, cellY, columnCounter);
-                columnCounter--;
-                cellX -= cellWidth;
+//                columnCounter++;
+//                cellX += cellWidth;
+//                calculateEmptyRows(cellX, cellY, columnCounter);
+//                columnCounter--;
+//                cellX -= cellWidth;
                 
             }  else {
-                cellYList.add(cellY);
+                //cellYList.add(cellY);
             }
             cellY += cellHeight;
         }
     }
     
-    public void calculateEmptyRows(double parentCellX, double parentCellY, int columnCounter) {
-
-        if (columnCounter < columnCount) {
-            
-            RangeMatrixHeaderButton button = findButtonInMap(null);
-            double cellX = parentCellX;
-            double cellWidth = rowsWidthList.get(columnCounter);
-            boolean isGroup = false;
-            
-            button.setX(cellX);
-            button.setY(parentCellY);
-            button.setGroup(isGroup);
-            button.setWidth(cellWidth);
-            button.setHeight(minimalCellHeight);
-            
-            buttonList.add(button);
-            
-            Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
-            
-            rTree.add(rect, buttonList.indexOf(button));
-            
-            cellX += cellWidth;
-            columnCounter++;
-
-            calculateEmptyRows(cellX, parentCellY, columnCounter);
-
-            columnCounter--;
-            cellX -= cellWidth;
-        }
-
-    }
+//    public void calculateEmptyRows(double parentCellX, double parentCellY, int columnCounter) {
+//
+//        if (columnCounter < columnCount) {
+//            
+//            RangeMatrixHeaderButton button = findButtonInMap(null);
+//            double cellX = parentCellX;
+//            double cellWidth = rowsWidthList.get(columnCounter);
+//            boolean isGroup = false;
+//            
+//            button.setX(cellX);
+//            button.setY(parentCellY);
+//            button.setGroup(isGroup);
+//            button.setWidth(cellWidth);
+//            button.setHeight(minimalCellHeight);
+//            
+//            buttonList.add(button);
+//            
+//            Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
+//            
+//            rTree.add(rect, buttonList.indexOf(button));
+//            
+//            cellX += cellWidth;
+//            columnCounter++;
+//
+//            calculateEmptyRows(cellX, parentCellY, columnCounter);
+//
+//            columnCounter--;
+//            cellX -= cellWidth;
+//        }
+//
+//    }
     
-    private RangeMatrixHeaderButton findButtonInMap(Object child) {
+    public RangeMatrixHeaderButton findButtonInMap(Object child) {
         
         RangeMatrixHeaderButton button = buttonMap.get(child);
 
@@ -347,9 +496,38 @@ public class RangeMatrixRowHeader extends JComponent {
         return button;
     }
     
+    public RangeMatrixHeaderButton findTypeButtonInMap(Object child) {
+        
+        RangeMatrixHeaderButton button = typeButtonMap.get(child);
+
+        if (button == null) {
+            
+            String rowName;
+            if (child == null) {
+                rowName = "";
+            } else {
+                rowName = model.getRowGroupType(child);
+            }
+
+            button = new RangeMatrixHeaderButton(child, rowName);
+            typeButtonMap.put(child, button);
+        }
+        return button;
+    }
+    
     public void drawRows(Graphics2D g2d) {
         
-        for (RangeMatrixHeaderButton button : buttonList) {
+        for (RangeMatrixHeaderButton button : buttonMap.values()) {
+            crp.paintComponent(g2d, 
+                               renderer.getRowRendererComponent(button.getButtonObject(),
+                                                                   button.getButtonName()),
+                               this,
+                               (int) button.getX(),
+                               (int) button.getY(),
+                               (int) button.getWidth(),
+                               (int) button.getHeight());
+        }
+        for (RangeMatrixHeaderButton button : typeButtonMap.values()) {
             crp.paintComponent(g2d, 
                                renderer.getRowRendererComponent(button.getButtonObject(),
                                                                    button.getButtonName()),
@@ -382,12 +560,74 @@ public class RangeMatrixRowHeader extends JComponent {
         g2d.drawImage(buffer, 0, 0, this);
     }
     
-        public void processingClickOnColumn(RangeMatrixHeaderButton button) {
+    public void processingClickOnColumn(RangeMatrixHeaderButton button) {
         if (button.isCollapsed()) {
             button.setCollapsed(false);
         } else {
             button.setCollapsed(true);
         }
+    }
+    
+//    public void processingClickOnRow(RangeMatrixHeaderButton button) {
+//        
+//        int rowIndex = calculateRowIndex(button);
+//        
+//        if (button.isCollapsed() && button.isGroup()) {
+//            
+//            TreeMap<Integer, Object> leafColumnMap = (TreeMap<Integer, Object>) fillLeafColumnMap(button.getButtonObject(), new TreeMap<>());
+//            RangeMatrixHeaderButton leafHeaderButton = findButtonInMap(leafColumnMap.firstEntry().getValue());
+//            double widthOfLeadingColumn = leafHeaderButton.getWidth();
+//            
+//            button.setCollapsed(false);
+//            calculateParams();
+//            rm.makeColumnLeading(button, widthOfLeadingColumn, false);
+//            rm.ignorePaintColumns(button, false);
+//            rm.shiftColumnsAfterCollapse(rowIndex);
+//            
+//        } else if (!button.isCollapsed() && button.isGroup()) {
+//            
+//            double widthByName = calculateWidthByColumnName(button.getButtonObject());
+//            button.setCollapsed(true);
+//            calculateParams();
+//            rm.makeColumnLeading(button, widthByName, true);
+//            rm.ignorePaintColumns(button, true);
+//            rm.shiftColumnsAfterCollapse(rowIndex);
+//        }
+//    }
+    
+    public int calculateRowIndex(RangeMatrixHeaderButton button) {
+        int rowIndex;
+        if (model.isRowGroup(button.getButtonObject())) {
+            Object leaf = fillLeafRowFullList(button.getButtonObject(), new ArrayList<>()).get(0);
+            rowIndex = findButtonInMap(leaf).getCellIndex();
+        } else {
+            rowIndex = button.getCellIndex();
+        }
+
+        return rowIndex;
+    }
+    
+    /**
+     * Возвращает список всех листовых элементов объекта, независимо от того, 
+     * свернуты некоторые из предков или нет.
+     * @param parentRow
+     * @param leafRowList
+     * @return
+     */
+    public ArrayList<Object> fillLeafRowFullList(Object parentRow, ArrayList<Object> leafRowList) {
+        int rowCount = model.getRowGroupCount(parentRow);
+
+        for (int i = 0; i < rowCount; i++) {
+            Object child = model.getRowGroup(parentRow, i);
+            boolean isGroup = model.isRowGroup(child);
+            
+            if (isGroup) {
+                fillLeafRowFullList(child, leafRowList);
+            } else {
+                leafRowList.add(child);
+            }
+        }
+        return leafRowList;
     }
 
     
@@ -400,23 +640,31 @@ public class RangeMatrixRowHeader extends JComponent {
                 @Override
                 public boolean execute(int i) {
                     System.out.println(buttonList.get(i));
-                    //RangeMatrixHeaderButton button = buttonList.get(i);
-                    //processingClickOnColumn(button);
+                    RangeMatrixHeaderButton button = buttonList.get(i);
+                    processingClickOnColumn(button);
                     return false;              // return true here to continue receiving results
                 }
             }, Float.MAX_VALUE);
-//            rTree = new RTree();
-//            rTree.init(null);
-//            calculateParams();
-//            rebuildBuffer();
-//            repaint();
-//            rm.calculateHeightOfComponent();
-//            rm.calculateWidthOfComponent();
-//            rm.rebuildBuffer();
-//            rm.repaint();
-//            rm.getHeaderCorner().calculateHeightOfComponent();
-//            rm.getHeaderCorner().rebuildBuffer();
-//            rm.getHeaderCorner().repaint();
+            rTree = new RTree();
+            rTree.init(null);
+            calculateParams();
+            rm.setupRowsWidthList();
+            calculateWidthOfComponent();
+            calculateHeightOfComponent();
+            rebuildBuffer();
+            revalidate();
+            repaint();
+            
+            rm.calculateHeightOfComponent();
+            rm.calculateWidthOfComponent();
+            rm.rebuildBuffer();
+            rm.revalidate();
+            rm.repaint();
+            
+            rm.getHeaderCorner().calculateHeightOfComponent();
+            rm.getHeaderCorner().rebuildBuffer();
+            rm.getHeaderCorner().revalidate();
+            rm.getHeaderCorner().repaint();
         }
 
         @Override

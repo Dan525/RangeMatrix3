@@ -74,8 +74,8 @@ public class RangeMatrix extends JComponent {
         
         this.model = model;
         columnHeader.setModel();
-        rowHeader.setModel();
         headerCorner.setModel();
+        rowHeader.setModel();
 
         buttonTable = HashBasedTable.create();
         setupRowsWidthList();
@@ -112,14 +112,14 @@ public class RangeMatrix extends JComponent {
     }
 
     public void calculateWidthOfComponents() {
-        columnHeader.calculateWidthOfComponent();
+        //columnHeader.calculateWidthOfComponent();
         rowHeader.calculateWidthOfComponent();
         headerCorner.calculateWidthOfComponent();
         calculateWidthOfComponent();
     }
 
     public void calculateHeightOfComponents() {
-        columnHeader.calculateHeightOfComponent();
+        //columnHeader.calculateHeightOfComponent();
         rowHeader.calculateHeightOfComponent();
         headerCorner.calculateHeightOfComponent();
         calculateHeightOfComponent();
@@ -220,21 +220,23 @@ public class RangeMatrix extends JComponent {
     public void calculateCells() {
 //        List<Double> cellXList = columnHeader.getCellXList();
 //        List<Double> cellWidthList = columnHeader.getCellWidthList();
-        ArrayList<Double> cellYList = rowHeader.getCellYList();
-        double minimalCellHeight = rowHeader.getMinimalCellHeight();
+        //ArrayList<Double> cellYList = rowHeader.getCellYList();
+        //double minimalCellHeight = rowHeader.getMinimalCellHeight();
         //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
-        List<Object> leafButtonList = columnHeader.getLeafButtonList();
+        List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
+        List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
 
-        for (int column = 0; column < leafButtonList.size(); column++) {
-            for (int row = 0; row < cellYList.size(); row++) {
+        for (int column = 0; column < leafColumnButtonList.size(); column++) {
+            for (int row = 0; row < leafRowButtonList.size(); row++) {
                 
                 RangeMatrixTableButton button = findButtonInTable(column, row);
-                RangeMatrixHeaderButton headerButton = columnHeader.findButtonInMap(leafButtonList.get(column));
+                RangeMatrixHeaderButton columnHeaderButton = columnHeader.findButtonInMap(leafColumnButtonList.get(column));
+                RangeMatrixHeaderButton rowHeaderButton = rowHeader.findButtonInMap(leafRowButtonList.get(row));
                 ///////////
-                button.setHeight(minimalCellHeight);
-                button.setWidth(headerButton.getWidth());
-                button.setX(headerButton.getX());
-                button.setY(cellYList.get(row));
+                button.setWidth(columnHeaderButton.getWidth());
+                button.setX(columnHeaderButton.getX());
+                button.setHeight(rowHeaderButton.getHeight());
+                button.setY(rowHeaderButton.getY());
                 ///////////
                 BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();

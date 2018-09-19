@@ -79,7 +79,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 //        cellXList.clear();
 //        cellWidthList.clear();
         leafButtonList.clear();
-        calculateColumnCoordinates(null, 0, 0, 0);
+        calculateColumnCoordinates(null, 0);
         calculateColumnIndices(null, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
         calculateWidthOfComponent();
@@ -189,7 +189,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             if (isGroup) {
                 columnCounter = calculateColumnIndices(child, columnCounter);
             } else {
-                button.setColumn(columnCounter);
+                button.setCellIndex(columnCounter);
                 //leafButtonMap.put(columnCounter, button);
                 leafButtonList.add(child);
                 columnCounter++;
@@ -198,7 +198,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         return columnCounter;
     }
     
-    public void calculateColumnCoordinates(Object parentColumn, double parentCellX, int rowCounter, int columnCounter) {
+    public void calculateColumnCoordinates(Object parentColumn, double parentCellX) {
 
         int columnCount = model.getColumnGroupCount(parentColumn);
         double cellX = parentCellX;
@@ -207,9 +207,10 @@ public class RangeMatrixColumnHeader extends JComponent {
             Object child = model.getColumnGroup(parentColumn, i);
 
             double cellWidth;
+            boolean isGroup;
+            
             RangeMatrixHeaderButton button = findButtonInMap(child);
 
-            boolean isGroup;
             if (button.isCollapsed()) {
                 isGroup = false;
 
@@ -225,7 +226,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             button.setX(cellX);
 
             if (isGroup) {
-                calculateColumnCoordinates(child, cellX, rowCounter, columnCounter);
+                calculateColumnCoordinates(child, cellX);
             }
             cellX += cellWidth;
         }
@@ -300,6 +301,15 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
+    //
+    
+    /**
+     * Возвращает список всех листовых элементов объекта, независимо от того, 
+     * свернуты некоторые из предков или нет.
+     * @param parentColumn
+     * @param leafColumnList
+     * @return
+     */
     public ArrayList<Object> fillLeafColumnFullList(Object parentColumn, ArrayList<Object> leafColumnList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
@@ -308,7 +318,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             boolean isGroup = model.isColumnGroup(child);
             
             if (isGroup) {
-                fillLeafColumnList(child, leafColumnList);
+                fillLeafColumnFullList(child, leafColumnList);
             } else {
                 leafColumnList.add(child);
             }
@@ -523,9 +533,9 @@ public class RangeMatrixColumnHeader extends JComponent {
         int columnIndex;
         if (model.isColumnGroup(button.getButtonObject())) {
             Object leaf = fillLeafColumnFullList(button.getButtonObject(), new ArrayList<>()).get(0);
-            columnIndex = findButtonInMap(leaf).getColumn();
+            columnIndex = findButtonInMap(leaf).getCellIndex();
         } else {
-            columnIndex = button.getColumn();
+            columnIndex = button.getCellIndex();
         }
 
         return columnIndex;
