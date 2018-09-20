@@ -40,13 +40,19 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getRowRendererComponent(Object row, String rowName) {
+    public JLabel getRowRendererComponent(Object row, String rowName, boolean isCollapsed, boolean isGroup) {
         delegate.setText(rowName);
         delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
         delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        delegate.setIcon(null);
+        if (isCollapsed && isGroup) {
+            delegate.setIcon(collapsedIcon);
+        } else if (!isCollapsed && isGroup) {
+            delegate.setIcon(expandedIcon);
+        } else {
+            delegate.setIcon(null);
+        }
         return delegate;
     }
 

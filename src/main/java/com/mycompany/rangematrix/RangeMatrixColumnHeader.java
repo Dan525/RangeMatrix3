@@ -326,7 +326,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
-        public Map<Integer,Object> fillLeafColumnMap(Object parentColumn, Map<Integer,Object> leafColumnMap) {
+    /**
+     * Возвращает таблицу "индекс колонки - объект" из объектов, принадлежащим
+     * кнопкам, которые являются видимыми. Используя реализацию TreeMap,
+     * получаем ключи в отсортированном виде. Это нужно для получения первой
+     * кнопки - элемента с наименьшим индексом.
+     * @param parentColumn
+     * @param leafColumnMap
+     * @return
+     */
+    public Map<Integer,Object> fillLeafColumnMap(Object parentColumn, Map<Integer,Object> leafColumnMap) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
@@ -529,6 +538,14 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
     
+    /**
+     * Возвращает индекс колонки. Индекс рассчитывается из условия, что все
+     * колонки развернуты (при этом не важно, развернуты они в данный момент
+     * или нет). Для колонок из всех рядов, кроме последнего, индекс
+     * берется по первому из предков, находящихся в последнем (нижнем) ряду.
+     * @param button
+     * @return
+     */
     public int calculateColumnIndex(RangeMatrixHeaderButton button) {
         int columnIndex;
         if (model.isColumnGroup(button.getButtonObject())) {
@@ -558,8 +575,7 @@ public class RangeMatrixColumnHeader extends JComponent {
                                 processingClickOnColumn(button);
                                 return false;
                             }
-                          },
-                          Float.MAX_VALUE);
+                          }, 0);
             
             rTree = new RTree();
             rTree.init(null);

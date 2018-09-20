@@ -56,7 +56,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
             rowName = model.getCornerColumnNames().get(columnIndex);
         }
         
-        JLabel label = renderer.getRowRendererComponent(null, rowName);
+        JLabel label = renderer.getRowRendererComponent(null, rowName, false, false);
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
     
@@ -120,7 +120,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
             Rectangle2D rect = new Rectangle2D.Double(cellX, cellY, cellWidth, cellHeight);
             //g2d.draw(rect);
             
-            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, columnName),
+            crp.paintComponent(g2d, renderer.getRowRendererComponent(null, columnName, false, false),
                                this, (int)cellX, (int)cellY, (int)cellWidth, (int)cellHeight);
 
             cellX += cellWidth;
