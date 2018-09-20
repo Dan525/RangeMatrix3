@@ -25,7 +25,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     @Override
     public JLabel getColumnRendererComponent(Object column, String columnName, boolean isCollapsed, boolean isGroup) {
         delegate.setText(columnName);
-        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
         delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -42,7 +42,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     @Override
     public JLabel getRowRendererComponent(Object row, String rowName, boolean isCollapsed, boolean isGroup) {
         delegate.setText(rowName);
-        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
         delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -57,13 +57,19 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getCellRendererComponent(int column, int row, String value, boolean isLeading) {
-        if (isLeading) {
-            delegate.setText("<...>");
-            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD));
+    public JLabel getCellRendererComponent(int column, int row, String value, boolean isLeadingByColumn, boolean isLeadingByRow) {
+        if (isLeadingByColumn && !isLeadingByRow) {
+            delegate.setText("•");
+            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
+        } else if (!isLeadingByColumn && isLeadingByRow) {
+            delegate.setText("•");
+            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
+        } else if (isLeadingByColumn && isLeadingByRow) {
+            delegate.setText("•");
+            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
         } else {
             delegate.setText(value);
-            delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN));
+            delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN, 12));
         }
         
         delegate.setHorizontalAlignment(JLabel.CENTER);

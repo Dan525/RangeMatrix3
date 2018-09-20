@@ -165,12 +165,12 @@ public class RangeMatrix extends JComponent {
         for (Integer columnIndex : leafColumnIndexList.subList(1, leafColumnIndexList.size())) {
             Map<Integer, RangeMatrixTableButton> column = buttonTable.column(columnIndex);
             for (RangeMatrixTableButton button : column.values()) {
-                button.setCollapsed(isCollapsed);
+                button.setCollapsedByColumn(isCollapsed);
             }
         }
     }
     
-    public void makeColumnLeading(RangeMatrixHeaderButton headerButton, double cellWidth, boolean isLeading) {
+    public void makeColumnLeading(RangeMatrixHeaderButton headerButton, double cellWidth, boolean isLeadingByColumn) {
         
         Object leadingHeaderButtonObject = model.getColumnGroup(headerButton.getButtonObject(), 0);
         RangeMatrixHeaderButton leadingHeaderButton = columnHeader.findButtonInMap(leadingHeaderButtonObject);
@@ -186,7 +186,7 @@ public class RangeMatrix extends JComponent {
             if (isCollapsedLeadingButton) {
                 button.setWidth(cellWidth);
             } else {
-                button.setLeading(isLeading);
+                button.setLeadingByColumn(isLeadingByColumn);
                 button.setWidth(cellWidth);
             }
             
@@ -194,7 +194,7 @@ public class RangeMatrix extends JComponent {
             BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(leafColumnIndexList.get(0), row, button.getButtonName(), button.isLeading());
+                JLabel label = renderer.getCellRendererComponent(leafColumnIndexList.get(0), row, button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -224,12 +224,12 @@ public class RangeMatrix extends JComponent {
         for (Integer rowIndex : leafRowIndexList.subList(1, leafRowIndexList.size())) {
             Map<Integer, RangeMatrixTableButton> row = buttonTable.row(rowIndex);
             for (RangeMatrixTableButton button : row.values()) {
-                button.setCollapsed(isCollapsed);
+                button.setCollapsedByRow(isCollapsed);
             }
         }
     }
     
-    public void makeRowLeading(RangeMatrixHeaderButton headerButton, boolean isLeading) {
+    public void makeRowLeading(RangeMatrixHeaderButton headerButton, boolean isLeadingByRow) {
         
         Object leadingHeaderButtonObject = model.getRowGroup(headerButton.getButtonObject(), 0);
         RangeMatrixHeaderButton leadingHeaderButton = rowHeader.findButtonInMap(leadingHeaderButtonObject);
@@ -245,7 +245,7 @@ public class RangeMatrix extends JComponent {
             if (isCollapsedLeadingButton) {
                 //button.setWidth(cellWidth);
             } else {
-                button.setLeading(isLeading);
+                button.setLeadingByRow(isLeadingByRow);
                 //button.setWidth(cellWidth);
             }
             
@@ -253,7 +253,7 @@ public class RangeMatrix extends JComponent {
             BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button.getButtonName(), button.isLeading());
+                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -300,7 +300,7 @@ public class RangeMatrix extends JComponent {
                 BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName(), button.isLeading());
+                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
