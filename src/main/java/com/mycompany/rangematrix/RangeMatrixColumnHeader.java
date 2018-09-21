@@ -76,9 +76,8 @@ public class RangeMatrixColumnHeader extends JComponent {
     
     public void calculateParams() {
         calculateMinimalCellHeight();
-//        cellXList.clear();
-//        cellWidthList.clear();
         leafButtonList.clear();
+        buttonList.clear();
         calculateColumnCoordinates(null, 0);
         calculateColumnIndices(null, 0);
         calculateRowCount(null, new ArrayList<>(), 1);

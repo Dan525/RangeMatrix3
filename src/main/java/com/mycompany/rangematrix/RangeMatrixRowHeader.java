@@ -6,7 +6,9 @@
 package com.mycompany.rangematrix;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Table;
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
 import com.infomatiq.jsi.SpatialIndex;
@@ -41,10 +43,12 @@ public class RangeMatrixRowHeader extends JComponent {
     private CellRendererPane crp;
     private SpatialIndex rTree;
     
-    private ArrayList<Double> cellYList;
+    //private ArrayList<Double> cellYList;
     private ArrayList<RangeMatrixHeaderButton> buttonList;
     private Map<Object,RangeMatrixHeaderButton> buttonMap;
     private Map<Object,RangeMatrixHeaderButton> typeButtonMap;
+    //private Map<Object,RangeMatrixHeaderButton> emptyButtonMap;
+    private Table<Object, Integer, RangeMatrixHeaderButton> emptyButtonTable;
     private List<Object> leafButtonList;
     private double minimalCellHeight;
     private int columnCount;
@@ -68,7 +72,8 @@ public class RangeMatrixRowHeader extends JComponent {
         buttonList = new ArrayList<>();
         buttonMap = new HashMap<>();
         typeButtonMap = new HashMap<>();
-        cellYList = new ArrayList<>();
+        emptyButtonTable = HashBasedTable.create();
+        //cellYList = new ArrayList<>();
         leafButtonList = new ArrayList<>();
         
         calculateParams();
@@ -78,6 +83,7 @@ public class RangeMatrixRowHeader extends JComponent {
     
     public void calculateParams() {
         leafButtonList.clear();
+        buttonList.clear();
         calculateMinimalCellHeight();
         calculateRowCoordinates(null, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
@@ -300,15 +306,9 @@ public class RangeMatrixRowHeader extends JComponent {
             
             if (isGroup) {
                 calculateRowCoordinates(child, cellY);
-            } else {
-                cellYList.add(cellY);
             }
             cellY += cellHeight;
         }
-    }
-
-    public ArrayList<Double> getCellYList() {
-        return cellYList;
     }
 
     public void calculateWidthOfComponent() {
@@ -450,12 +450,19 @@ public class RangeMatrixRowHeader extends JComponent {
                 
             } else if (!isGroup && columnCounter < columnCount) {
                 
-//                columnCounter++;
-//                cellX += cellWidth;
-//                calculateEmptyRows(cellX, cellY, columnCounter);
-//                columnCounter--;
-//                cellX -= cellWidth;
-                
+                if (hasType) {
+                    columnCounter+=2;
+                    cellX += (cellWidth + cellWidthType);
+                    calculateEmptyRows(child, cellX, cellY, columnCounter);
+                    columnCounter-=2;
+                    cellX -= (cellWidth + cellWidthType);
+                } else {
+                    columnCounter++;
+                    cellX += (cellWidth + cellWidthType);
+                    calculateEmptyRows(child, cellX, cellY, columnCounter);
+                    columnCounter--;
+                    cellX -= (cellWidth + cellWidthType);
+                }
             }  else {
                 //cellYList.add(cellY);
             }
@@ -463,37 +470,37 @@ public class RangeMatrixRowHeader extends JComponent {
         }
     }
     
-//    public void calculateEmptyRows(double parentCellX, double parentCellY, int columnCounter) {
-//
-//        if (columnCounter < columnCount) {
-//            
-//            RangeMatrixHeaderButton button = findButtonInMap(null);
-//            double cellX = parentCellX;
-//            double cellWidth = rowsWidthList.get(columnCounter);
-//            boolean isGroup = false;
-//            
-//            button.setX(cellX);
-//            button.setY(parentCellY);
-//            button.setGroup(isGroup);
-//            button.setWidth(cellWidth);
-//            button.setHeight(minimalCellHeight);
-//            
-//            buttonList.add(button);
-//            
-//            Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
-//            
-//            rTree.add(rect, buttonList.indexOf(button));
-//            
-//            cellX += cellWidth;
-//            columnCounter++;
-//
-//            calculateEmptyRows(cellX, parentCellY, columnCounter);
-//
-//            columnCounter--;
-//            cellX -= cellWidth;
-//        }
-//
-//    }
+    public void calculateEmptyRows(Object child,double parentCellX, double parentCellY, int columnCounter) {
+
+        if (columnCounter < columnCount) {
+            
+            RangeMatrixHeaderButton button = findEmptyButtonInMap(child, columnCounter);
+            double cellX = parentCellX;
+            double cellWidth = rowsWidthList.get(columnCounter);
+            boolean isGroup = false;
+            
+            button.setX(cellX);
+            button.setY(parentCellY);
+            button.setGroup(isGroup);
+            button.setWidth(cellWidth);
+            button.setHeight(minimalCellHeight);
+            
+            buttonList.add(button);
+            
+            //Rectangle rect = new Rectangle((float)cellX, (float)parentCellY, (float)(cellX + cellWidth), (float)(parentCellY + minimalCellHeight));
+            
+            //rTree.add(rect, buttonList.indexOf(button));
+            
+            cellX += cellWidth;
+            columnCounter++;
+
+            calculateEmptyRows(child, cellX, parentCellY, columnCounter);
+
+            columnCounter--;
+            cellX -= cellWidth;
+        }
+
+    }
     
     public RangeMatrixHeaderButton findButtonInMap(Object child) {
         
@@ -533,6 +540,20 @@ public class RangeMatrixRowHeader extends JComponent {
         return button;
     }
     
+    public RangeMatrixHeaderButton findEmptyButtonInMap(Object child, int columnCounter) {
+        
+        RangeMatrixHeaderButton button = emptyButtonTable.get(child, columnCounter);
+
+        if (button == null) {
+            
+            String rowName = "";
+
+            button = new RangeMatrixHeaderButton(child, rowName);
+            emptyButtonTable.put(child, columnCounter, button);
+        }
+        return button;
+    }
+    
     public void drawRows(Graphics2D g2d) {
         
         for (RangeMatrixHeaderButton button : buttonList) {
@@ -547,18 +568,6 @@ public class RangeMatrixRowHeader extends JComponent {
                                (int) button.getWidth(),
                                (int) button.getHeight());
         }
-//        for (RangeMatrixHeaderButton button : typeButtonMap.values()) {
-//            crp.paintComponent(g2d, 
-//                               renderer.getRowRendererComponent(button.getButtonObject(),
-//                                                                button.getButtonName(),
-//                                                                button.isCollapsed(), 
-//                                                                button.isGroup()),
-//                               this,
-//                               (int) button.getX(),
-//                               (int) button.getY(),
-//                               (int) button.getWidth(),
-//                               (int) button.getHeight());
-//        }
         
     }
 
@@ -580,14 +589,6 @@ public class RangeMatrixRowHeader extends JComponent {
         }
         Graphics2D g2d = (Graphics2D) g;
         g2d.drawImage(buffer, 0, 0, this);
-    }
-    
-    public void processingClickOnColumn(RangeMatrixHeaderButton button) {
-        if (button.isCollapsed()) {
-            button.setCollapsed(false);
-        } else {
-            button.setCollapsed(true);
-        }
     }
     
     public void processingClickOnRow(RangeMatrixHeaderButton button) {
@@ -694,10 +695,10 @@ public class RangeMatrixRowHeader extends JComponent {
     }
     
     /**
-     * Возвращает индексы всех еще не свернутых кнопок - предков кнопки,
-     * на которую было произведено нажатие. Нужно для присвоения всем ячейкам
-     * таблицы, начиная со столбца, находящегося под второй кнопкой из списка
-     * предков, аттрибута Collapsed. 
+     * Возвращает индексы всех не свернутых кнопок - предков кнопки,
+     * на которую было произведено нажатие. Нужно для присвоения аттрибута 
+     * Collapsed всем ячейкам таблицы, начиная со столбца, находящегося под 
+     * второй кнопкой из списка предков. 
      * @param parentRow
      * @param leafRowIndexList
      * @return

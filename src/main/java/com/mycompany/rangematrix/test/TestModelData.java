@@ -5,6 +5,8 @@
  */
 package com.mycompany.rangematrix.test;
 
+import java.util.Arrays;
+
 /**
  *
  * @author daniil_pozdeev
@@ -135,21 +137,9 @@ public class TestModelData {
     public M[] rowHeaderDataSource = new M[] {
         new M("PTOC1",
                 new M[] {
-//                    new M("ENA", new M[]{new M("BOOL")}),
-//                    new M("BLOCK", new M[]{new M("BOOL")}),
-//                    new M("ENA_INT", new M[]{new M("INT")}),
-//                    new M("STR_INT", new M[]{new M("INT")}),
-//                    new M("OP_INT", new M[]{new M("INT")}),
-//                    new M("STR", new M[]{new M("BOOL")}),
-//                    new M("OP", new M[]{new M("BOOL")})
                     new M("ENA", "BOOL"),
                     new M("BLOCK", "BOOL"),
-                    new M("ENA_INT", "INT",
-                            new M[]{
-                                new M("B124", "int"),
-                                new M("B324L", "integer"),
-                                new M("BOerL", "long"),
-                            }),
+                    new M("ENA_INT", "INT"),
                     new M("STR_INT", "INT"),
                     new M("OP_INT", "INT"),
                     new M("STR", "BOOL"),
@@ -187,7 +177,7 @@ public class TestModelData {
         M[] sourceModuleGroup = new M[count * SOURCE_MODULE_TYPES.length];
         for (int i = 0; i < count; i++) {
             for (int j = 0; j < SOURCE_MODULE_TYPES.length; j++) {
-                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j] = SOURCE_MODULE_TYPES[j];
+                sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j] = new M(SOURCE_MODULE_TYPES[j]);
                 sourceModuleGroup[i*SOURCE_MODULE_TYPES.length + j].name += " [Плата №" + (i*SOURCE_MODULE_TYPES.length + j) + "]";
             }
         }
@@ -198,7 +188,7 @@ public class TestModelData {
         M[] destinationModuleGroup = new M[count * DESTINATION_MODULE_TYPES.length];
         for (int i = 0; i < count; i++) {
             for (int j = 0; j < DESTINATION_MODULE_TYPES.length; j++) {
-                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j] = DESTINATION_MODULE_TYPES[j];
+                destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j] = new M(DESTINATION_MODULE_TYPES[j]);
                 destinationModuleGroup[i*DESTINATION_MODULE_TYPES.length + j].name += " [Плата №" + (i*DESTINATION_MODULE_TYPES.length + j) + "]";
             }
         }
@@ -229,6 +219,12 @@ public class TestModelData {
             this.name = name;
             this.type = type;
             this.groups = groups;
+        }
+        
+        public M(M m) {
+            this.name = m.name;
+            this.type = m.type;
+            this.groups = m.groups;
         }
     }
 }
