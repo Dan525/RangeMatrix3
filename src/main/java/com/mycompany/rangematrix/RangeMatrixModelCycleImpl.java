@@ -4,6 +4,7 @@ import com.mycompany.rangematrix.test.TestModelData;
 import com.mycompany.rangematrix.test.TestModelData.M;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -136,8 +137,14 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
 
     @Override
     public Object getValueAt(int column, int row) {
-        int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
-        return randomNum;
+        String[] randArray = {"1","","","","","",""};
+        //int randomNum = ThreadLocalRandom.current().nextInt(0, 2);
+        return getRandom(randArray);
+    }
+    
+    public String getRandom(String[] array) {
+        int rnd = new Random().nextInt(array.length);
+        return array[rnd];
     }
     
     //Listeners

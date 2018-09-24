@@ -8,8 +8,11 @@ package com.mycompany.rangematrix;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import com.infomatiq.jsi.Point;
+import com.infomatiq.jsi.Rectangle;
 import com.infomatiq.jsi.SpatialIndex;
 import com.infomatiq.jsi.rtree.RTree;
+import gnu.trove.TIntProcedure;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -177,12 +180,15 @@ public class RangeMatrix extends JComponent {
         boolean isCollapsedLeadingButton = leadingHeaderButton.isCollapsed();
         
         ArrayList<Integer> leafColumnIndexList = columnHeader.fillLeafColumnIndexList(headerButton.getButtonObject(), new ArrayList<>());
-        
+        ArrayList<Integer> fullLeafColumnIndexList = columnHeader.fillFullLeafColumnIndexList(headerButton.getButtonObject(), new ArrayList<>());
+
         Map<Integer, RangeMatrixTableButton> column = buttonTable.column(leafColumnIndexList.get(0));
+        
+        int notEmptyInRowCounter = 0;
         
         for (int row = 0; row < column.size(); row++) {
             RangeMatrixTableButton button = column.get(row);
-            
+
             if (isCollapsedLeadingButton) {
                 button.setWidth(cellWidth);
             } else {
@@ -190,17 +196,33 @@ public class RangeMatrix extends JComponent {
                 button.setWidth(cellWidth);
             }
             
+            if (isLeadingByColumn) {
+                
+                for (int columnIndex : fullLeafColumnIndexList) {
+                    if (!buttonTable.get(row, columnIndex).getButtonName().isEmpty()) {
+                        notEmptyInRowCounter++;
+                    }
+                }
+                
+                button.getNotEmptyInRowStack().push(notEmptyInRowCounter > 0);
+                notEmptyInRowCounter = 0;
+            } else {
+                button.getNotEmptyInRowStack().pop();
+            }
             
             BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = bufferedCell.createGraphics();
-                
-                JLabel label = renderer.getCellRendererComponent(leafColumnIndexList.get(0), row, button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
-                label.setBounds((int)button.getX(),
-                            (int)button.getY(),
-                            (int)button.getWidth(),
-                            (int)button.getHeight());
-                label.paint(g2d);
-                button.setImg(bufferedCell);
+            Graphics2D g2d = bufferedCell.createGraphics();
+
+            JLabel label = renderer.getCellRendererComponent(leafColumnIndexList.get(0), 
+                    row, 
+                    button);
+            
+            label.setBounds((int) button.getX(),
+                    (int) button.getY(),
+                    (int) button.getWidth(),
+                    (int) button.getHeight());
+            label.paint(g2d);
+            button.setImg(bufferedCell);
         }
     }
     
@@ -236,24 +258,38 @@ public class RangeMatrix extends JComponent {
         boolean isCollapsedLeadingButton = leadingHeaderButton.isCollapsed();
         
         ArrayList<Integer> leafRowIndexList = rowHeader.fillLeafRowIndexList(headerButton.getButtonObject(), new ArrayList<>());
-        
+        ArrayList<Integer> fullLeafRowIndexList = rowHeader.fillFullLeafRowIndexList(headerButton.getButtonObject(), new ArrayList<>());
+
         Map<Integer, RangeMatrixTableButton> row = buttonTable.row(leafRowIndexList.get(0));
+        
+        int notEmptyInColumnCounter = 0;
         
         for (int column = 0; column < row.size(); column++) {
             RangeMatrixTableButton button = row.get(column);
             
-            if (isCollapsedLeadingButton) {
-                //button.setWidth(cellWidth);
-            } else {
+            if (!isCollapsedLeadingButton) {
                 button.setLeadingByRow(isLeadingByRow);
-                //button.setWidth(cellWidth);
             }
             
+            if (isLeadingByRow) {
+                
+                for (int rowIndex : fullLeafRowIndexList) {
+                    if (!buttonTable.get(rowIndex, column).getButtonName().isEmpty()) {
+                        notEmptyInColumnCounter++;
+                    }
+                }
+                
+                button.getNotEmptyInColumnStack().push(notEmptyInColumnCounter > 0);
+                notEmptyInColumnCounter = 0;
+            } else {
+                button.getNotEmptyInColumnStack().pop();
+            }
             
             BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
+                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button);
+                
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -284,6 +320,7 @@ public class RangeMatrix extends JComponent {
         //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
         List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
         List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
+        int rTreeIndex = 1;
 
         for (int column = 0; column < leafColumnButtonList.size(); column++) {
             for (int row = 0; row < leafRowButtonList.size(); row++) {
@@ -297,10 +334,19 @@ public class RangeMatrix extends JComponent {
                 button.setHeight(rowHeaderButton.getHeight());
                 button.setY(rowHeaderButton.getY());
                 ///////////
+                Rectangle rect = new Rectangle((float)button.getX(), 
+                        (float)button.getY(), 
+                        (float)(button.getX()+button.getWidth()), 
+                        (float)(button.getY()+button.getHeight()));
+                
+                rTree.add(rect, rTreeIndex);
+                rTreeIndex++;
+
+                
                 BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2d = bufferedCell.createGraphics();
                 
-                JLabel label = renderer.getCellRendererComponent(column, row, button.getButtonName(), button.isLeadingByColumn(), button.isLeadingByRow());
+                JLabel label = renderer.getCellRendererComponent(column, row, button);
                 label.setBounds((int)button.getX(),
                             (int)button.getY(),
                             (int)button.getWidth(),
@@ -449,7 +495,25 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseEntered(MouseEvent e) {
+            Point rTreePoint = new Point(e.getX(), e.getY());
             
+            rTree.nearest(rTreePoint, 
+                          new TIntProcedure() {
+                            @Override
+                            public boolean execute(int i) {
+                                int columnCount = model.getColumnGroupCount(null);
+                                int rowCount = model.getRowGroupCount(null);
+                                int enteredRow = i / columnCount;
+                                int enteredColumn = i % rowCount;
+                                
+                                RangeMatrixTableButton tableButton = buttonTable.get(enteredRow, enteredColumn);
+                                tableButton.setEntered(true);
+                                return false;
+                            }
+                          }, 0);
+            
+            rTree = new RTree();
+            rTree.init(null);
         }
 
         @Override

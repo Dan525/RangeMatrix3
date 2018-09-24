@@ -13,10 +13,11 @@ import javax.swing.border.MatteBorder;
  */
 public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
 
+    private final ClassLoader cl = this.getClass().getClassLoader();
     private final JLabel delegate = new JLabel();
     private final Border cellBorder = new MatteBorder(0, 0, 1, 1, Color.GRAY);
-    private final ImageIcon collapsedIcon = new ImageIcon("src\\res\\icons\\collapsed_icon2.png");
-    private final ImageIcon expandedIcon = new ImageIcon("src\\res\\icons\\expanded_icon2.png");
+    private final ImageIcon collapsedIcon = new ImageIcon(cl.getResource("collapsed_icon2.png"));
+    private final ImageIcon expandedIcon = new ImageIcon(cl.getResource("expanded_icon2.png"));
     
     public DefaultRangeMatrixRenderer() {
         delegate.setOpaque(true);
@@ -57,23 +58,52 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getCellRendererComponent(int column, int row, String value, boolean isLeadingByColumn, boolean isLeadingByRow) {
+    public JLabel getCellRendererComponent(int column, int row, RangeMatrixTableButton button) {//String value, boolean isLeadingByColumn, boolean isLeadingByRow, int notEmptyInRowCounter) {
+        
+        boolean isLeadingByColumn = button.isLeadingByColumn();
+        boolean isLeadingByRow = button.isLeadingByRow();
+        boolean hasAnyValuesInColumn;
+        boolean hasAnyValuesInRow;
+        String value = button.getButtonName();
+        
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
+        
         if (isLeadingByColumn && !isLeadingByRow) {
-            delegate.setText("•");
-            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
+            hasAnyValuesInRow = button.getNotEmptyInRowStack().peek();
+            if (hasAnyValuesInRow) {
+                delegate.setText("●");
+            } else {
+                delegate.setText("○");
+            }
+            
         } else if (!isLeadingByColumn && isLeadingByRow) {
-            delegate.setText("•");
-            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
+            hasAnyValuesInColumn = button.getNotEmptyInColumnStack().peek();
+            if (hasAnyValuesInColumn) {
+                delegate.setText("●");
+            } else {
+                delegate.setText("○");
+            }
+            
         } else if (isLeadingByColumn && isLeadingByRow) {
-            delegate.setText("•");
-            delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 14));
+            hasAnyValuesInColumn = button.getNotEmptyInColumnStack().peek();
+            hasAnyValuesInRow = button.getNotEmptyInRowStack().peek();
+            if (hasAnyValuesInColumn || hasAnyValuesInRow) {
+                delegate.setText("●");
+            } else {
+                delegate.setText("○");
+            }
         } else {
             delegate.setText(value);
             delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN, 12));
         }
         
+        if (!button.isEntered()) {
+            delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
+        } else {
+            delegate.setBackground(Color.lightGray);
+        }
+        
         delegate.setHorizontalAlignment(JLabel.CENTER);
-        delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
         delegate.setBorder(cellBorder);
         delegate.setIcon(null);
         return delegate;

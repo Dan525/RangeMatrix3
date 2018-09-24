@@ -102,6 +102,14 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
         return ((File)row).getPath();
     }
     
+    @Override
+    public boolean hasType(Object row) {
+        if (((File)row).getPath() == null) {
+            return false;
+        }
+        return true;
+    }
+    
     //Corner
 
     @Override

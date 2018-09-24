@@ -379,6 +379,23 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnIndexList;
     }
     
+    public ArrayList<Integer> fillFullLeafColumnIndexList(Object parentColumn, ArrayList<Integer> leafColumnIndexList) {
+        int columnCount = model.getColumnGroupCount(parentColumn);
+
+        for (int i = 0; i < columnCount; i++) {
+            Object child = model.getColumnGroup(parentColumn, i);
+            boolean isGroup = model.isColumnGroup(child);
+            
+            if (isGroup) {
+                fillLeafColumnIndexList(child, leafColumnIndexList);
+            } else {
+                int columnIndex = calculateColumnIndex(findButtonInMap(child));
+                leafColumnIndexList.add(columnIndex);
+            }
+        }
+        return leafColumnIndexList;
+    }
+    
     public int calculateColumnCount(Object parentColumn, int columnCounter) {
         
         int columnCount = model.getColumnGroupCount(parentColumn);

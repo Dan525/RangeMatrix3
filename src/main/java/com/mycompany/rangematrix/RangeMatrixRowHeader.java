@@ -52,6 +52,7 @@ public class RangeMatrixRowHeader extends JComponent {
     private List<Object> leafButtonList;
     private double minimalCellHeight;
     private int columnCount;
+    private int rowCount;
     private ArrayList<Double> rowsWidthList;
     private double spaceAroundName = 4;
     private BufferedImage buffer;
@@ -87,6 +88,7 @@ public class RangeMatrixRowHeader extends JComponent {
         calculateMinimalCellHeight();
         calculateRowCoordinates(null, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
+        rowCount = calculateTableRowsCount(null, 0);
         calculateRowIndices(null, 0);
     }
 
@@ -621,8 +623,8 @@ public class RangeMatrixRowHeader extends JComponent {
     /**
      * Возвращает индекс ряда. Индекс рассчитывается из условия, что все
      * ряды развернуты (при этом не важно, развернуты они в данный момент
-     * или нет). Для колонок из всех рядов, кроме последнего, индекс
-     * берется по первому из предков, находящихся в последнем (нижнем) ряду.
+     * или нет). Для рядов из всех колонок, кроме последней, индекс
+     * берется по первому из предков, находящемуся в последней (крайней правой) колонке.
      * @param button
      * @return
      */
@@ -659,6 +661,22 @@ public class RangeMatrixRowHeader extends JComponent {
             }
         }
         return leafRowList;
+    }
+    
+    public int calculateTableRowsCount(Object parentRow, int rowCounter) {
+        int rowCount = model.getRowGroupCount(parentRow);
+
+        for (int i = 0; i < rowCount; i++) {
+            Object child = model.getRowGroup(parentRow, i);
+            boolean isGroup = model.isRowGroup(child);
+            
+            if (isGroup) {
+                rowCounter = calculateTableRowsCount(child, rowCounter);
+            } else {
+                rowCounter++;
+            }
+        }
+        return rowCounter;
     }
     
     /**
@@ -715,6 +733,23 @@ public class RangeMatrixRowHeader extends JComponent {
             } else {
                 isGroup = model.isRowGroup(child);
             }
+            if (isGroup) {
+                fillLeafRowIndexList(child, leafRowIndexList);
+            } else {
+                int rowIndex = calculateRowIndex(findButtonInMap(child));
+                leafRowIndexList.add(rowIndex);
+            }
+        }
+        return leafRowIndexList;
+    }
+    
+    public ArrayList<Integer> fillFullLeafRowIndexList(Object parentRow, ArrayList<Integer> leafRowIndexList) {
+        int rowCount = model.getRowGroupCount(parentRow);
+
+        for (int i = 0; i < rowCount; i++) {
+            Object child = model.getRowGroup(parentRow, i);
+            boolean isGroup = model.isRowGroup(child);
+            
             if (isGroup) {
                 fillLeafRowIndexList(child, leafRowIndexList);
             } else {

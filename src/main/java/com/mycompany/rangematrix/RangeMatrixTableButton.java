@@ -1,6 +1,7 @@
 package com.mycompany.rangematrix;
 
 import java.awt.image.BufferedImage;
+import java.util.Stack;
 
 /**
  *
@@ -21,9 +22,14 @@ public class RangeMatrixTableButton {
     private boolean collapsedByRow;
     private boolean leadingByColumn;
     private boolean leadingByRow;
+    private final Stack<Boolean> notEmptyInColumnStack;
+    private final Stack<Boolean> notEmptyInRowStack;
+    private boolean entered;
     
     public RangeMatrixTableButton(Object buttonObject) {
         this.buttonObject = buttonObject;
+        notEmptyInColumnStack = new Stack<>();
+        notEmptyInRowStack = new Stack<>();
     }
 
     public int getColumn() {
@@ -141,4 +147,23 @@ public class RangeMatrixTableButton {
     public Object getButtonObject() {
         return buttonObject;
     }
+    
+    //Check for significant values under collapsed column or row
+
+    public Stack<Boolean> getNotEmptyInColumnStack() {
+        return notEmptyInColumnStack;
+    }
+
+    public Stack<Boolean> getNotEmptyInRowStack() {
+        return notEmptyInRowStack;
+    }
+
+    public boolean isEntered() {
+        return entered;
+    }
+
+    public void setEntered(boolean entered) {
+        this.entered = entered;
+    }
+
 }
