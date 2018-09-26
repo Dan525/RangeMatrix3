@@ -591,6 +591,7 @@ public class RangeMatrixRowHeader extends JComponent {
             rebuildBuffer();
         }
         Graphics2D g2d = (Graphics2D) g;
+        
         g2d.drawImage(buffer, 0, 0, this);
     }
     
