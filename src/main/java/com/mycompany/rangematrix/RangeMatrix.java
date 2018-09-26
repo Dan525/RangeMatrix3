@@ -50,7 +50,7 @@ public class RangeMatrix extends JComponent {
     
     private int columnCount;
     private int rowCount;
-    private RangeMatrixTableButton currentButton;
+    private RangeMatrixTableButton previousButton;
     private int currentCell = 0;
     
     private double width;
@@ -474,6 +474,37 @@ public class RangeMatrix extends JComponent {
         rTree.init(null);
     }
     
+    public void iterateOnButtonCross(RangeMatrixTableButton button, boolean isEntered) {
+        
+        Map<Integer, RangeMatrixTableButton> column = buttonTable.column(button.getColumn());
+        for (RangeMatrixTableButton verticalButton : column.values()) {
+            verticalButton.setEntered(isEntered);
+            repaintCell(verticalButton);
+        }
+
+        Map<Integer, RangeMatrixTableButton> row = buttonTable.row(button.getRow());
+        for (RangeMatrixTableButton horizontalButton : row.values()) {
+            horizontalButton.setEntered(isEntered);
+            repaintCell(horizontalButton);
+        }
+    }
+    
+//    public void iterateOnButtonHorizontal(RangeMatrixTableButton button, boolean isEntered) {
+//        Map<Integer, RangeMatrixTableButton> row = buttonTable.row(button.getRow());
+//        for (RangeMatrixTableButton horizontalButton : row.values()) {
+//            horizontalButton.setEntered(isEntered);
+//            repaintCell(horizontalButton);
+//        }
+//    }
+//    
+//    public void iterateOnButtonVertical(RangeMatrixTableButton button, boolean isEntered) {
+//        Map<Integer, RangeMatrixTableButton> column = buttonTable.column(button.getColumn());
+//        for (RangeMatrixTableButton verticalButton : column.values()) {
+//            verticalButton.setEntered(isEntered);
+//            repaintCell(verticalButton);
+//        }
+//    }
+    
     private void repaintCell(RangeMatrixTableButton button) {
         BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = bufferedCell.createGraphics();
@@ -541,15 +572,13 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseExited(MouseEvent e) {
-            if (currentButton != null) {
-                currentButton.setEntered(false);
-                repaintCell(currentButton);
+            if (previousButton != null) {
+                iterateOnButtonCross(previousButton, false);
                 rebuildBuffer();
                 revalidate();
                 repaint();
             }
         }
-        
     }
     
     protected class RangeMatrixMouseMotionHandler implements MouseMotionListener {
@@ -573,20 +602,18 @@ public class RangeMatrix extends JComponent {
                         int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
                         int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
 
-                        System.out.println(i + ", " + enteredRow + ", " + enteredColumn);
+                        System.out.println(i + ": ряд " + enteredRow + ", колонка " + enteredColumn);
                         RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
-                        if (currentButton != null) {
-                            currentButton.setEntered(false);
-                            repaintCell(currentButton);
-                        }                        
-                        tableButton.setEntered(true);
-                        repaintCell(tableButton);
+                        if (previousButton != null) {
+                            iterateOnButtonCross(previousButton, false);
+                        }
+                        iterateOnButtonCross(tableButton, true);
                         
                         rebuildBuffer();
                         revalidate();
                         repaint();
                         
-                        currentButton = tableButton;
+                        previousButton = tableButton;
                         currentCell = i;
                     }
                     
@@ -594,6 +621,5 @@ public class RangeMatrix extends JComponent {
                 }
             }, 0);
         }
-        
     }
 }

@@ -791,6 +791,7 @@ public class RangeMatrixRowHeader extends JComponent {
             
             rm.calculateHeightOfComponent();
             rm.calculateWidthOfComponent();
+            rm.clearTableRTree();
             rm.rebuildBuffer();
             rm.revalidate();
             rm.repaint();

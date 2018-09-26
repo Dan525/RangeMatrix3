@@ -1,6 +1,7 @@
 package com.mycompany.rangematrix;
 
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 import java.util.Stack;
 
 /**
@@ -175,4 +176,21 @@ public class RangeMatrixTableButton {
         this.indexInTable = indexInTable;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RangeMatrixTableButton other = (RangeMatrixTableButton) obj;
+        if (!Objects.equals(this.buttonObject, other.buttonObject)) {
+            return false;
+        }
+        return true;
+    }
 }
