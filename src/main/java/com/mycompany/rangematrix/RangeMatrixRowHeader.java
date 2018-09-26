@@ -76,6 +76,7 @@ public class RangeMatrixRowHeader extends JComponent {
         emptyButtonTable = HashBasedTable.create();
         //cellYList = new ArrayList<>();
         leafButtonList = new ArrayList<>();
+        rowCount = calculateTableRowsCount(null, 0);
         
         calculateParams();
         
@@ -88,7 +89,7 @@ public class RangeMatrixRowHeader extends JComponent {
         calculateMinimalCellHeight();
         calculateRowCoordinates(null, 0);
         calculateColumnCount(null, new ArrayList<>(), 1);
-        rowCount = calculateTableRowsCount(null, 0);
+        
         calculateRowIndices(null, 0);
     }
 
@@ -664,9 +665,9 @@ public class RangeMatrixRowHeader extends JComponent {
     }
     
     public int calculateTableRowsCount(Object parentRow, int rowCounter) {
-        int rowCount = model.getRowGroupCount(parentRow);
+        int groupRowCount = model.getRowGroupCount(parentRow);
 
-        for (int i = 0; i < rowCount; i++) {
+        for (int i = 0; i < groupRowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
             boolean isGroup = model.isRowGroup(child);
             
@@ -677,6 +678,10 @@ public class RangeMatrixRowHeader extends JComponent {
             }
         }
         return rowCounter;
+    }
+
+    public int getRowCount() {
+        return rowCount;
     }
     
     /**

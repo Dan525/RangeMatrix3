@@ -25,6 +25,7 @@ public class RangeMatrixTableButton {
     private final Stack<Boolean> notEmptyInColumnStack;
     private final Stack<Boolean> notEmptyInRowStack;
     private boolean entered;
+    private int indexInTable;
     
     public RangeMatrixTableButton(Object buttonObject) {
         this.buttonObject = buttonObject;
@@ -164,6 +165,14 @@ public class RangeMatrixTableButton {
 
     public void setEntered(boolean entered) {
         this.entered = entered;
+    }
+
+    public int getIndexInTable() {
+        return indexInTable;
+    }
+
+    public void setIndexInTable(int indexInTable) {
+        this.indexInTable = indexInTable;
     }
 
 }

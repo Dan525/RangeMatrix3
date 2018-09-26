@@ -20,6 +20,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,11 @@ public class RangeMatrix extends JComponent {
     private CellRendererPane crp;
     private SpatialIndex rTree;
     private Table<Integer, Integer, RangeMatrixTableButton> buttonTable;
+    
+    private int columnCount;
+    private int rowCount;
+    private RangeMatrixTableButton currentButton;
+    private int currentCell = 0;
     
     private double width;
     private double height;
@@ -85,9 +91,11 @@ public class RangeMatrix extends JComponent {
         calculateWidthOfComponents();
         calculateHeightOfComponents();
         calculateCells();
+        columnCount = columnHeader.calculateColumnCount(null, 0);
+        rowCount = rowHeader.calculateTableRowsCount(null, 0);
         
+        this.addMouseMotionListener(new RangeMatrixMouseMotionHandler());
         this.addMouseListener(new RangeMatrixMouseHandler());
-
     }
 
     public IRangeMatrixRenderer getRenderer() {
@@ -284,18 +292,19 @@ public class RangeMatrix extends JComponent {
             } else {
                 button.getNotEmptyInColumnStack().pop();
             }
+            repaintCell(button);
             
-            BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = bufferedCell.createGraphics();
-                
-                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button);
-                
-                label.setBounds((int)button.getX(),
-                            (int)button.getY(),
-                            (int)button.getWidth(),
-                            (int)button.getHeight());
-                label.paint(g2d);
-                button.setImg(bufferedCell);
+//            BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//                Graphics2D g2d = bufferedCell.createGraphics();
+//                
+//                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button);
+//                
+//                label.setBounds((int)button.getX(),
+//                            (int)button.getY(),
+//                            (int)button.getWidth(),
+//                            (int)button.getHeight());
+//                label.paint(g2d);
+//                button.setImg(bufferedCell);
         }
     }
     
@@ -320,7 +329,7 @@ public class RangeMatrix extends JComponent {
         //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
         List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
         List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
-        int rTreeIndex = 1;
+        int indexInTable = 1;
 
         for (int column = 0; column < leafColumnButtonList.size(); column++) {
             for (int row = 0; row < leafRowButtonList.size(); row++) {
@@ -333,26 +342,28 @@ public class RangeMatrix extends JComponent {
                 button.setX(columnHeaderButton.getX());
                 button.setHeight(rowHeaderButton.getHeight());
                 button.setY(rowHeaderButton.getY());
+                button.setIndexInTable(indexInTable);
                 ///////////
-                Rectangle rect = new Rectangle((float)button.getX(), 
-                        (float)button.getY(), 
-                        (float)(button.getX()+button.getWidth()), 
-                        (float)(button.getY()+button.getHeight()));
-                
-                rTree.add(rect, rTreeIndex);
-                rTreeIndex++;
+//                Rectangle rect = new Rectangle((float)button.getX(), 
+//                        (float)button.getY(), 
+//                        (float)(button.getX()+button.getWidth()), 
+//                        (float)(button.getY()+button.getHeight()));
+//                
+//                rTree.add(rect, rTreeIndex);
+//                rTreeIndex++;
+                indexInTable++;
 
-                
-                BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = bufferedCell.createGraphics();
-                
-                JLabel label = renderer.getCellRendererComponent(column, row, button);
-                label.setBounds((int)button.getX(),
-                            (int)button.getY(),
-                            (int)button.getWidth(),
-                            (int)button.getHeight());
-                label.paint(g2d);
-                button.setImg(bufferedCell);
+                repaintCell(button);
+//                BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//                Graphics2D g2d = bufferedCell.createGraphics();
+//                
+//                JLabel label = renderer.getCellRendererComponent(column, row, button);
+//                label.setBounds((int)button.getX(),
+//                            (int)button.getY(),
+//                            (int)button.getWidth(),
+//                            (int)button.getHeight());
+//                label.paint(g2d);
+//                button.setImg(bufferedCell);
 //                File outputfile = new File("image" + column + row + ".png");
 //                try {
 //                    ImageIO.write(bufferedCell, "png", outputfile);
@@ -363,6 +374,14 @@ public class RangeMatrix extends JComponent {
         }
     }
     
+    public void addButtonToRTree(RangeMatrixTableButton button) {
+        Rectangle rect = new Rectangle((float) button.getX(),
+                (float) button.getY(),
+                (float) (button.getX() + button.getWidth()),
+                (float) (button.getY() + button.getHeight()));
+
+        rTree.add(rect, button.getIndexInTable());
+    }    
 
     public void drawValues(Graphics2D g2d) {
 //        List<Double> cellXList = columnHeader.getCellXList();
@@ -372,6 +391,7 @@ public class RangeMatrix extends JComponent {
         //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
         List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
         List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
+        int rTreeIndex = 1;
 
         for (int column = 0; column < leafColumnButtonList.size(); column++) {
             for (int row = 0; row < leafRowButtonList.size(); row++) {
@@ -379,6 +399,8 @@ public class RangeMatrix extends JComponent {
 
                 if (!button.isCollapsed()) {
                     g2d.drawImage(button.getImg(), (int)button.getX(), (int)button.getY(), this);
+                    addButtonToRTree(button);
+                    rTreeIndex++;
                 }
                 
             }
@@ -446,6 +468,25 @@ public class RangeMatrix extends JComponent {
         //drawHorizontalLines(g2d);
         drawValues(g2d);
     }
+    
+    public void clearTableRTree() {
+        rTree = new RTree();
+        rTree.init(null);
+    }
+    
+    private void repaintCell(RangeMatrixTableButton button) {
+        BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = bufferedCell.createGraphics();
+
+        JLabel label = renderer.getCellRendererComponent(button.getColumn(), button.getRow(), button);
+
+        label.setBounds((int) button.getX(),
+                (int) button.getY(),
+                (int) button.getWidth(),
+                (int) button.getHeight());
+        label.paint(g2d);
+        button.setImg(bufferedCell);
+    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -495,30 +536,63 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            Point rTreePoint = new Point(e.getX(), e.getY());
             
-            rTree.nearest(rTreePoint, 
-                          new TIntProcedure() {
-                            @Override
-                            public boolean execute(int i) {
-                                int columnCount = model.getColumnGroupCount(null);
-                                int rowCount = model.getRowGroupCount(null);
-                                int enteredRow = i / columnCount;
-                                int enteredColumn = i % rowCount;
-                                
-                                RangeMatrixTableButton tableButton = buttonTable.get(enteredRow, enteredColumn);
-                                tableButton.setEntered(true);
-                                return false;
-                            }
-                          }, 0);
-            
-            rTree = new RTree();
-            rTree.init(null);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
+            if (currentButton != null) {
+                currentButton.setEntered(false);
+                repaintCell(currentButton);
+                rebuildBuffer();
+                revalidate();
+                repaint();
+            }
+        }
+        
+    }
+    
+    protected class RangeMatrixMouseMotionHandler implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
             
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            Point rTreePoint = new Point(e.getX(), e.getY());
+            rTree.nearest(rTreePoint,
+                    new TIntProcedure() {
+                @Override
+                public boolean execute(int i) {
+                    
+                    if (currentCell != i) {
+                        //int columnCount = columnHeader.getColumnCount();
+                        //int rowCount = rowHeader.getRowCount();
+                        int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
+                        int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+
+                        System.out.println(i + ", " + enteredRow + ", " + enteredColumn);
+                        RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
+                        if (currentButton != null) {
+                            currentButton.setEntered(false);
+                            repaintCell(currentButton);
+                        }                        
+                        tableButton.setEntered(true);
+                        repaintCell(tableButton);
+                        
+                        rebuildBuffer();
+                        revalidate();
+                        repaint();
+                        
+                        currentButton = tableButton;
+                        currentCell = i;
+                    }
+                    
+                    return false;
+                }
+            }, 0);
         }
         
     }

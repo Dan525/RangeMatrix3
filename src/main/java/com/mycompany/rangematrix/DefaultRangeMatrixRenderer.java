@@ -100,7 +100,7 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
         if (!button.isEntered()) {
             delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
         } else {
-            delegate.setBackground(Color.lightGray);
+            delegate.setBackground(Color.YELLOW);
         }
         
         delegate.setHorizontalAlignment(JLabel.CENTER);

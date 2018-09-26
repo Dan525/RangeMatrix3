@@ -42,6 +42,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 //    private List<Double> cellXList;
 //    private List<Double> cellWidthList;
     private int rowCount;
+    //private int columnCount;
     private BufferedImage buffer;
     private double width;
     private double height;
@@ -64,6 +65,7 @@ public class RangeMatrixColumnHeader extends JComponent {
 //        cellWidthList = new ArrayList<>();
         //leafButtonMap = new HashMap<>();
         leafButtonList = new ArrayList<>();
+        //columnCount = calculateColumnCount(null, 0);
 
         calculateParams();
 
@@ -81,6 +83,7 @@ public class RangeMatrixColumnHeader extends JComponent {
         calculateColumnCoordinates(null, 0);
         calculateColumnIndices(null, 0);
         calculateRowCount(null, new ArrayList<>(), 1);
+        
         calculateWidthOfComponent();
         calculateHeightOfComponent();        
     }
@@ -398,12 +401,12 @@ public class RangeMatrixColumnHeader extends JComponent {
     
     public int calculateColumnCount(Object parentColumn, int columnCounter) {
         
-        int columnCount = model.getColumnGroupCount(parentColumn);
+        int groupColumnCount = model.getColumnGroupCount(parentColumn);
 
-        for (int i = 0; i < columnCount; i++) {
+        for (int i = 0; i < groupColumnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
             boolean isGroup = model.isColumnGroup(child);
-            RangeMatrixHeaderButton button = findButtonInMap(child);
+            //RangeMatrixHeaderButton button = findButtonInMap(child);
 //            if (button.isCollapsed()) {
 //                isGroup = false;
 //            } else {
@@ -417,6 +420,10 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
         return columnCounter;
     }
+
+//    public int getColumnCount() {
+//        return columnCount;
+//    }
     
     public RangeMatrixHeaderButton findButtonInMap(Object child) {
         
@@ -602,6 +609,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             rm.calculateHeightOfComponent();
             rm.calculateWidthOfComponent();
             //rm.calculateCells();
+            rm.clearTableRTree();
             rm.rebuildBuffer();
             rm.revalidate();
             rm.repaint();
