@@ -465,7 +465,6 @@ public class RangeMatrix extends JComponent {
     public Dimension getPreferredSize() {
         Dimension d = new Dimension();
         d.setSize(width, height);
-        System.out.println(d);
         return d;
     }
 
