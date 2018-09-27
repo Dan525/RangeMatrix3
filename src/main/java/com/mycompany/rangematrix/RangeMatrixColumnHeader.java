@@ -290,6 +290,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             Object child = model.getColumnGroup(parentColumn, i);
             boolean isGroup;
             RangeMatrixHeaderButton button = findButtonInMap(child);
+            
             if (button.isCollapsed()) {
                 isGroup = false;
             } else {
@@ -391,7 +392,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             boolean isGroup = model.isColumnGroup(child);
             
             if (isGroup) {
-                fillLeafColumnIndexList(child, leafColumnIndexList);
+                fillFullLeafColumnIndexList(child, leafColumnIndexList);
             } else {
                 int columnIndex = calculateColumnIndex(findButtonInMap(child));
                 leafColumnIndexList.add(columnIndex);

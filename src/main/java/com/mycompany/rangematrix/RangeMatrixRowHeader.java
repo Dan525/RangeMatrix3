@@ -193,7 +193,7 @@ public class RangeMatrixRowHeader extends JComponent {
     }
 
     public double calculateHeightOfRow(Object row) {
-        ArrayList<Object> leafRowList = fillLeafRows(row, new ArrayList<>());
+        ArrayList<Object> leafRowList = fillLeafRowList(row, new ArrayList<>());
 
         if (leafRowList.isEmpty()) {
             return minimalCellHeight;
@@ -342,14 +342,12 @@ public class RangeMatrixRowHeader extends JComponent {
         return d;
     }
 
-    public ArrayList<Object> fillLeafRows(Object parentRow, ArrayList<Object> leafRowList) {
+    public ArrayList<Object> fillLeafRowList(Object parentRow, ArrayList<Object> leafRowList) {
         int rowCount = model.getRowGroupCount(parentRow);
 
         for (int i = 0; i < rowCount; i++) {
             Object child = model.getRowGroup(parentRow, i);
-            
             boolean isGroup;
-            
             RangeMatrixHeaderButton button = findButtonInMap(child);
             
             if (button.isCollapsed()) {
@@ -359,7 +357,7 @@ public class RangeMatrixRowHeader extends JComponent {
             }
             
             if (isGroup) {
-                fillLeafRows(child, leafRowList);
+                fillLeafRowList(child, leafRowList);
             } else {
                 leafRowList.add(child);
             }
@@ -761,7 +759,7 @@ public class RangeMatrixRowHeader extends JComponent {
             boolean isGroup = model.isRowGroup(child);
             
             if (isGroup) {
-                fillLeafRowIndexList(child, leafRowIndexList);
+                fillFullLeafRowIndexList(child, leafRowIndexList);
             } else {
                 int rowIndex = calculateRowIndex(findButtonInMap(child));
                 leafRowIndexList.add(rowIndex);

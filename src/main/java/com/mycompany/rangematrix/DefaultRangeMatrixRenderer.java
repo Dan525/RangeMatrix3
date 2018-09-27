@@ -101,10 +101,11 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
             if (row % 2 == 0) {
                 delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
             } else {
-                delegate.setBackground(new Color(240,240,240));
+                delegate.setBackground(new Color(245,245,245));
             }
             
         } else {
+            //подсветка ячеек
             delegate.setBackground(new Color(214, 230, 245));//javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")
         }
         
