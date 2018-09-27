@@ -305,8 +305,6 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnList;
     }
     
-    //
-    
     /**
      * Возвращает список всех листовых элементов объекта, независимо от того, 
      * свернуты некоторые из предков или нет.

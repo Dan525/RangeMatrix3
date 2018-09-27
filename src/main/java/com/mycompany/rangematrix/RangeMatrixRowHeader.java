@@ -610,8 +610,8 @@ public class RangeMatrixRowHeader extends JComponent {
             button.setCollapsed(false);
             calculateParams();
             rm.makeRowLeading(button, false);
-            rm.ignorePaintRows(button, false);
-            rm.shiftRowsAfterCollapse(rowIndex);
+            int collapsedRowCount = rm.ignorePaintRows(button, false);
+            rm.shiftRowsAfterCollapse(rowIndex, collapsedRowCount, false);
             
         } else if (!button.isCollapsed() && button.isGroup()) {
             
@@ -619,8 +619,8 @@ public class RangeMatrixRowHeader extends JComponent {
             button.setCollapsed(true);
             calculateParams();
             rm.makeRowLeading(button, true);
-            rm.ignorePaintRows(button, true);
-            rm.shiftRowsAfterCollapse(rowIndex);
+            int collapsedRowCount = rm.ignorePaintRows(button, true);
+            rm.shiftRowsAfterCollapse(rowIndex, collapsedRowCount, false);
         }
     }
     

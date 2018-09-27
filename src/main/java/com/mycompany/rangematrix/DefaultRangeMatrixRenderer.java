@@ -93,12 +93,13 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
                 delegate.setText("○");
             }
         } else {
+            
             delegate.setText(value);
             delegate.setFont(delegate.getFont().deriveFont(Font.PLAIN, 12));
         }
         
         if (!button.isEntered()) {
-            if (row % 2 == 0) {
+            if (button.getCurrentRow() % 2 == 0) {
                 delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("Table.background"));
             } else {
                 delegate.setBackground(new Color(245,245,245));

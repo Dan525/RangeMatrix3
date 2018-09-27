@@ -162,6 +162,7 @@ public class RangeMatrix extends JComponent {
             //////////
             button.setColumn(column);
             button.setRow(row);
+            button.setCurrentRow(row);
             button.setButtonName(value.toString());
             //////////
             buttonTable.put(row, column, button);
@@ -249,16 +250,17 @@ public class RangeMatrix extends JComponent {
         }
     }
     
-    public void ignorePaintRows(RangeMatrixHeaderButton headerButton, boolean isCollapsed) {
-        
+    public int ignorePaintRows(RangeMatrixHeaderButton headerButton, boolean isCollapsed) {
         ArrayList<Integer> leafRowIndexList = rowHeader.fillLeafRowIndexList(headerButton.getButtonObject(), new ArrayList<>());
-
+        int collapsedRowCount = leafRowIndexList.size() - 1;
+        
         for (Integer rowIndex : leafRowIndexList.subList(1, leafRowIndexList.size())) {
             Map<Integer, RangeMatrixTableButton> row = buttonTable.row(rowIndex);
             for (RangeMatrixTableButton button : row.values()) {
                 button.setCollapsedByRow(isCollapsed);
             }
         }
+        return collapsedRowCount;
     }
     
     public void makeRowLeading(RangeMatrixHeaderButton headerButton, boolean isLeadingByRow) {
@@ -310,7 +312,7 @@ public class RangeMatrix extends JComponent {
         }
     }
     
-    public void shiftRowsAfterCollapse(int rowIndex) {
+    public void shiftRowsAfterCollapse(int rowIndex, int collapsedRowCount, boolean isCollapsed) {
         //List<Object> leafButtonList = columnHeader.getLeafButtonList();
         Map<Integer, Object> leafRowMap = rowHeader.fillLeafRowMap(null, new HashMap<>());
         for (Cell<Integer, Integer, RangeMatrixTableButton> cell : buttonTable.cellSet()) {
@@ -319,6 +321,12 @@ public class RangeMatrix extends JComponent {
             if (rowIndexToShift > rowIndex) {
                 RangeMatrixHeaderButton headerButton = rowHeader.findButtonInMap(leafRowMap.get(rowIndexToShift));
                 button.setY(headerButton.getY());
+                
+                int row = button.getCurrentRow();
+                button.setCurrentRow(isCollapsed ? row + collapsedRowCount : row - collapsedRowCount);
+                if (collapsedRowCount % 2 != 0) {
+                    repaintCell(button);
+                }
             }
         }
     }
@@ -457,6 +465,7 @@ public class RangeMatrix extends JComponent {
     public Dimension getPreferredSize() {
         Dimension d = new Dimension();
         d.setSize(width, height);
+        System.out.println(d);
         return d;
     }
 
@@ -491,25 +500,25 @@ public class RangeMatrix extends JComponent {
         }
     }
     
-    public void iterateOnButtonHorizontal(RangeMatrixTableButton button, boolean isEntered) {
-        Map<Integer, RangeMatrixTableButton> row = buttonTable.row(button.getRow());
-        for (RangeMatrixTableButton horizontalButton : row.values()) {
-            if (!horizontalButton.equals(button)) {
-                horizontalButton.setEntered(isEntered);
-                repaintCell(horizontalButton);
-            }
-        }
-    }
-    
-    public void iterateOnButtonVertical(RangeMatrixTableButton button, boolean isEntered) {
-        Map<Integer, RangeMatrixTableButton> column = buttonTable.column(button.getColumn());
-        for (RangeMatrixTableButton verticalButton : column.values()) {
-            if (!verticalButton.equals(button)) {
-                verticalButton.setEntered(isEntered);
-                repaintCell(verticalButton);
-            }
-        }
-    }
+//    public void iterateOnButtonHorizontal(RangeMatrixTableButton button, boolean isEntered) {
+//        Map<Integer, RangeMatrixTableButton> row = buttonTable.row(button.getRow());
+//        for (RangeMatrixTableButton horizontalButton : row.values()) {
+//            if (!horizontalButton.equals(button)) {
+//                horizontalButton.setEntered(isEntered);
+//                repaintCell(horizontalButton);
+//            }
+//        }
+//    }
+//    
+//    public void iterateOnButtonVertical(RangeMatrixTableButton button, boolean isEntered) {
+//        Map<Integer, RangeMatrixTableButton> column = buttonTable.column(button.getColumn());
+//        for (RangeMatrixTableButton verticalButton : column.values()) {
+//            if (!verticalButton.equals(button)) {
+//                verticalButton.setEntered(isEntered);
+//                repaintCell(verticalButton);
+//            }
+//        }
+//    }
     
     private void repaintCell(RangeMatrixTableButton button) {
         BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -597,46 +606,63 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            Point rTreePoint = new Point(e.getX(), e.getY());
-            rTree.nearest(rTreePoint,
-                    new TIntProcedure() {
-                @Override
-                public boolean execute(int i) {
-                    
-                    if (currentCell != i) {
-                        //int columnCount = columnHeader.getColumnCount();
-                        //int rowCount = rowHeader.getRowCount();
-                        int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
-                        int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+            if (e.getX() <= getPreferredSize().getWidth() &&
+                e.getY() <= getPreferredSize().getHeight()) {
+                
+                Point rTreePoint = new Point(e.getX(), e.getY());
+                rTree.nearest(rTreePoint,
+                        new TIntProcedure() {
+                    @Override
+                    public boolean execute(int i) {
 
-                        System.out.println(i + ": ряд " + enteredRow + ", колонка " + enteredColumn);
-                        RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
-//                        if (previousButton != null) {
-//                            iterateOnButtonCross(previousButton, false);
-//                        }
-//                        iterateOnButtonCross(tableButton, true);
-                        if (previousButton == null) {
-                            iterateOnButtonCross(tableButton, true);
-                        } else {
-                            if (previousButton.getColumn() != tableButton.getColumn()) {
-                                iterateOnButtonVertical(previousButton, false);
-                                iterateOnButtonVertical(tableButton, true);
-                            } else {
-                                iterateOnButtonHorizontal(previousButton, false);
-                                iterateOnButtonHorizontal(tableButton, true);
+                        if (currentCell != i) {
+                            //int columnCount = columnHeader.getColumnCount();
+                            //int rowCount = rowHeader.getRowCount();
+                            int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
+                            int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+
+                            System.out.println(i + ": ряд " + enteredRow + ", колонка " + enteredColumn);
+                            RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
+                            if (previousButton != null) {
+                                iterateOnButtonCross(previousButton, false);
                             }
+                            iterateOnButtonCross(tableButton, true);
+//                        if (previousButton == null) {
+//                            iterateOnButtonCross(tableButton, true);
+//                        } else {
+//                            if (previousButton.getColumn() != tableButton.getColumn() && 
+//                                previousButton.getRow() == tableButton.getRow()) {
+//                                iterateOnButtonVertical(previousButton, false);
+//                                iterateOnButtonVertical(tableButton, true);
+//                            } else if (previousButton.getColumn() == tableButton.getColumn() && 
+//                                previousButton.getRow() != tableButton.getRow()) {
+//                                iterateOnButtonHorizontal(previousButton, false);
+//                                iterateOnButtonHorizontal(tableButton, true);
+//                            } else {
+//                                iterateOnButtonCross(previousButton, false);
+//                                iterateOnButtonCross(tableButton, true);
+//                            }
+//                        }
+                            rebuildBuffer();
+                            revalidate();
+                            repaint();
+
+                            previousButton = tableButton;
+                            currentCell = i;
                         }
-                        rebuildBuffer();
-                        revalidate();
-                        repaint();
-                        
-                        previousButton = tableButton;
-                        currentCell = i;
+
+                        return false;
                     }
-                    
-                    return false;
-                }
-            }, 0);
+                }, 0);
+                
+            } else {
+                iterateOnButtonCross(previousButton, false);
+                currentCell = 0;
+                rebuildBuffer();
+                revalidate();
+                repaint();
+            }
+            
         }
     }
 }

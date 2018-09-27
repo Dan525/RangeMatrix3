@@ -12,6 +12,7 @@ public class RangeMatrixTableButton {
     
     private int column;
     private int row;
+    private int currentRow;
     private double x;
     private double y;
     private double width;
@@ -174,5 +175,13 @@ public class RangeMatrixTableButton {
 
     public void setIndexInTable(int indexInTable) {
         this.indexInTable = indexInTable;
+    }
+
+    public int getCurrentRow() {
+        return currentRow;
+    }
+
+    public void setCurrentRow(int currentRow) {
+        this.currentRow = currentRow;
     }
 }
