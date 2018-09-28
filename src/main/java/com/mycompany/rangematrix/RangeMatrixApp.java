@@ -6,7 +6,6 @@
 package com.mycompany.rangematrix;
 
 import com.mycompany.rangematrix.test.TestModelData;
-import com.mycompany.rangematrix.test.TestModelData;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import javax.swing.JFrame;
@@ -20,9 +19,10 @@ public class RangeMatrixApp extends JFrame {
     
     public RangeMatrixApp() {
         super("Матрица ранжирования");
+        ToolTip toolTip = new ToolTip(this);
         TestModelData data = new TestModelData();
         RangeMatrixModel model = new RangeMatrixModelCycleImpl(data);
-        RangeMatrix rangeMatrix = new RangeMatrix(model);
+        RangeMatrix rangeMatrix = new RangeMatrix(model, toolTip);
         JScrollPane rmScrollPane = new JScrollPane(rangeMatrix);
         
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

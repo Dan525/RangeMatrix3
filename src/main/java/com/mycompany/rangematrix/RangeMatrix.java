@@ -31,7 +31,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.CellRendererPane;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.JWindow;
+import javax.swing.UIManager;
 
 /**
  *
@@ -47,6 +51,10 @@ public class RangeMatrix extends JComponent {
     private CellRendererPane crp;
     private SpatialIndex rTree;
     private Table<Integer, Integer, RangeMatrixTableButton> buttonTable;
+    //JWindow toolTip;
+    //JTable toolTipTable;
+    //JLabel toolTipLabel;
+    ToolTip toolTip;
     
     private int columnCount;
     private int rowCount;
@@ -57,7 +65,7 @@ public class RangeMatrix extends JComponent {
     private double height;
     private BufferedImage buffer;
 
-    public RangeMatrix(RangeMatrixModel model) {
+    public RangeMatrix(RangeMatrixModel model, ToolTip toolTip) {
         columnHeader = new RangeMatrixColumnHeader(this);
         rowHeader = new RangeMatrixRowHeader(this);
         headerCorner = new RangeMatrixHeaderCorner(this, columnHeader, rowHeader);
@@ -66,6 +74,7 @@ public class RangeMatrix extends JComponent {
         
         renderer = new DefaultRangeMatrixRenderer();
         crp = new CellRendererPane();
+        this.toolTip = toolTip;
         
         doSetModel(model);
     }
@@ -93,6 +102,18 @@ public class RangeMatrix extends JComponent {
         calculateCells();
         columnCount = columnHeader.calculateColumnCount(null, 0);
         rowCount = rowHeader.calculateTableRowsCount(null, 0);
+        
+        //JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
+//        JFrame f = (JFrame) SwingUtilities.getRoot(this);
+//        toolTip = new JWindow(f);
+//        toolTipLabel = new JLabel();
+//        toolTipLabel.setHorizontalAlignment(JLabel.CENTER);
+//        toolTipLabel.setOpaque(true);
+//        toolTipLabel.setBackground(UIManager.getColor("ToolTip.background"));
+//        toolTipLabel.setBorder(UIManager.getBorder("ToolTip.border"));
+//        toolTip.add(toolTipLabel);
+//        setOpaque(true);
+        //ToolTips toolTips = new ToolTips(f);
         
         this.addMouseMotionListener(new RangeMatrixMouseMotionHandler());
         this.addMouseListener(new RangeMatrixMouseHandler());
@@ -532,6 +553,23 @@ public class RangeMatrix extends JComponent {
         label.paint(g2d);
         button.setImg(bufferedCell);
     }
+    
+//    public void showToolTip(String text, int x, int y) {
+//        toolTipLabel.setText(text);
+//        toolTip.pack();
+//        toolTip.setLocation(x,y);
+//        toolTip.setVisible(true);
+//    }
+//    
+//    public void hideToolTip()
+//    {
+//        toolTip.dispose();
+//    }
+//    
+//    public boolean isToolTipShowing()
+//    {
+//        return toolTip.isShowing();
+//    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -571,12 +609,31 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            
+            Point rTreePoint = new Point(e.getX(), e.getY());
+                rTree.nearest(rTreePoint,
+                        new TIntProcedure() {
+                    @Override
+                    public boolean execute(int i) {
+
+                        int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
+                            int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+                            
+                            RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
+                            
+                            if (tableButton.isLeading()) {
+                                String text = i + ": ряд " + enteredRow + ", колонка " + enteredColumn;
+                            
+                                toolTip.showToolTip(text, e.getXOnScreen(), e.getYOnScreen()-20);
+                            }
+                            
+                        return false;
+                    }
+                }, 0);
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            
+            toolTip.hideToolTip();
         }
 
         @Override
@@ -619,13 +676,17 @@ public class RangeMatrix extends JComponent {
                             //int rowCount = rowHeader.getRowCount();
                             int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
                             int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+                            
 
-                            System.out.println(i + ": ряд " + enteredRow + ", колонка " + enteredColumn);
+                            //System.out.println();
                             RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
                             if (previousButton != null) {
                                 iterateOnButtonCross(previousButton, false);
                             }
                             iterateOnButtonCross(tableButton, true);
+                            //String text = i + ": ряд " + enteredRow + ", колонка " + enteredColumn;
+                            
+                            
 //                        if (previousButton == null) {
 //                            iterateOnButtonCross(tableButton, true);
 //                        } else {
@@ -642,6 +703,7 @@ public class RangeMatrix extends JComponent {
 //                                iterateOnButtonCross(tableButton, true);
 //                            }
 //                        }
+                            
                             rebuildBuffer();
                             revalidate();
                             repaint();
