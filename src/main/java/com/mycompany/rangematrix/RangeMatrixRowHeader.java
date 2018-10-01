@@ -772,6 +772,56 @@ public class RangeMatrixRowHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+//            Point rTreePoint = new Point(e.getX(), e.getY());
+//            rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+//                @Override
+//                public boolean execute(int i) {
+//                    System.out.println(buttonList.get(i));
+//                    RangeMatrixHeaderButton button = buttonList.get(i);
+//                    processingClickOnRow(button);
+//                    return false;              // return true here to continue receiving results
+//                }
+//            }, 0);
+//            rTree = new RTree();
+//            rTree.init(null);
+//            calculateParams();
+//            rm.setupRowsWidthList();
+//            calculateWidthOfComponent();
+//            calculateHeightOfComponent();
+//            rebuildBuffer();
+//            revalidate();
+//            repaint();
+//            
+//            rm.calculateHeightOfComponent();
+//            rm.calculateWidthOfComponent();
+//            rm.clearTableRTree();
+//            rm.rebuildBuffer();
+//            rm.revalidate();
+//            rm.repaint();
+//            
+//            rm.getHeaderCorner().calculateHeightOfComponent();
+//            rm.getHeaderCorner().rebuildBuffer();
+//            rm.getHeaderCorner().revalidate();
+//            rm.getHeaderCorner().repaint();
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+//            Point rTreePoint = new Point(e.getX(), e.getY());
+//            rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
+//                @Override
+//                public boolean execute(int i) {
+//                    System.out.println(buttonList.get(i));
+//                    RangeMatrixHeaderButton button = buttonList.get(i);
+//                    rm.toolTip.showToolTip(button.getButtonName(), e.getXOnScreen(), e.getYOnScreen()-20);
+//                    return false;              // return true here to continue receiving results
+//                }
+//            }, 0);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+//            rm.toolTip.hideToolTip();
             Point rTreePoint = new Point(e.getX(), e.getY());
             rTree.nearest(rTreePoint, new TIntProcedure() {         // a procedure whose execute() method will be called with the results
                 @Override
@@ -803,16 +853,6 @@ public class RangeMatrixRowHeader extends JComponent {
             rm.getHeaderCorner().rebuildBuffer();
             rm.getHeaderCorner().revalidate();
             rm.getHeaderCorner().repaint();
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-
         }
 
         @Override

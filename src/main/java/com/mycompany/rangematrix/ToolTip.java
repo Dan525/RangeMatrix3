@@ -9,8 +9,9 @@ public class ToolTip
     
     JWindow toolTip;
     JLabel label;
+    JPanel glass;
  
-    public ToolTip(Frame f)
+    public ToolTip(JFrame f)
     {
         
         // initialize toolTip
@@ -20,6 +21,7 @@ public class ToolTip
         label.setOpaque(true);
         label.setBackground(UIManager.getColor("ToolTip.background"));
         label.setBorder(UIManager.getBorder("ToolTip.border"));
+        //label.setFont(label.getFont().deriveFont(Font.PLAIN, 12));
         toolTip.add(label);
         //setOpaque(true);
     }

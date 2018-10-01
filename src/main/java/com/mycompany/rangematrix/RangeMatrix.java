@@ -643,6 +643,9 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseExited(MouseEvent e) {
+            java.awt.Point p = new java.awt.Point(e.getLocationOnScreen());
+        SwingUtilities.convertPointFromScreen(p, e.getComponent());
+        if(e.getComponent().contains(p)) {return;}
             if (previousButton != null) {
                 iterateOnButtonCross(previousButton, false);
                 currentCell = 0;

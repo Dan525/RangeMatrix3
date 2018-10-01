@@ -592,6 +592,16 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
             Point rTreePoint = new Point(e.getX(), e.getY());
             
             rTree.nearest(rTreePoint, 
@@ -624,16 +634,6 @@ public class RangeMatrixColumnHeader extends JComponent {
             rm.getHeaderCorner().calculateHeightOfComponent();
             rm.getHeaderCorner().rebuildBuffer();
             rm.getHeaderCorner().repaint();            
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-
         }
 
         @Override
