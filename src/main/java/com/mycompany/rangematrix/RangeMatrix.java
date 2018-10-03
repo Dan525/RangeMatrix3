@@ -78,6 +78,19 @@ public class RangeMatrix extends JComponent {
         
         doSetModel(model);
     }
+    
+    public RangeMatrix(RangeMatrixModel model) {
+        columnHeader = new RangeMatrixColumnHeader(this);
+        rowHeader = new RangeMatrixRowHeader(this);
+        headerCorner = new RangeMatrixHeaderCorner(this, columnHeader, rowHeader);
+        rTree = new RTree();
+        rTree.init(null);
+        
+        renderer = new DefaultRangeMatrixRenderer();
+        crp = new CellRendererPane();
+        
+        doSetModel(model);
+    }
 
     public RangeMatrixModel getModel() {
         return model;
@@ -604,36 +617,36 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            System.out.println("Table coordinates: " + e.getX() + ", " + e.getY());
+            //System.out.println("Table coordinates: " + e.getX() + ", " + e.getY());
         }
 
         @Override
         public void mousePressed(MouseEvent e) {
-            Point rTreePoint = new Point(e.getX(), e.getY());
-                rTree.nearest(rTreePoint,
-                        new TIntProcedure() {
-                    @Override
-                    public boolean execute(int i) {
-
-                        int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
-                            int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
-                            
-                            RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
-                            
-                            if (tableButton.isLeading()) {
-                                String text = i + ": ряд " + enteredRow + ", колонка " + enteredColumn;
-                            
-                                toolTip.showToolTip(text, e.getXOnScreen(), e.getYOnScreen()-20);
-                            }
-                            
-                        return false;
-                    }
-                }, 0);
+//            Point rTreePoint = new Point(e.getX(), e.getY());
+//                rTree.nearest(rTreePoint,
+//                        new TIntProcedure() {
+//                    @Override
+//                    public boolean execute(int i) {
+//
+//                        int enteredRow = i % rowCount == 0 ? rowCount : i % rowCount;
+//                            int enteredColumn = i % rowCount == 0 ? i / rowCount : (i / rowCount) + 1;
+//                            
+//                            RangeMatrixTableButton tableButton = buttonTable.get(enteredRow - 1, enteredColumn - 1);
+//                            
+//                            if (tableButton.isLeading()) {
+//                                String text = i + ": ряд " + enteredRow + ", колонка " + enteredColumn;
+//                            
+//                                toolTip.showToolTip(text, e.getXOnScreen(), e.getYOnScreen()-20);
+//                            }
+//                            
+//                        return false;
+//                    }
+//                }, 0);
         }
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            toolTip.hideToolTip();
+            //toolTip.hideToolTip();
         }
 
         @Override
@@ -643,9 +656,9 @@ public class RangeMatrix extends JComponent {
 
         @Override
         public void mouseExited(MouseEvent e) {
-            java.awt.Point p = new java.awt.Point(e.getLocationOnScreen());
-        SwingUtilities.convertPointFromScreen(p, e.getComponent());
-        if(e.getComponent().contains(p)) {return;}
+//            java.awt.Point p = new java.awt.Point(e.getLocationOnScreen());
+//        SwingUtilities.convertPointFromScreen(p, e.getComponent());
+//        if(e.getComponent().contains(p)) {return;}
             if (previousButton != null) {
                 iterateOnButtonCross(previousButton, false);
                 currentCell = 0;
