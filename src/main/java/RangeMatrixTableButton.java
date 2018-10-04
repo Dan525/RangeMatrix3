@@ -1,4 +1,4 @@
-package com.mycompany.rangematrix;
+
 
 import java.awt.image.BufferedImage;
 import java.util.Objects;

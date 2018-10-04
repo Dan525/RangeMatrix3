@@ -1,4 +1,4 @@
-package com.mycompany.rangematrix;
+
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,11 +13,12 @@ import javax.swing.border.MatteBorder;
  */
 public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
 
-    private final ClassLoader cl = this.getClass().getClassLoader();
+    //private final ClassLoader cl = this.getClass().getClassLoader();
     private final JLabel delegate = new JLabel();
     private final Border cellBorder = new MatteBorder(0, 0, 1, 1, Color.GRAY);
-    private final ImageIcon collapsedIcon = new ImageIcon(cl.getResource("collapsed_icon2.png"));
-    private final ImageIcon expandedIcon = new ImageIcon(cl.getResource("expanded_icon2.png"));
+//    private final ImageIcon collapsedIcon = new ImageIcon(cl.getResource("collapsed_icon2.png"));
+    private final ImageIcon collapsedIcon = new ImageIcon(getClass().getResource("collapsed_icon2.png"));
+    private final ImageIcon expandedIcon = new ImageIcon(getClass().getResource("expanded_icon2.png"));
     
     public DefaultRangeMatrixRenderer() {
         delegate.setOpaque(true);

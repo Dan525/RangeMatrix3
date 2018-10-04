@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.rangematrix;
+
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -113,8 +113,8 @@ public class RangeMatrix extends JComponent {
         calculateWidthOfComponents();
         calculateHeightOfComponents();
         calculateCells();
-        columnCount = columnHeader.calculateColumnCount(null, 0);
-        rowCount = rowHeader.calculateTableRowsCount(null, 0);
+        columnCount = columnHeader.calculateTableColumnCount(null, 0);
+        rowCount = rowHeader.calculateTableRowCount(null, 0);
         
         //JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
 //        JFrame f = (JFrame) SwingUtilities.getRoot(this);
@@ -148,6 +148,10 @@ public class RangeMatrix extends JComponent {
         this.crp = crp;
     }
 
+    public ToolTip getToolTip() {
+        return toolTip;
+    }
+
     public RangeMatrixHeaderCorner getHeaderCorner() {
         return headerCorner;
     }
@@ -172,7 +176,7 @@ public class RangeMatrix extends JComponent {
 
     public ArrayList<Double> maxOfTwoLists(ArrayList<Double> rowsWidthList, ArrayList<Double> cornerRowsWidthList) {
         ArrayList<Double> newList = new ArrayList<>();
-        for (int i = 0; i < rowHeader.getColumnCount(); i++) {
+        for (int i = 0; i < rowHeader.getLevelsCount(); i++) {
             newList.add(Math.max(rowsWidthList.get(i), cornerRowsWidthList.get(i)));
         }
         return newList;
@@ -244,6 +248,7 @@ public class RangeMatrix extends JComponent {
                 for (int columnIndex : fullLeafColumnIndexList) {
                     if (!buttonTable.get(row, columnIndex).getButtonName().isEmpty()) {
                         notEmptyInRowCounter++;
+                        break;
                     }
                 }
                 
@@ -254,20 +259,6 @@ public class RangeMatrix extends JComponent {
             }
             
             repaintCell(button);
-            
-//            BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-//            Graphics2D g2d = bufferedCell.createGraphics();
-//
-//            JLabel label = renderer.getCellRendererComponent(leafColumnIndexList.get(0), 
-//                    row, 
-//                    button);
-//            
-//            label.setBounds((int) button.getX(),
-//                    (int) button.getY(),
-//                    (int) button.getWidth(),
-//                    (int) button.getHeight());
-//            label.paint(g2d);
-//            button.setImg(bufferedCell);
         }
     }
     
@@ -322,6 +313,7 @@ public class RangeMatrix extends JComponent {
                 for (int rowIndex : fullLeafRowIndexList) {
                     if (!buttonTable.get(rowIndex, column).getButtonName().isEmpty()) {
                         notEmptyInColumnCounter++;
+                        break;
                     }
                 }
                 
@@ -331,18 +323,6 @@ public class RangeMatrix extends JComponent {
                 button.getNotEmptyInColumnStack().pop();
             }
             repaintCell(button);
-            
-//            BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-//                Graphics2D g2d = bufferedCell.createGraphics();
-//                
-//                JLabel label = renderer.getCellRendererComponent(column, leafRowIndexList.get(0), button);
-//                
-//                label.setBounds((int)button.getX(),
-//                            (int)button.getY(),
-//                            (int)button.getWidth(),
-//                            (int)button.getHeight());
-//                label.paint(g2d);
-//                button.setImg(bufferedCell);
         }
     }
     
@@ -366,14 +346,9 @@ public class RangeMatrix extends JComponent {
     }
     
     public void calculateCells() {
-//        List<Double> cellXList = columnHeader.getCellXList();
-//        List<Double> cellWidthList = columnHeader.getCellWidthList();
-        //ArrayList<Double> cellYList = rowHeader.getCellYList();
-        //double minimalCellHeight = rowHeader.getMinimalCellHeight();
-        //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
         List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
         List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
-        int indexInTable = 1;
+        int indexInTable = 1; //нужен для выделения строки и столбца при наведении
 
         for (int column = 0; column < leafColumnButtonList.size(); column++) {
             for (int row = 0; row < leafRowButtonList.size(); row++) {
@@ -388,32 +363,10 @@ public class RangeMatrix extends JComponent {
                 button.setY(rowHeaderButton.getY());
                 button.setIndexInTable(indexInTable);
                 ///////////
-//                Rectangle rect = new Rectangle((float)button.getX(), 
-//                        (float)button.getY(), 
-//                        (float)(button.getX()+button.getWidth()), 
-//                        (float)(button.getY()+button.getHeight()));
-//                
-//                rTree.add(rect, rTreeIndex);
-//                rTreeIndex++;
+
                 indexInTable++;
 
                 repaintCell(button);
-//                BufferedImage bufferedCell = new BufferedImage((int) button.getWidth(), (int) button.getHeight(), BufferedImage.TYPE_INT_ARGB);
-//                Graphics2D g2d = bufferedCell.createGraphics();
-//                
-//                JLabel label = renderer.getCellRendererComponent(column, row, button);
-//                label.setBounds((int)button.getX(),
-//                            (int)button.getY(),
-//                            (int)button.getWidth(),
-//                            (int)button.getHeight());
-//                label.paint(g2d);
-//                button.setImg(bufferedCell);
-//                File outputfile = new File("image" + column + row + ".png");
-//                try {
-//                    ImageIO.write(bufferedCell, "png", outputfile);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RangeMatrix.class.getName()).log(Level.SEVERE, null, ex);
-//                }
             }
         }
     }
@@ -428,14 +381,8 @@ public class RangeMatrix extends JComponent {
     }    
 
     public void drawValues(Graphics2D g2d) {
-//        List<Double> cellXList = columnHeader.getCellXList();
-//        List<Double> cellWidthList = columnHeader.getCellWidthList();
-        //ArrayList<Double> cellYList = rowHeader.getCellYList();
-        //double minimalCellHeight = rowHeader.getMinimalCellHeight();
-        //Map<Integer,RangeMatrixHeaderButton> leafButtonMap = columnHeader.getLeafButtonMap();
         List<Object> leafColumnButtonList = columnHeader.getLeafButtonList();
         List<Object> leafRowButtonList = rowHeader.getLeafButtonList();
-        int rTreeIndex = 1;
 
         for (int column = 0; column < leafColumnButtonList.size(); column++) {
             for (int row = 0; row < leafRowButtonList.size(); row++) {
@@ -444,7 +391,6 @@ public class RangeMatrix extends JComponent {
                 if (!button.isCollapsed()) {
                     g2d.drawImage(button.getImg(), (int)button.getX(), (int)button.getY(), this);
                     addButtonToRTree(button);
-                    rTreeIndex++;
                 }
                 
             }
@@ -461,6 +407,11 @@ public class RangeMatrix extends JComponent {
 
     public void calculateHeightOfComponent() {
         height = rowHeader.getHeightOfComponent();
+    }
+    
+    public void calculateSizeOfComponent() {
+        calculateHeightOfComponent();
+        calculateWidthOfComponent();
     }
 
     public double getHeightOfComponent() {
@@ -565,6 +516,12 @@ public class RangeMatrix extends JComponent {
                 (int) button.getHeight());
         label.paint(g2d);
         button.setImg(bufferedCell);
+    }
+    
+    public void repaintCombo() {
+        rebuildBuffer();
+        revalidate();
+        repaint();
     }
     
 //    public void showToolTip(String text, int x, int y) {

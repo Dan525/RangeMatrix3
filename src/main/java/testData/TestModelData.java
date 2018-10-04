@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.rangematrix.test;
+package testData;
 
 import java.util.Arrays;
 
@@ -198,6 +198,7 @@ public class TestModelData {
     public static class M {
 
         public String name;
+        public String toolTipName;
         public String type;
         public M[] groups;
 

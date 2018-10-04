@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.rangematrix;
+
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -62,7 +62,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
     
     public ArrayList<Double> fillRowsWidthList() {
         ArrayList<Double> rowsWidthListTemp = new ArrayList<>();
-        for (int i = 0; i < rowHeader.getColumnCount(); i++) {
+        for (int i = 0; i < rowHeader.getLevelsCount(); i++) {
             double rowWidth = calculateWidthOfRowByName(i);
             rowsWidthListTemp.add(rowWidth);
         }
@@ -102,7 +102,7 @@ public class RangeMatrixHeaderCorner extends JComponent {
     }
 
     public void drawCorner(Graphics2D g2d, double parentCellX, double parentCellY) {
-        int columnCount = rowHeader.getColumnCount();
+        int columnCount = rowHeader.getLevelsCount();
         double cellX = parentCellX;
         double cellY = parentCellY;
 
@@ -125,6 +125,12 @@ public class RangeMatrixHeaderCorner extends JComponent {
 
             cellX += cellWidth;
         }
+    }
+    
+    public void repaintCombo() {
+        rebuildBuffer();
+        revalidate();
+        repaint();
     }
 
     @Override

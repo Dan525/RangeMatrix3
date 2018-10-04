@@ -1,7 +1,7 @@
-package com.mycompany.rangematrix;
 
-import com.mycompany.rangematrix.test.TestModelData;
-import com.mycompany.rangematrix.test.TestModelData.M;
+
+import testData.TestModelData;
+import testData.TestModelData.M;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
@@ -60,6 +60,14 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
     }
     
     @Override
+    public String getColumnGroupToolTipName(Object column) {
+        if (column == null) {
+            return "";
+        }
+        return ((M)column).toolTipName;
+    }
+    
+    @Override
     public String getColumnGroupType(Object column) {
         if (column == null) {
             return "";
@@ -103,6 +111,14 @@ public class RangeMatrixModelCycleImpl implements RangeMatrixModel {
             return "";
         }
         return ((M)row).name;
+    }
+    
+    @Override
+    public String getRowGroupToolTipName(Object row) {
+        if (row == null) {
+            return "";
+        }
+        return ((M)row).toolTipName;
     }
     
     @Override

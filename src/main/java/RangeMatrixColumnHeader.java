@@ -1,4 +1,4 @@
-package com.mycompany.rangematrix;
+
 
 import com.infomatiq.jsi.Point;
 import com.infomatiq.jsi.Rectangle;
@@ -12,6 +12,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,18 +37,34 @@ public class RangeMatrixColumnHeader extends JComponent {
     private SpatialIndex rTree;
     
     private double spaceAroundName = 4;
-    private List<RangeMatrixHeaderButton> buttonList;
-    private Map<Object,RangeMatrixHeaderButton> buttonMap;
-    //private Map<Integer,RangeMatrixHeaderButton> leafButtonMap;
-    private List<Object> leafButtonList;
-//    private List<Double> cellXList;
-//    private List<Double> cellWidthList;
-    private int rowCount;
+    private double minimalCellHeight;
+    private int levelsCount;
     //private int columnCount;
     private BufferedImage buffer;
     private double width;
     private double height;
-    private double minimalCellHeight;
+    
+    
+    /*
+    Список кнопок, которые необходимо отрисовывать в данный момент.
+    Имеет соответствие с прямоугольниками из RTree.
+    */
+    private List<RangeMatrixHeaderButton> buttonList;
+    
+    /*
+    Хранит все имеющиеся кнопки
+    */
+    private Map<Object,RangeMatrixHeaderButton> buttonMap;
+    
+    /*
+    Список с объектами листовых кнопок. Нужен для получения кнопок из buttonMap,
+    соответствующих номеру колонки таблицы. Эти кнопки нужны для получения из
+    них параметров для отрисовки ячеек соответствующей колонки.
+    */
+    private List<Object> leafButtonList;
+    
+    //private ToolTip toolTip;
+    //private int currentCell = 0;
 
     public RangeMatrixColumnHeader(RangeMatrix rm) {
         this.rm = rm;
@@ -57,20 +74,21 @@ public class RangeMatrixColumnHeader extends JComponent {
         this.model = rm.getModel();
         this.renderer = rm.getRenderer();
         this.crp = rm.getCrp();
-        rTree = new RTree();
-        rTree.init(null);
+        //this.toolTip = rm.getToolTip();
+        
+        initColumnHeaderRTree();
 
         buttonList = new ArrayList<>();
         buttonMap = new HashMap<>();
-//        cellXList = new ArrayList<>();
-//        cellWidthList = new ArrayList<>();
-        //leafButtonMap = new HashMap<>();
         leafButtonList = new ArrayList<>();
-        //columnCount = calculateColumnCount(null, 0);
-
+        
+        //columnCount = calculateTableColumnCount(null, 0);
+        calculateMinimalCellHeight();
+        
         calculateParams();
 
         this.addMouseListener(new RangeMatrixMouseHandler());
+        //this.addMouseMotionListener(new RangeMatrixMouseMotionHandler());
     }
 
     public RangeMatrixModel getModel() {
@@ -78,12 +96,11 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
     
     public void calculateParams() {
-        calculateMinimalCellHeight();
         leafButtonList.clear();
         buttonList.clear();
         calculateColumnCoordinates(null, 0);
-        calculateColumnIndices(null, 0);
-        calculateRowCount(null, new ArrayList<>(), 1);
+        assignColumnIndices(null, 0);
+        levelsCount = calculateLevelsCount(null, new ArrayList<>(), 1);
         
         calculateWidthOfComponent();
         calculateHeightOfComponent();        
@@ -98,8 +115,6 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
 
     public double calculateWidthByColumnName(Object column) {
-
-        //String columnName = model.getColumnGroupName(column);
         RangeMatrixHeaderButton button = findButtonInMap(column);
         JLabel label = renderer.getColumnRendererComponent(button.getButtonObject(),
                                                            button.getButtonName(),
@@ -135,12 +150,19 @@ public class RangeMatrixColumnHeader extends JComponent {
         }
     }
 
-    public void calculateRowCount(Object parentColumn, ArrayList<Integer> maxRowIndexList, int maxRowIndex) {
+    /**
+     * Вычисляет количество уровней заголовка.
+     * @param parentColumn
+     * @param maxLevelIndexList
+     * @param maxLevelIndex
+     * @return
+     */
+    public int calculateLevelsCount(Object parentColumn, ArrayList<Integer> maxLevelIndexList, int maxLevelIndex) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
-            boolean isGroup;// = model.isColumnGroup(child);
+            boolean isGroup;
             RangeMatrixHeaderButton button = findButtonInMap(child);
             if (button.isCollapsed()) {
                 isGroup = false;
@@ -148,39 +170,39 @@ public class RangeMatrixColumnHeader extends JComponent {
                 isGroup = model.isColumnGroup(child);
             }
             if (isGroup) {
-                maxRowIndex++;
-                calculateRowCount(child, maxRowIndexList, maxRowIndex);
-                maxRowIndex--;
+                maxLevelIndex++;
+                calculateLevelsCount(child, maxLevelIndexList, maxLevelIndex);
+                maxLevelIndex--;
             }
-            maxRowIndexList.add(maxRowIndex);
+            maxLevelIndexList.add(maxLevelIndex);
         }
-        rowCount = Collections.max(maxRowIndexList);
+        return Collections.max(maxLevelIndexList);
     }
 
-    public int getRowCount() {
-        return rowCount;
+    public int getLevelsCount() {
+        return levelsCount;
     }
 
-    public int calculateHeightMultiplier(Object parentColumn, boolean isGroup, int rowIndex) {
+    public int calculateHeightMultiplier(Object parentColumn, boolean isGroup, int levelIndex) {
         if (!isGroup) {
-            return (rowCount - rowIndex) + 1;
+            return (levelsCount - levelIndex) + 1;
         } else {
             return 1;
         }
     }
     
-//    public <K, V> Map<K, V> filterByValue(Map<K, V> map, Predicate<V> predicate) {
-//        return map.entrySet()
-//                .stream()
-//                .filter(entry -> predicate.test(entry.getValue()))
-//                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-//    }
-//    
-//    public RangeMatrixHeaderButton calculateButtonByColumnIndex(int columnIndex) {
-//        
-//    }
-    
-    public int calculateColumnIndices(Object parentColumn, int columnCounter) {
+    /**
+     * Присваивает порядковые номера кнопкам нижнего уровня (иначе говоря, 
+     * листовым кнопкам; кнопкам, не имеющим потомков). Нужно для того, чтобы
+     * иметь связь между кнопками заголовка и колонками таблицы.
+     * По индексам этих кнопок определяются индексы кнопок, имеющих потомков: в
+     * момент, когда эти кнопки сворачивают и они оказываются кнопками нижнего
+     * уровня.
+     * @param parentColumn
+     * @param columnCounter
+     * @return
+     */
+    public int assignColumnIndices(Object parentColumn, int columnCounter) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
@@ -190,17 +212,25 @@ public class RangeMatrixColumnHeader extends JComponent {
             boolean isGroup = model.isColumnGroup(child);
 
             if (isGroup) {
-                columnCounter = calculateColumnIndices(child, columnCounter);
+                columnCounter = assignColumnIndices(child, columnCounter);
             } else {
                 button.setCellIndex(columnCounter);
-                //leafButtonMap.put(columnCounter, button);
                 leafButtonList.add(child);
                 columnCounter++;
             }
         }
         return columnCounter;
     }
+
+    public List<Object> getLeafButtonList() {
+        return leafButtonList;
+    }
     
+    /**
+     * Вычисляет координату по оси X и ширину кнопок.
+     * @param parentColumn
+     * @param parentCellX
+     */
     public void calculateColumnCoordinates(Object parentColumn, double parentCellX) {
 
         int columnCount = model.getColumnGroupCount(parentColumn);
@@ -234,23 +264,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             cellX += cellWidth;
         }
     }
-
-    public List<Object> getLeafButtonList() {
-        return leafButtonList;
-    }
-
-//    public Map<Integer, RangeMatrixHeaderButton> getLeafButtonMap() {
-//        return leafButtonMap;
-//    }
-
-//    public List<Double> getCellXList() {
-//        return cellXList;
-//    }
-//
-//    public List<Double> getCellWidthList() {
-//        return cellWidthList;
-//    }
-
+    
     public void calculateMinimalCellHeight() {
         JLabel label = renderer.getColumnRendererComponent(null, " ", false, false);
         minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
@@ -269,7 +283,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
 
     public void calculateHeightOfComponent() {
-        height = (minimalCellHeight * rowCount);
+        height = (minimalCellHeight * levelsCount);
     }
 
     public double getHeightOfComponent() {
@@ -283,6 +297,12 @@ public class RangeMatrixColumnHeader extends JComponent {
         return d;
     }
 
+    /**
+     * Возвращает список объектов, принадлежащих листовым или свернутым кнопкам.
+     * @param parentColumn
+     * @param leafColumnList
+     * @return
+     */
     public ArrayList<Object> fillLeafColumnList(Object parentColumn, ArrayList<Object> leafColumnList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
@@ -306,13 +326,13 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
     
     /**
-     * Возвращает список всех листовых элементов объекта, независимо от того, 
-     * свернуты некоторые из предков или нет.
+     * Возвращает список объектов, принадлежащих листовым кнопкам, независимо 
+     * от того, свернуты некоторые из потомков или нет.
      * @param parentColumn
      * @param leafColumnList
      * @return
      */
-    public ArrayList<Object> fillLeafColumnFullList(Object parentColumn, ArrayList<Object> leafColumnList) {
+    public ArrayList<Object> fillFullLeafColumnList(Object parentColumn, ArrayList<Object> leafColumnList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < columnCount; i++) {
@@ -320,7 +340,7 @@ public class RangeMatrixColumnHeader extends JComponent {
             boolean isGroup = model.isColumnGroup(child);
             
             if (isGroup) {
-                fillLeafColumnFullList(child, leafColumnList);
+                fillFullLeafColumnList(child, leafColumnList);
             } else {
                 leafColumnList.add(child);
             }
@@ -329,7 +349,7 @@ public class RangeMatrixColumnHeader extends JComponent {
     }
     
     /**
-     * Возвращает таблицу "индекс колонки - объект" из объектов, принадлежащим
+     * Возвращает таблицу "индекс колонки - объект" из объектов, принадлежащих
      * кнопкам, которые являются видимыми. Используя реализацию TreeMap,
      * получаем ключи в отсортированном виде. Это нужно для получения первой
      * кнопки - элемента с наименьшим индексом.
@@ -360,6 +380,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnMap;
     }
         
+    /**
+     * Возвращает индексы всех листовых (если кнопка свернута, то она в данном 
+     * случае будет являться листом) кнопок  - предков кнопки, на которую было
+     * произведено нажатие. Нужно для присвоения аттрибута Collapsed всем 
+     * ячейкам таблицы, начиная со строки, находящейся под второй кнопкой из 
+     * списка предков.
+     * @param parentColumn
+     * @param leafColumnIndexList
+     * @return
+     */
     public ArrayList<Integer> fillLeafColumnIndexList(Object parentColumn, ArrayList<Integer> leafColumnIndexList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
@@ -382,6 +412,16 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnIndexList;
     }
     
+    /**
+     * Возвращает индексы всех листовых (в данном случае кнопка будет листом,
+     * только если у нее нет предков, независимо от того свернута она или нет) 
+     * кнопок  - предков кнопки, на которую было произведено нажатие. Нужно для
+     * проверки наличия непустых ячеек таблицы при сворачивании колонки с целью
+     * дальнейшего отображения этой информации в Leading Column.
+     * @param parentColumn
+     * @param leafColumnIndexList
+     * @return
+     */
     public ArrayList<Integer> fillFullLeafColumnIndexList(Object parentColumn, ArrayList<Integer> leafColumnIndexList) {
         int columnCount = model.getColumnGroupCount(parentColumn);
 
@@ -399,31 +439,28 @@ public class RangeMatrixColumnHeader extends JComponent {
         return leafColumnIndexList;
     }
     
-    public int calculateColumnCount(Object parentColumn, int columnCounter) {
-        
+    /**
+     * Возвращает полное количество колонок таблицы, независимо от того,
+     * свернуты некоторые колонки или нет.
+     * @param parentColumn
+     * @param columnCounter
+     * @return
+     */
+    public int calculateTableColumnCount(Object parentColumn, int columnCounter) {
         int groupColumnCount = model.getColumnGroupCount(parentColumn);
 
         for (int i = 0; i < groupColumnCount; i++) {
             Object child = model.getColumnGroup(parentColumn, i);
             boolean isGroup = model.isColumnGroup(child);
-            //RangeMatrixHeaderButton button = findButtonInMap(child);
-//            if (button.isCollapsed()) {
-//                isGroup = false;
-//            } else {
-//                isGroup = model.isColumnGroup(child);
-//            }
+            
             if (isGroup) {
-                columnCounter = calculateColumnCount(child, columnCounter);
+                columnCounter = calculateTableColumnCount(child, columnCounter);
             } else {
                 columnCounter++;
             }
         }
         return columnCounter;
     }
-
-//    public int getColumnCount() {
-//        return columnCount;
-//    }
     
     public RangeMatrixHeaderButton findButtonInMap(Object child) {
         
@@ -432,12 +469,22 @@ public class RangeMatrixColumnHeader extends JComponent {
         if (button == null) {
             String columnName = model.getColumnGroupName(child);
             button = new RangeMatrixHeaderButton(child, columnName);
+            //button.setButtonToolTip(model.getColumnGroupToolTipName(child));
             buttonMap.put(child, button);
         }
         return button;
     }
     
-    public void calculateButtonGroupAttribute(Object child, RangeMatrixHeaderButton button) {
+    /**
+     * При сворачивании принудительно устанавливается isGroup = false, чтобы не
+     * отрисовывать потомков.
+     * В данном методе устанавливается для кнопки настоящее свойство ее объекта:
+     * является он группой (имеет ли потомков) или нет.
+     * Необходимо, чтобы отображать +/- только на кнопках групп.
+     * @param child
+     * @param button
+     */
+    public void assignButtonGroupAttribute(Object child, RangeMatrixHeaderButton button) {
         if (model.isColumnGroup(child)) {
             button.setGroup(true);
         } else {
@@ -461,11 +508,11 @@ public class RangeMatrixColumnHeader extends JComponent {
             RangeMatrixHeaderButton button = findButtonInMap(child);
 
             if (button.isCollapsed()) {
-                calculateButtonGroupAttribute(child, button);
+                assignButtonGroupAttribute(child, button);
                 isGroup = false;
                 cellWidth = calculateWidthByColumnName(child);
             } else {
-                calculateButtonGroupAttribute(child, button);
+                assignButtonGroupAttribute(child, button);
                 isGroup = model.isColumnGroup(child);
                 cellWidth = calculateWidthOfColumn(child);
             }
@@ -534,10 +581,6 @@ public class RangeMatrixColumnHeader extends JComponent {
             rebuildBuffer();
         }
         Graphics2D g2d = (Graphics2D) g;
-        RenderingHints rh = new RenderingHints(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2d.setRenderingHints(rh);
         g2d.drawImage(buffer, 0, 0, this);
     }
     
@@ -571,21 +614,32 @@ public class RangeMatrixColumnHeader extends JComponent {
     /**
      * Возвращает индекс колонки. Индекс рассчитывается из условия, что все
      * колонки развернуты (при этом не важно, развернуты они в данный момент
-     * или нет). Для колонок из всех рядов, кроме последнего, индекс
-     * берется по первому из предков, находящихся в последнем (нижнем) ряду.
+     * или нет). Для колонок всех уровней, кроме последнего, индекс берется по 
+     * первому из потомков, находящемуся на последнем (нижнем) уровне.
      * @param button
      * @return
      */
     public int calculateColumnIndex(RangeMatrixHeaderButton button) {
         int columnIndex;
         if (model.isColumnGroup(button.getButtonObject())) {
-            Object leaf = fillLeafColumnFullList(button.getButtonObject(), new ArrayList<>()).get(0);
+            Object leaf = fillFullLeafColumnList(button.getButtonObject(), new ArrayList<>()).get(0);
             columnIndex = findButtonInMap(leaf).getCellIndex();
         } else {
             columnIndex = button.getCellIndex();
         }
 
         return columnIndex;
+    }
+    
+    public void initColumnHeaderRTree() {
+        rTree = new RTree();
+        rTree.init(null);
+    }
+    
+    public void repaintCombo() {
+        rebuildBuffer();
+        revalidate();
+        repaint();
     }
 
     protected class RangeMatrixMouseHandler implements MouseListener {
@@ -617,23 +671,15 @@ public class RangeMatrixColumnHeader extends JComponent {
                             }
                           }, 0);
             
-            rTree = new RTree();
-            rTree.init(null);
-            //calculateParams();
-            rebuildBuffer();
-            revalidate();
-            repaint();
-            rm.calculateHeightOfComponent();
-            rm.calculateWidthOfComponent();
-            //rm.calculateCells();
+            initColumnHeaderRTree();
+            repaintCombo();
+            
+            rm.calculateSizeOfComponent();
             rm.clearTableRTree();
-            rm.rebuildBuffer();
-            rm.revalidate();
-            rm.repaint();
-            //rm.repaintScrollPane();
+            rm.repaintCombo();
+            
             rm.getHeaderCorner().calculateHeightOfComponent();
-            rm.getHeaderCorner().rebuildBuffer();
-            rm.getHeaderCorner().repaint();            
+            rm.getHeaderCorner().repaintCombo();            
         }
 
         @Override
@@ -646,5 +692,34 @@ public class RangeMatrixColumnHeader extends JComponent {
 
         }
 
+    }
+    
+    protected class RangeMatrixMouseMotionHandler implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+//            Point rTreePoint = new Point(e.getX(), e.getY());
+//            
+//            rTree.nearest(rTreePoint, 
+//                          new TIntProcedure() {
+//                            @Override
+//                            public boolean execute(int i) {
+//                                if (currentCell != i) {
+//                                    //System.out.println(buttonList.get(i));
+//                                    RangeMatrixHeaderButton button = buttonList.get(i);
+//                                    //System.out.println(button.getButtonToolTip());
+//                                    toolTip.showToolTip("11", e.getXOnScreen(), e.getYOnScreen()-20);
+//                                    //processingClickOnColumn(button);
+//                                    currentCell = i;
+//                                }
+//                                return false;
+//                            }
+//                          }, 0);
+        }
+        
     }
 }

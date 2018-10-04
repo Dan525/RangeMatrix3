@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.rangematrix;
+
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,13 +15,15 @@ import java.util.ArrayList;
 public class RangeMatrixModelImpl implements RangeMatrixModel {
     
     private final ArrayList<RangeMatrixListener> listeners = new ArrayList<>();
+    private final String columnPath = "C:\\Users\\daniil_pozdeev\\Documents\\NetBeansProjects\\RangeMatrix\\src\\res\\Заголовок колонок - копия";
+    private final String rowPath = "C:\\Users\\daniil_pozdeev\\Documents\\NetBeansProjects\\RangeMatrix\\src\\res\\rows - копия";
 
     //Column Group
     
     @Override
     public int getColumnGroupCount(Object column) {
         if (column == null) {
-            return new File("src\\res\\Заголовок колонок - копия").list().length;
+            return new File(columnPath).list().length;
         }
         return ((File)column).list().length;
     }
@@ -29,7 +31,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public Object getColumnGroup(Object column, int index) {
         if (column == null) {
-            return new File("src\\res\\Заголовок колонок - копия").listFiles()[index];
+            return new File(columnPath).listFiles()[index];
         }
         return ((File)column).listFiles()[index];
     }
@@ -46,17 +48,25 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public String getColumnGroupName(Object column) {
         if (column == null) {
-            return new File("src\\res\\Заголовок колонок - копия").getName();
+            return new File(columnPath).getName();
         }
         return ((File)column).getName();
     }
     
     @Override
-    public String getColumnGroupType(Object column) {
+    public String getColumnGroupToolTipName(Object column) {
         if (column == null) {
-            return new File("src\\res\\Заголовок колонок - копия").getName();
+            return new File(columnPath).getName();
         }
         return ((File)column).getPath();
+    }
+    
+    @Override
+    public String getColumnGroupType(Object column) {
+        if (column == null) {
+            return new File(columnPath).getName();
+        }
+        return ((File)column).getName();
     }
     
     //Row Group
@@ -64,7 +74,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public int getRowGroupCount(Object row) {
         if (row == null) {
-            return new File("src\\res\\rows - копия").list().length;
+            return new File(rowPath).list().length;
         }
         return ((File)row).list().length;
     }
@@ -72,7 +82,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public Object getRowGroup(Object row, int index) {
         if (row == null) {
-            return new File("src\\res\\rows - копия").listFiles()[index];
+            return new File(rowPath).listFiles()[index];
         }
         return ((File)row).listFiles()[index];
     }
@@ -89,17 +99,25 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     @Override
     public String getRowGroupName(Object row) {
         if (row == null) {
-            return new File("src\\res\\rows - копия").getName();
+            return new File(rowPath).getName();
         }
         return ((File)row).getName();
+    }
+
+    @Override
+    public String getRowGroupToolTipName(Object row) {
+        if (row == null) {
+            return new File(rowPath).getName();
+        }
+        return ((File)row).getPath();
     }
     
     @Override
     public String getRowGroupType(Object row) {
         if (row == null) {
-            return new File("src\\res\\rows - копия").getName();
+            return new File(rowPath).getName();
         }
-        return ((File)row).getPath();
+        return ((File)row).getName();
     }
     
     @Override
@@ -139,4 +157,5 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     public void removeRangeMatrixListener(RangeMatrixListener l) {
         listeners.remove(l);
     }
+
 }

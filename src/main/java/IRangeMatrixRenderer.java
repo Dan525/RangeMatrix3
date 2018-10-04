@@ -1,4 +1,4 @@
-package com.mycompany.rangematrix;
+
 
 import javax.swing.JLabel;
 

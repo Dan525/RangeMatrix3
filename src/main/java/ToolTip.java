@@ -1,5 +1,5 @@
 
-package com.mycompany.rangematrix;
+
 
 import java.awt.*;
 import javax.swing.*;

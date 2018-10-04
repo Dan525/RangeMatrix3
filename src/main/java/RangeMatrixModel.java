@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.rangematrix;
+
 
 import java.util.List;
 
@@ -25,6 +25,8 @@ public interface RangeMatrixModel {
     
     String getColumnGroupName(Object column);
     
+    String getColumnGroupToolTipName(Object column);
+    
     String getColumnGroupType(Object column);
     
     //Row Group
@@ -36,6 +38,8 @@ public interface RangeMatrixModel {
     boolean isRowGroup(Object row);
     
     String getRowGroupName(Object row);
+    
+    String getRowGroupToolTipName(Object row);
     
     String getRowGroupType(Object row);
     
