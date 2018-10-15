@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package testData;
+package test;
 
 import java.util.Arrays;
 
@@ -16,20 +16,38 @@ public class TestModelData {
     public M[] columnHeaderDataSource;
     
     public TestModelData() {
-        columnHeaderDataSource = new M[]{new M("Источник сигнала", fillSourceModuleGroup(1)), new M("Назначение сигнала", fillDestinationModule(1))};
+        columnHeaderDataSource = new M[]{new M("ИС", new FN("Источник сигнала"), fillSourceModuleGroup(1)), new M("НС", new FN("Назначение сигнала"), fillDestinationModule(1))};
     }
     
     public static final M[] SOURCE_MODULE_TYPES = new M[] {
         new M("M6-CPU-A1",
                 new M[] {
-                    new M("Функциональные клавиши",
+                    new M("ФК", new FN("Функциональные клавиши"),
                             new M[] {
                                 new M("F1", "BOOL"),
                                 new M("F2", "BOOL"),
                                 new M("F3", "BOOL"),
                                 new M("F4", "BOOL"),
                                 new M("F5", "BOOL"),
-                                new M("F6", "BOOL"),
+                                new M("F6", "BOOL", 
+                                    new M[] {
+                                        new M("1"),
+                                        new M("2_asfgesdgdshdfjhg",
+                                            new M[] {
+                                                new M("1"),
+                                                new M("2"),
+                                                new M("3")
+                                            }
+                                        ),
+                                        new M("3",
+                                            new M[] {
+                                                new M("1"),
+                                                new M("2"),
+                                                new M("3")
+                                            }
+                                        )
+                                    }
+                                ),
                                 new M("F7", "BOOL"),
                                 new M("F8", "BOOL"),
                                 new M("F9", "BOOL")
@@ -37,14 +55,20 @@ public class TestModelData {
                     ),
                     new M("Логика"),
                     new M("61850 MMS"),
-                    new M("61850 GOOSE"),
+                    new M("61850 GOOSE",
+                        new M[] {
+                            new M("1"),
+                            new M("2"),
+                            new M("3")
+                        }
+                    ),
                     new M("Дисплей"),
-                    new M("CAN2 (из другого модуля)")
+                    new M("CAN2",new FN("CAN2 (из другого модуля)"))
                 }
         ),
         new M("M6-8RO-16DI220", 
                 new M[] {
-                    new M("Дискретные входы",
+                    new M("ДВ", new FN("Дискретные входы"),
                             new M[]{
                                 new M("IN1", "BOOL"),
                                 new M("IN2", "BOOL"),
@@ -65,13 +89,13 @@ public class TestModelData {
                             }
                     ),
                     new M("Логика"),
-                    new M("CAN2 (из другого модуля)")
+                    new M("CAN2",new FN("CAN2 (из другого модуля)"))
                 }
         ),
         new M("M6-xVT-zCT", 
                 new M[] {
                     new M("Логика"),
-                    new M("CAN2 (из другого модуля)")
+                    new M("CAN2",new FN("CAN2 (из другого модуля)"))
                 }
         )
     };
@@ -83,8 +107,8 @@ public class TestModelData {
                     new M("61850 MMS"),
                     new M("61850 GOOSE"),
                     new M("Дисплей"),
-                    new M("CAN2 (в другой модуль)"),
-                    new M("Светодиоды",
+                    new M("CAN2", new FN("CAN2 (в другой модуль)")),
+                    new M("С", new FN("Светодиоды"),
                             new M[] {
                                 new M("1", "BOOL"),
                                 new M("2", "BOOL"),
@@ -108,7 +132,7 @@ public class TestModelData {
         ),
         new M("M6-8RO-16DI220", 
                 new M[] {
-                    new M("Дискретные выходы",
+                    new M("ДВ", new FN("Дискретные входы"),
                             new M[]{
                                 new M("OUT1", "BOOL"),
                                 new M("OUT2", "BOOL"),
@@ -121,13 +145,13 @@ public class TestModelData {
                             }
                     ),
                     new M("Логика"),
-                    new M("CAN2 (в другой модуль)")
+                    new M("CAN2", new FN("CAN2 (в другой модуль)"))
                 }
         ),
         new M("M6-xVT-zCT", 
                 new M[] {
                     new M("Логика"),
-                    new M("CAN2 (в другой модуль)")
+                    new M("CAN2", new FN("CAN2 (в другой модуль)"))
                 }
         )
     };
@@ -198,10 +222,12 @@ public class TestModelData {
     public static class M {
 
         public String name;
-        public String toolTipName;
+        public String fullName;
         public String type;
         public M[] groups;
 
+        //Without ToolTip
+        
         public M(String name, M[] groups) {
             this.name = name;
             this.groups = groups;
@@ -222,10 +248,53 @@ public class TestModelData {
             this.groups = groups;
         }
         
+        //With ToolTip
+        
+        public M(String name, FN fullName, M[] groups) {
+            this.name = name;
+            this.fullName = fullName.getFullName();
+            this.groups = groups;
+        }
+        
+        public M(String name, FN fullName) {
+            this.name = name;
+            this.fullName = fullName.getFullName();
+        }
+        
+        public M(String name, FN fullName, String type) {
+            this.name = name;
+            this.fullName = fullName.getFullName();
+            this.type = type;
+        }
+        
+        public M(String name, FN fullName, String type, M[] groups) {
+            this.name = name;
+            this.fullName = fullName.getFullName();
+            this.type = type;
+            this.groups = groups;
+        }
+        
         public M(M m) {
             this.name = m.name;
             this.type = m.type;
             this.groups = m.groups;
+            this.fullName = m.fullName;
+        }
+    }
+    
+    private static class FN {
+        private String fullName;
+        
+        FN(String fullName) {
+            this.fullName = fullName;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public void setFullName(String fullName) {
+            this.fullName = fullName;
         }
     }
 }

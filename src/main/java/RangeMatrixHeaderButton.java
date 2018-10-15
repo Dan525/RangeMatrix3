@@ -17,8 +17,9 @@ public class RangeMatrixHeaderButton {
     private double width;
     private double height;
     private final Object buttonObject;
+    private Object parentObject;
     private final String buttonName;
-    private String buttonToolTip;
+    private String buttonFullName;
     private boolean collapsed;
     private boolean group;
     private int cellIndex;
@@ -148,11 +149,19 @@ public class RangeMatrixHeaderButton {
         return buttonName;
     }
 
-    public String getButtonToolTip() {
-        return buttonToolTip;
+    public String getButtonFullName() {
+        return buttonFullName;
     }
 
-    public void setButtonToolTip(String buttonToolTip) {
-        this.buttonToolTip = buttonToolTip;
+    public void setButtonFullName(String buttonFullName) {
+        this.buttonFullName = buttonFullName;
+    }
+
+    public Object getParentObject() {
+        return parentObject;
+    }
+
+    public void setParentObject(Object parentObject) {
+        this.parentObject = parentObject;
     }
 }

@@ -25,7 +25,7 @@ public interface RangeMatrixModel {
     
     String getColumnGroupName(Object column);
     
-    String getColumnGroupToolTipName(Object column);
+    String getColumnGroupFullName(Object column);
     
     String getColumnGroupType(Object column);
     
@@ -39,7 +39,7 @@ public interface RangeMatrixModel {
     
     String getRowGroupName(Object row);
     
-    String getRowGroupToolTipName(Object row);
+    String getRowGroupFullName(Object row);
     
     String getRowGroupType(Object row);
     

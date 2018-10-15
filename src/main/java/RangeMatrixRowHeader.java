@@ -126,7 +126,7 @@ public class RangeMatrixRowHeader extends JComponent {
     }
 
     public void calculateMinimalCellHeight() {
-        JLabel label = renderer.getRowRendererComponent(null, " ", false, false);
+        JLabel label = renderer.getRowRendererComponent(" ");
         minimalCellHeight = label.getPreferredSize().getHeight() + 2 * spaceAroundName;
     }
 
@@ -136,19 +136,13 @@ public class RangeMatrixRowHeader extends JComponent {
 
     public double calculateWidthOfRowByName(Object row) {
         RangeMatrixHeaderButton button = findButtonInMap(row);
-        JLabel label = renderer.getRowRendererComponent(button.getButtonObject(),
-                                                        button.getButtonName(),
-                                                        button.isCollapsed(), 
-                                                        true);
+        JLabel label = renderer.getRowRendererComponent(button);
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
     
     public double calculateWidthOfRowByType(Object row) {
         RangeMatrixHeaderButton button = findTypeButtonInMap(row);
-        JLabel label = renderer.getRowRendererComponent(button.getButtonObject(),
-                                                        button.getButtonName(),
-                                                        button.isCollapsed(), 
-                                                        false);
+        JLabel label = renderer.getRowRendererComponent(button);
         return label.getPreferredSize().getWidth() + 2 * spaceAroundName;
     }
 
@@ -564,13 +558,16 @@ public class RangeMatrixRowHeader extends JComponent {
         if (button == null) {
             
             String rowName;
+            boolean isGroup;
             if (child == null) {
                 rowName = "";
+                isGroup = false;
             } else {
                 rowName = model.getRowGroupName(child);
+                isGroup = model.isRowGroup(child);
             }
-
             button = new RangeMatrixHeaderButton(child, rowName);
+            button.setGroup(isGroup);
             buttonMap.put(child, button);
         }
         return button;
@@ -613,10 +610,7 @@ public class RangeMatrixRowHeader extends JComponent {
         
         for (RangeMatrixHeaderButton button : buttonList) {
             crp.paintComponent(g2d, 
-                               renderer.getRowRendererComponent(button.getButtonObject(),
-                                                                button.getButtonName(),
-                                                                button.isCollapsed(), 
-                                                                button.isGroup()),
+                               renderer.getRowRendererComponent(button),
                                this,
                                (int) button.getX(),
                                (int) button.getY(),
@@ -676,7 +670,7 @@ public class RangeMatrixRowHeader extends JComponent {
      * Возвращает индекс ряда. Индекс рассчитывается из условия, что все
      * ряды развернуты (при этом не важно, развернуты они в данный момент
      * или нет). Для рядов всех уровней, кроме последнего, индекс берется по 
-     * первому из предков, находящемуся на последнем (крайнем правом) уровне.
+     * первому из потомков, находящемуся на последнем (крайнем правом) уровне.
      * @param button
      * @return
      */
@@ -694,7 +688,7 @@ public class RangeMatrixRowHeader extends JComponent {
     
     /**
      * Возвращает список всех листовых элементов объекта, независимо от того, 
-     * свернуты некоторые из предков или нет.
+     * свернуты некоторые из потомков или нет.
      * @param parentRow
      * @param leafRowList
      * @return
@@ -777,10 +771,10 @@ public class RangeMatrixRowHeader extends JComponent {
     
     /**
      * Возвращает индексы всех листовых (если кнопка свернута, то она в данном 
-     * случае будет являться листом) кнопок  - предков кнопки, на которую было
+     * случае будет являться листом) кнопок  - потомков кнопки, на которую было
      * произведено нажатие. Нужно для присвоения аттрибута Collapsed всем 
      * ячейкам таблицы, начиная со столбца, находящегося под второй кнопкой из 
-     * списка предков. 
+     * списка потомков. 
      * @param parentRow
      * @param leafRowIndexList
      * @return
@@ -809,8 +803,8 @@ public class RangeMatrixRowHeader extends JComponent {
     
     /**
      * Возвращает индексы всех листовых (в данном случае кнопка будет листом,
-     * только если у нее нет предков, независимо от того свернута она или нет) 
-     * кнопок  - предков кнопки, на которую было произведено нажатие. Нужно для
+     * только если у нее нет потомков, независимо от того свернута она или нет) 
+     * кнопок  - потомков кнопки, на которую было произведено нажатие. Нужно для
      * проверки наличия непустых ячеек таблицы при сворачивании ряда с целью
      * дальнейшего отображения этой информации в Leading Row.
      * @param parentRow

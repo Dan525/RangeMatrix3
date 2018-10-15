@@ -25,8 +25,52 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
     }
 
     @Override
-    public JLabel getColumnRendererComponent(Object column, String columnName, boolean isCollapsed, boolean isGroup) {
-        delegate.setText(columnName);
+    public JLabel getColumnRendererComponent(RangeMatrixHeaderButton button) {
+        Object column = button.getButtonObject();
+        String columnName = button.getButtonName();
+        String fullColumnName = button.getButtonFullName();
+        boolean isCollapsed = button.isCollapsed();
+        boolean isGroup = button.isGroup();
+        
+        
+        
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
+        delegate.setHorizontalAlignment(JLabel.CENTER);
+        delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
+        delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        if (isCollapsed && isGroup) {
+            delegate.setIcon(collapsedIcon);
+            delegate.setText(columnName);
+        } else if (!isCollapsed && isGroup) {
+            delegate.setIcon(expandedIcon);
+            if (button.getButtonFullName() != null) {
+                delegate.setText(fullColumnName);
+            } else {
+                delegate.setText(columnName);
+            }
+            
+        } else {
+            delegate.setIcon(null);
+            delegate.setText(columnName);
+        }
+        return delegate;
+    }
+    
+    @Override
+    public JLabel getColumnRendererComponent(String text) {
+        delegate.setText(text);
+        delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
+        return delegate;
+    }
+
+    @Override
+    public JLabel getRowRendererComponent(RangeMatrixHeaderButton button) {
+        Object row = button.getButtonObject();
+        String rowName = button.getButtonName();
+        boolean isCollapsed = button.isCollapsed();
+        boolean isGroup = button.isGroup();
+        
+        delegate.setText(rowName);
         delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
         delegate.setHorizontalAlignment(JLabel.CENTER);
         delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
@@ -40,21 +84,11 @@ public class DefaultRangeMatrixRenderer implements IRangeMatrixRenderer {
         }
         return delegate;
     }
-
+    
     @Override
-    public JLabel getRowRendererComponent(Object row, String rowName, boolean isCollapsed, boolean isGroup) {
-        delegate.setText(rowName);
+    public JLabel getRowRendererComponent(String text) {
+        delegate.setText(text);
         delegate.setFont(delegate.getFont().deriveFont(Font.BOLD, 12));
-        delegate.setHorizontalAlignment(JLabel.CENTER);
-        delegate.setBackground(javax.swing.UIManager.getDefaults().getColor("TableHeader.background"));
-        delegate.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        if (isCollapsed && isGroup) {
-            delegate.setIcon(collapsedIcon);
-        } else if (!isCollapsed && isGroup) {
-            delegate.setIcon(expandedIcon);
-        } else {
-            delegate.setIcon(null);
-        }
         return delegate;
     }
 

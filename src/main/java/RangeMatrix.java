@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -115,18 +116,6 @@ public class RangeMatrix extends JComponent {
         calculateCells();
         columnCount = columnHeader.calculateTableColumnCount(null, 0);
         rowCount = rowHeader.calculateTableRowCount(null, 0);
-        
-        //JFrame f = (JFrame) SwingUtilities.getWindowAncestor(this);
-//        JFrame f = (JFrame) SwingUtilities.getRoot(this);
-//        toolTip = new JWindow(f);
-//        toolTipLabel = new JLabel();
-//        toolTipLabel.setHorizontalAlignment(JLabel.CENTER);
-//        toolTipLabel.setOpaque(true);
-//        toolTipLabel.setBackground(UIManager.getColor("ToolTip.background"));
-//        toolTipLabel.setBorder(UIManager.getBorder("ToolTip.border"));
-//        toolTip.add(toolTipLabel);
-//        setOpaque(true);
-        //ToolTips toolTips = new ToolTips(f);
         
         this.addMouseMotionListener(new RangeMatrixMouseMotionHandler());
         this.addMouseListener(new RangeMatrixMouseHandler());
@@ -218,6 +207,34 @@ public class RangeMatrix extends JComponent {
                 button.setCollapsedByColumn(isCollapsed);
             }
         }
+    }
+    
+    public int recalculateBrotherColumn(RangeMatrixHeaderButton leadingHeaderButton, int leadingColumnIndex) {
+        Object parentObject;
+        RangeMatrixHeaderButton parentHeaderButton = leadingHeaderButton;
+        do {
+        parentObject = parentHeaderButton.getParentObject();
+        parentHeaderButton = columnHeader.findButtonInMap(parentObject);
+        } while (parentObject != null);
+        TreeMap<Integer, Object> leafColumnMap = (TreeMap<Integer, Object>) columnHeader.fillLeafColumnMap(parentHeaderButton.getButtonObject(), new TreeMap<>());
+        int columnIndex = leadingColumnIndex;
+        
+        for (Object headerButtonObject : leafColumnMap.values()) {
+            RangeMatrixHeaderButton headerButton = columnHeader.findButtonInMap(headerButtonObject);
+            columnIndex = columnHeader.calculateColumnIndex(headerButton);
+            
+            //if (columnIndex != leadingColumnIndex) {
+                Map<Integer, RangeMatrixTableButton> column = buttonTable.column(columnIndex);
+                for (int row = 0; row < column.size(); row++) {
+                    RangeMatrixTableButton button = column.get(row);
+                    button.setX(headerButton.getX());
+                    button.setWidth(headerButton.getWidth());
+                    repaintCell(button);
+                }
+            //}
+            
+        }
+        return columnIndex;
     }
     
     public void makeColumnLeading(RangeMatrixHeaderButton headerButton, double cellWidth, boolean isLeadingByColumn) {
@@ -619,9 +636,7 @@ public class RangeMatrix extends JComponent {
             if (previousButton != null) {
                 iterateOnButtonCross(previousButton, false);
                 currentCell = 0;
-                rebuildBuffer();
-                revalidate();
-                repaint();
+                repaintCombo();
             }
         }
     }
@@ -677,9 +692,7 @@ public class RangeMatrix extends JComponent {
 //                            }
 //                        }
                             
-                            rebuildBuffer();
-                            revalidate();
-                            repaint();
+                            repaintCombo();
 
                             previousButton = tableButton;
                             currentCell = i;
@@ -692,9 +705,7 @@ public class RangeMatrix extends JComponent {
             } else {
                 iterateOnButtonCross(previousButton, false);
                 currentCell = 0;
-                rebuildBuffer();
-                revalidate();
-                repaint();
+                repaintCombo();
             }
             
         }

@@ -54,7 +54,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     }
     
     @Override
-    public String getColumnGroupToolTipName(Object column) {
+    public String getColumnGroupFullName(Object column) {
         if (column == null) {
             return new File(columnPath).getName();
         }
@@ -105,7 +105,7 @@ public class RangeMatrixModelImpl implements RangeMatrixModel {
     }
 
     @Override
-    public String getRowGroupToolTipName(Object row) {
+    public String getRowGroupFullName(Object row) {
         if (row == null) {
             return new File(rowPath).getName();
         }
